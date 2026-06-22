@@ -1,11 +1,7 @@
-import LoadingBar from "./components/LoadingBar";
+import StartupScreen from "./components/StartupScreen";
 
 function App() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-black">
-      <LoadingBar />
-    </main>
-  );
+  return <StartupScreen />;
 }
 
 export default App;
