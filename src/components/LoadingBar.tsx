@@ -1,9 +1,11 @@
 function LoadingBar() {
   return (
     <div className="loading-bar-frame" role="progressbar" aria-label="Loading">
-      <span className="loading-bar-box" />
-      <span className="loading-bar-box" />
-      <span className="loading-bar-box" />
+      <div className="loading-bar-track">
+        <span className="loading-bar-box" />
+        <span className="loading-bar-box" />
+        <span className="loading-bar-box" />
+      </div>
     </div>
   );
 }
