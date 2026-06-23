@@ -1,5 +1,7 @@
+import StartupScreen from "./components/StartupScreen";
+
 function App() {
-  return <p className="text-blue-400">portfolio</p>;
+  return <StartupScreen />;
 }
 
 export default App;
