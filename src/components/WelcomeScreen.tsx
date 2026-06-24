@@ -2,7 +2,7 @@ function WelcomeScreen() {
   return (
     <div className="welcome-bg-gradient min-h-screen relative">
       {/* Top bar */}
-      <div className="absolute top-0 h-32 w-full bg-welcome-header">
+      <div className="absolute top-0 h-28 w-full bg-welcome-header">
         <div className="absolute bottom-0 h-0.5 w-full welcome-top-line" />
       </div>
       {/* Content */}
@@ -12,7 +12,7 @@ function WelcomeScreen() {
         </h1>
       </div>
       {/* Bottom bar */}
-      <div className="absolute bottom-0 h-48 w-full bg-welcome-header">
+      <div className="absolute bottom-0 h-28 w-full bg-welcome-header">
         <div className="welcome-gold-line h-0.5 w-full" />
       </div>
     </div>
