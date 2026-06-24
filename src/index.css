@@ -5,7 +5,7 @@
   --color-welcome-blue: #567dda;
   --color-welcome-green: #13920d;
 
-  --font-trebuchet: "Trebuchet MS", sans-serif;
+  --font-arial: "Arial", sans-serif;
 }
 
 @layer components {

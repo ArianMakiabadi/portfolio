@@ -7,7 +7,7 @@ function WelcomeScreen() {
       </div>
       {/* Content */}
       <div className="flex items-center justify-center min-h-screen">
-        <h1 className="translate-x-36 -translate-y-8 font-trebuchet text-6xl font-semibold text-white [text-shadow:1px_1px_3px_rgba(0,0,0,0.4)]">
+        <h1 className="translate-x-36 -translate-y-8 font-arial italic text-6xl font-semibold text-white [text-shadow:4px_4px_1px_rgba(20,73,153,0.4)]">
           welcome
         </h1>
       </div>
