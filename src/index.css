@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@theme {
+  --color-welcome-header: #012f9e;
+  --color-welcome-blue: #567dda;
+  --color-welcome-green: #13920d;
+
+  --font-trebuchet: "Trebuchet MS", sans-serif;
+}
+
 @layer components {
   .startup-screen {
     @apply flex min-h-screen flex-col items-center justify-center bg-black px-6;
@@ -34,6 +42,49 @@
       #2838c7 100%
     );
   }
+
+  .welcome-bg-gradient {
+    background:
+      radial-gradient(
+        29.68% 27.76% at 5.94% 14.64%,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.16) 59.9%,
+        rgba(255, 255, 255, 0) 100%
+      ),
+      var(--color-welcome-blue);
+  }
+
+  .welcome-divider {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.48) 49.48%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+}
+@utility welcome-top-line {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.85) 8%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 255, 255, 0.85) 92%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+}
+
+@utility welcome-gold-line {
+  background: linear-gradient(
+    90deg,
+    #8f5c2a 0%,
+    #f3b253 8%,
+    #ffd77b 20%,
+    #e0a048 35%,
+    #c88b40 55%,
+    #8f8aa0 80%,
+    #8ba0d0 100%
+  );
 }
 
 @keyframes loading-bar-slide {
