@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+html,
+body,
+#root {
+  user-select: none;
+}
+
 @theme {
   --color-welcome-header: #012f9e;
   --color-welcome-blue: #567dda;
