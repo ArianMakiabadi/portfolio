@@ -4,6 +4,8 @@ html,
 body,
 #root {
   user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @theme {
@@ -11,7 +13,8 @@ body,
   --color-welcome-blue: #567dda;
   --color-welcome-green: #13920d;
 
-  --font-arial: "Arial", sans-serif;
+  --font-arial: Arial, sans-serif;
+  --font-tahoma: Tahoma, sans-serif;
 }
 
 @layer components {
