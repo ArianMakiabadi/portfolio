@@ -1,25 +1,29 @@
+import LoginButton from "./LoginButton";
+
 function LoginScreen() {
   return (
-    <div className="welcome-bg-gradient min-h-screen relative">
+    <div className="welcome-bg-gradient min-h-screen relative flex justify-center">
       {/* Top bar */}
       <div className="absolute top-0 h-28 w-full bg-welcome-header">
         <div className="absolute bottom-0 h-0.5 w-full welcome-top-line" />
       </div>
       {/* Content */}
-      <div className="flex items-center justify-center min-h-screen gap-12">
-        <div className="flex flex-col justify-center items-end">
+      <div className="flex items-center justify-center h-screen gap-12">
+        <div className="flex flex-col justify-center items-end w-105">
           <img
             className="h-auto w-72"
             src="/windows-logo.webp"
             alt="Windows"
             draggable="false"
           />
-          <p className="font-arial text-white mt-4 text-2xl pr-2">
+          <p className="font-arial text-white mt-4 text-2xl pr-2 text-nowrap">
             To begin, click on Arian Makiabadi to login
           </p>
         </div>
         <div className="welcome-divider h-96 w-px" />
-        <div className="h-40 w-80 bg-green-300">login button</div>
+        <div className="w-105">
+          <LoginButton />
+        </div>
       </div>
       {/* Bottom bar */}
       <div className="absolute bottom-0 h-28 w-full bg-welcome-header">
