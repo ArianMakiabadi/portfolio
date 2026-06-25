@@ -1,6 +1,10 @@
 import LoginButton from "./LoginButton";
 
-function LoginScreen() {
+type LoginScreenProps = {
+  onLogin: () => void;
+};
+
+function LoginScreen({ onLogin }: LoginScreenProps) {
   return (
     <div className="welcome-bg-gradient min-h-screen relative flex justify-center">
       {/* Top bar */}
@@ -22,7 +26,7 @@ function LoginScreen() {
         </div>
         <div className="welcome-divider h-96 w-px" />
         <div className="w-105">
-          <LoginButton />
+          <LoginButton onLogin={onLogin} />
         </div>
       </div>
       {/* Bottom bar */}

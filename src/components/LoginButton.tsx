@@ -1,6 +1,13 @@
-function LoginButton() {
+type props = {
+  onLogin: () => void;
+};
+
+function LoginButton({ onLogin }: props) {
   return (
-    <div className="group relative overflow-hidden rounded-md cursor-pointer">
+    <div
+      className="group relative overflow-hidden rounded-md cursor-pointer"
+      onClick={onLogin}
+    >
       {/* Hover gradient */}
       <div className="absolute inset-0 bg-linear-to-r from-[#113fa6] via-[#113fa6] to-[#587cdb] opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100" />
 
