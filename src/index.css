@@ -10,6 +10,16 @@ body,
   margin: 0;
   padding: 0;
   height: 100%;
+
+  cursor: url(/src/assets/cursors/default_arrow.cur), auto;
+}
+
+.pointer {
+  cursor: url(/src/assets/cursors/default_pointer.cur), pointer;
+}
+
+.progress {
+  cursor: url(/src/assets/cursors/default_wait.cur), progress;
 }
 
 @theme {

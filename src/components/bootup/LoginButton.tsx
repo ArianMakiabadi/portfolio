@@ -5,7 +5,7 @@ type props = {
 function LoginButton({ onLogin }: props) {
   return (
     <div
-      className="group relative overflow-hidden rounded-md cursor-pointer"
+      className="group relative overflow-hidden rounded-md pointer"
       onClick={onLogin}
     >
       {/* Hover gradient */}
