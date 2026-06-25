@@ -21,7 +21,7 @@ function LoginScreen({ onLogin }: LoginScreenProps) {
             draggable="false"
           />
           <p className="font-arial text-white mt-4 text-2xl pr-2 text-nowrap">
-            To begin, click on Arian Makiabadi to login
+            To begin, click on Arian Makiabadi
           </p>
         </div>
         <div className="welcome-divider h-96 w-px" />
