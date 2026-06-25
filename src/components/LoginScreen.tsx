@@ -28,7 +28,7 @@ function LoginScreen() {
       {/* Bottom bar */}
       <div className="absolute bottom-0 h-28 w-full bg-welcome-header">
         <div className="welcome-gold-line h-0.5 w-full" />
-        <div className="h-full flex justify-end p-8">
+        <div className="flex justify-end p-8">
           <div className="flex flex-col">
             <p className="font-tahoma text-white text-sm ">
               There's plenty to discover once you're logged in.
