@@ -16,7 +16,7 @@ function LoginButton({ onLogin }: props) {
         <div className="flex gap-4">
           <div className="box-border h-16 w-16">
             <img
-              src="/profile-photo.webp"
+              src="/src/assets/profile-photo.webp"
               alt="user"
               className="rounded-md border-[3px] border-white transition-colors duration-300 group-hover:border-amber-400"
             />

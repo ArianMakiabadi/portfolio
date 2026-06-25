@@ -1,4 +1,4 @@
-import BootSequence from "./components/BootSequence";
+import BootSequence from "./components/bootup/BootSequence";
 
 function App() {
   return <BootSequence />;

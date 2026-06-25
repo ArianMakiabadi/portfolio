@@ -16,7 +16,7 @@ function LoginScreen({ onLogin }: LoginScreenProps) {
         <div className="flex flex-col justify-center items-end w-105">
           <img
             className="h-auto w-72"
-            src="/windows-logo.webp"
+            src="src/assets/logos/windows-logo.webp"
             alt="Windows"
             draggable="false"
           />
