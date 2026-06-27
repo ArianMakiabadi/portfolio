@@ -1,7 +1,7 @@
-import StartupScreen from "./components/StartupScreen";
+import BootSequence from "./components/bootup/BootSequence";
 
 function App() {
-  return <StartupScreen />;
+  return <BootSequence />;
 }
 
 export default App;

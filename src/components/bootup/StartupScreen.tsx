@@ -5,7 +5,7 @@ function StartupScreen() {
     <main className="startup-screen">
       <img
         className="startup-logo"
-        src="/windows-logo.webp"
+        src="src/assets/logos/windows-logo.webp"
         alt="Windows"
         draggable="false"
       />
