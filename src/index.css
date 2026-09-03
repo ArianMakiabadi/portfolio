@@ -85,6 +85,39 @@ body,
       rgba(255, 255, 255, 0) 100%
     );
   }
+
+  .start-menu-shadow {
+    box-shadow: -1px 3px 8px 0px rgba(0, 0, 0, 0.4);
+  }
+
+  .start-menu-banner {
+    background: linear-gradient(
+      rgb(24, 104, 206) 0%,
+      rgb(56, 125, 224) 50%,
+      rgb(71, 145, 235) 100%
+    );
+  }
+
+  .start-menu-footer {
+    background: linear-gradient(
+      rgb(66, 130, 214) 0%,
+      rgb(35, 110, 210) 50%,
+      rgb(15, 97, 203) 88%
+    );
+  }
+
+  .start-menu-divider {
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgb(218, 136, 74) 50%,
+      transparent 100%
+    );
+  }
+
+  .start-menu-text-shadow {
+    text-shadow: rgba(0, 0, 0, 0.7) 1px 1px;
+  }
 }
 @utility welcome-top-line {
   background: linear-gradient(

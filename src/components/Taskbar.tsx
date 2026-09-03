@@ -1,6 +1,8 @@
+import { useEffect, useRef, useState } from "react";
 import startButton from "../assets/taskbar/start-button.webp";
 import taskbarBg from "../assets/taskbar/taskbar-bg.webp";
 import systemTray from "../assets/taskbar/system-tray.webp";
+import StartMenu from "./startmenu/StartMenu";
 
 function Taskbar() {
   const now = new Date();
@@ -10,16 +12,57 @@ function Taskbar() {
     hour12: true,
   });
 
+  const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
+  const startButtonRef = useRef<HTMLButtonElement>(null);
+  const startMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isStartMenuOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        startMenuRef.current?.contains(target) ||
+        startButtonRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setIsStartMenuOpen(false);
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isStartMenuOpen]);
+
+  function closeStartMenu() {
+    setIsStartMenuOpen(false);
+  }
+
   return (
     <div
-      className="relative bg-repeat-x flex items-between"
+      className="fixed bottom-0 left-0 z-40 w-full bg-repeat-x flex items-between"
       style={{ backgroundImage: `url(${taskbarBg})` }}
     >
-      <img
-        src={startButton}
-        alt="start"
-        className="absolute left-0 top-0 transition-all duration-150 hover:brightness-110"
-      />
+      {isStartMenuOpen && (
+        <StartMenu
+          ref={startMenuRef}
+          onSelectApp={closeStartMenu}
+          onLogOff={closeStartMenu}
+          onShutDown={closeStartMenu}
+        />
+      )}
+      <button
+        ref={startButtonRef}
+        type="button"
+        onClick={() => setIsStartMenuOpen((open) => !open)}
+        className="pointer absolute left-0 top-0"
+      >
+        <img
+          src={startButton}
+          alt="start"
+          className="transition-all duration-150 hover:brightness-110"
+        />
+      </button>
       <div className="flex-1" />
 
       <img src={systemTray} alt="system-tray" className="h-full" />
