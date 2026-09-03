@@ -1,11 +1,11 @@
 import { forwardRef } from "react";
-import profilePhoto from "../../assets/profile-photo.webp";
-import logoffIcon from "../../assets/taskbar/icons/key-log-icon.webp";
-import shutdownIcon from "../../assets/taskbar/icons/shutdown-icon.webp";
-import { startMenuApps, startMenuLinks } from "../../data/startMenuItems";
+import profilePhoto from "../../../assets/profile-photo.webp";
+import logoffIcon from "../../../assets/taskbar/icons/key-log-icon.webp";
+import shutdownIcon from "../../../assets/taskbar/icons/shutdown-icon.webp";
+import { startMenuApps, startMenuLinks } from "../../../data/startMenuItems";
 import StartMenuAppButton from "./StartMenuAppButton";
 import StartMenuLinkButton from "./StartMenuLinkButton";
-import allPrograms from "../../assets/taskbar/icons/all-programs.webp";
+import allPrograms from "../../../assets/taskbar/icons/all-programs.webp";
 
 type StartMenuProps = {
   onSelectApp: (id: string) => void;
