@@ -6,6 +6,7 @@ import LoginScreen from "./LoginScreen";
 import Desktop from "./Desktop";
 import startupSound from "../../assets/sounds/start-windows.mp3";
 import { playSound } from "../../utils/audio";
+import { wait } from "../../utils/wait";
 
 type Stage =
   | "black-1"
@@ -14,10 +15,6 @@ type Stage =
   | "welcome"
   | "login"
   | "desktop";
-
-function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function BootSequence() {
   const [stage, setStage] = useState<Stage>("black-1");
