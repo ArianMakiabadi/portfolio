@@ -4,6 +4,8 @@ import StartupScreen from "./StartupScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import LoginScreen from "./LoginScreen";
 import Desktop from "./Desktop";
+import startupSound from "../../assets/sounds/start-windows.mp3";
+import { playSound } from "../../utils/audio";
 
 type Stage =
   | "black-1"
@@ -19,6 +21,7 @@ function wait(ms: number) {
 
 function BootSequence() {
   const [stage, setStage] = useState<Stage>("black-1");
+  const audio = new Audio(startupSound);
 
   useEffect(() => {
     async function run() {
@@ -50,7 +53,14 @@ function BootSequence() {
       return <WelcomeScreen />;
 
     case "login":
-      return <LoginScreen onLogin={() => setStage("desktop")} />;
+      return (
+        <LoginScreen
+          onLogin={() => {
+            setStage("desktop");
+            playSound(audio);
+          }}
+        />
+      );
 
     case "desktop":
       return <Desktop />;
