@@ -3,6 +3,7 @@ import BlackScreen from "./BlackScreen";
 import StartupScreen from "./StartupScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import LoginScreen from "./LoginScreen";
+import Desktop from "./Desktop";
 
 type Stage =
   | "black-1"
@@ -51,11 +52,11 @@ function BootSequence() {
     case "login":
       return <LoginScreen onLogin={() => setStage("desktop")} />;
 
-    // case "desktop":
-    //   return <Desktop />;
+    case "desktop":
+      return <Desktop />;
 
     default:
-      return <WelcomeScreen />;
+      return <Desktop />;
   }
 }
 export default BootSequence;
