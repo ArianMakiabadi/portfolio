@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import startButton from "../assets/taskbar/start-button.webp";
-import taskbarBg from "../assets/taskbar/taskbar-bg.webp";
-import systemTray from "../assets/taskbar/system-tray.webp";
+import startButton from "../../assets/taskbar/start-button.webp";
+import taskbarBg from "../../assets/taskbar/taskbar-bg.webp";
+import systemTray from "../../assets/taskbar/system-tray.webp";
+import { useWindowManager } from "../../context/useWindowManager";
 import StartMenu from "./startmenu/StartMenu";
+import TaskbarPellet from "./TaskbarPellet";
 
 function Taskbar() {
+  const { openWindows, activeWindowId, focusWindow } = useWindowManager();
+
   const now = new Date();
   const time = now.toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -15,6 +19,24 @@ function Taskbar() {
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const startButtonRef = useRef<HTMLButtonElement>(null);
   const startMenuRef = useRef<HTMLDivElement>(null);
+  const taskbarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const taskbarElement = taskbarRef.current;
+    if (!taskbarElement) return;
+
+    function updateTaskbarHeight() {
+      document.documentElement.style.setProperty(
+        "--taskbar-height",
+        `${taskbarElement!.offsetHeight}px`,
+      );
+    }
+
+    updateTaskbarHeight();
+    const observer = new ResizeObserver(updateTaskbarHeight);
+    observer.observe(taskbarElement);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!isStartMenuOpen) return;
@@ -40,7 +62,8 @@ function Taskbar() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 z-40 w-full bg-repeat-x flex items-between"
+      ref={taskbarRef}
+      className="fixed bottom-0 left-0 z-40 w-full bg-repeat-x flex items-center"
       style={{ backgroundImage: `url(${taskbarBg})` }}
     >
       {isStartMenuOpen && (
@@ -55,7 +78,7 @@ function Taskbar() {
         ref={startButtonRef}
         type="button"
         onClick={() => setIsStartMenuOpen((open) => !open)}
-        className="pointer absolute left-0 top-0"
+        className="pointer relative shrink-0"
       >
         <img
           src={startButton}
@@ -63,7 +86,17 @@ function Taskbar() {
           className="transition-all duration-150 hover:brightness-110"
         />
       </button>
-      <div className="flex-1" />
+      <div className="flex h-full flex-1 items-center gap-1 overflow-hidden pl-1">
+        {openWindows.map((openWindow) => (
+          <TaskbarPellet
+            key={openWindow.id}
+            title={openWindow.title}
+            iconSrc={openWindow.iconSrc}
+            isActive={activeWindowId === openWindow.id}
+            onClick={() => focusWindow(openWindow.id)}
+          />
+        ))}
+      </div>
 
       <img src={systemTray} alt="system-tray" className="h-full" />
       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-white font-tahoma">

@@ -1,4 +1,4 @@
-import type { StartMenuLinkItem } from "../../types/startMenu";
+import type { StartMenuLinkItem } from "../../../types/startMenu";
 
 type StartMenuLinkButtonProps = {
   item: StartMenuLinkItem;
