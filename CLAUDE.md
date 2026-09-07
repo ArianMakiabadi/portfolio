@@ -15,6 +15,10 @@ There is no test setup in this repo. `npm run build` is the typecheck gate — `
 
 The README is the stock Vite template README and describes nothing about this project.
 
+## Response style
+
+be extremly concise, sacrifice grammer for the sake of consision.
+
 ## What this is
 
 A personal portfolio built as a recreation of the Windows XP desktop in React 19 + TypeScript + Vite + Tailwind v4. Portfolio content (projects, CV, notepad, minesweeper, etc.) is meant to open as draggable XP windows launched from the Start menu.
@@ -26,6 +30,7 @@ A personal portfolio built as a recreation of the Windows XP desktop in React 19
 **Window management.** The system is a context (`src/context/`), split across three files so Fast Refresh stays happy: `windowManagerContext.ts` (the `createContext` + types), `WindowManagerProvider.tsx` (the state), `useWindowManager.ts` (the throwing hook). Only import the hook from consumers.
 
 State lives in the provider, not in the `Window` components:
+
 - `windows: Record<id, {title, iconSrc, isMinimized}>` — the registry the taskbar renders from
 - `zIndexes` + `highestZIndexRef` — focusing a window bumps it to a new highest z-index
 - `elementsRef: Map<id, HTMLElement>` — a document-level `mousedown` listener clears `activeWindowId` when the click lands outside every registered window element
