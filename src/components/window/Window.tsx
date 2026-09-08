@@ -126,8 +126,14 @@ function Window({
     const maxY = window.innerHeight - getTaskbarHeight() - size.height;
 
     setPosition({
-      x: Math.min(Math.max(drag.startPosition.x + deltaX, 0), Math.max(maxX, 0)),
-      y: Math.min(Math.max(drag.startPosition.y + deltaY, 0), Math.max(maxY, 0)),
+      x: Math.min(
+        Math.max(drag.startPosition.x + deltaX, 0),
+        Math.max(maxX, 0),
+      ),
+      y: Math.min(
+        Math.max(drag.startPosition.y + deltaY, 0),
+        Math.max(maxY, 0),
+      ),
     });
   }
 
@@ -270,7 +276,7 @@ function Window({
         </div>
       </div>
 
-      <div className="absolute h-full w-full overflow-hidden p-0.75">
+      <div className="absolute top-7 right-0 bottom-0 left-0 overflow-hidden px-0.75 pb-0.75">
         {children}
       </div>
 
