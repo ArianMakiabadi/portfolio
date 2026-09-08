@@ -1,30 +1,30 @@
+import { useState } from "react";
 import xpBliss from "../../assets/xp-bliss.webp";
-import noteIcon from "../../assets/taskbar/icons/note.webp";
 import Taskbar from "../taskbar/Taskbar";
-import Window from "../window/Window";
+import MinesweeperWindow from "../minesweeper/MinesweeperWindow";
 import { WindowManagerProvider } from "../../context/WindowManagerProvider";
 
 function Desktop() {
+  const [openApps, setOpenApps] = useState<Record<string, boolean>>({});
+
+  function openApp(id: string) {
+    setOpenApps((prev) => ({ ...prev, [id]: true }));
+  }
+
+  function closeApp(id: string) {
+    setOpenApps((prev) => ({ ...prev, [id]: false }));
+  }
+
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${xpBliss})` }}
     >
       <WindowManagerProvider>
-        <Window
-          id="test"
-          iconSrc={noteIcon}
-          title="test"
-          initialSize={{ width: 300, height: 300 }}
-          initialPosition={{ x: 200, y: 400 }}
-        >
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Laudantium
-            eligendi nisi tempora laboriosam deleniti voluptatum quos.
-            Blanditiis laboriosam magnam ipsa?
-          </p>
-        </Window>
-        <Taskbar />
+        {openApps.minesweeper && (
+          <MinesweeperWindow onClose={() => closeApp("minesweeper")} />
+        )}
+        <Taskbar onSelectApp={openApp} />
       </WindowManagerProvider>
     </div>
   );

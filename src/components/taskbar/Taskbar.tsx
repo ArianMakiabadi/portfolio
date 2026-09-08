@@ -6,7 +6,11 @@ import { useWindowManager } from "../../context/useWindowManager";
 import StartMenu from "./startmenu/StartMenu";
 import TaskbarPellet from "./TaskbarPellet";
 
-function Taskbar() {
+type TaskbarProps = {
+  onSelectApp: (id: string) => void;
+};
+
+function Taskbar({ onSelectApp }: TaskbarProps) {
   const { openWindows, activeWindowId, focusWindow } = useWindowManager();
 
   const now = new Date();
@@ -60,6 +64,11 @@ function Taskbar() {
     setIsStartMenuOpen(false);
   }
 
+  function handleSelectApp(id: string) {
+    closeStartMenu();
+    onSelectApp(id);
+  }
+
   return (
     <div
       ref={taskbarRef}
@@ -69,7 +78,7 @@ function Taskbar() {
       {isStartMenuOpen && (
         <StartMenu
           ref={startMenuRef}
-          onSelectApp={closeStartMenu}
+          onSelectApp={handleSelectApp}
           onLogOff={closeStartMenu}
           onShutDown={closeStartMenu}
         />
