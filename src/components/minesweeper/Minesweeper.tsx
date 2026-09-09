@@ -1,28 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { useMinesweeper } from "../../hooks/useMinesweeper";
-import type { Difficulty } from "../../types/minesweeper";
-import MenuBar from "../window/MenuBar";
+import type { useMinesweeper } from "../../hooks/useMinesweeper";
 import MinesweeperScorePanel from "./MinesweeperScorePanel";
 import MinesweeperBoard from "./MinesweeperBoard";
 
-type MinesweeperProps = {
-  initialDifficulty?: Difficulty;
-  onDifficultyChange?: (difficulty: Difficulty) => void;
-};
+type MinesweeperProps = ReturnType<typeof useMinesweeper>;
 
-const DIFFICULTIES: Difficulty[] = ["Beginner", "Intermediate", "Expert"];
-
-function Minesweeper({
-  initialDifficulty = "Beginner",
-  onDifficultyChange,
-}: MinesweeperProps) {
-  const { state, seconds, actions } = useMinesweeper(initialDifficulty);
+function Minesweeper({ state, seconds, actions }: MinesweeperProps) {
   const [isPressingBoard, setIsPressingBoard] = useState(false);
   const faceRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    onDifficultyChange?.(state.difficulty);
-  }, [state.difficulty, onDifficultyChange]);
 
   useEffect(() => {
     function handleWindowMouseUp() {
@@ -47,64 +32,28 @@ function Minesweeper({
 
   return (
     <div
-      className="flex h-full w-full flex-col"
+      className="mine-content-frame flex h-full w-full flex-col"
       onContextMenu={(event) => event.preventDefault()}
+      onMouseDown={handleContentMouseDown}
     >
-      <MenuBar
-        menus={[
-          {
-            label: "Game",
-            items: [
-              {
-                type: "action",
-                label: "New Game",
-                onSelect: () => actions.newGame(),
-              },
-              { type: "separator" },
-              ...DIFFICULTIES.map((level) => ({
-                type: "checkable" as const,
-                label: level,
-                checked: state.difficulty === level,
-                onSelect: () => actions.newGame(level),
-              })),
-            ],
-          },
-          {
-            label: "Help",
-            items: [
-              {
-                type: "action",
-                label: "How to play?",
-                onSelect: () =>
-                  console.log("TODO: 'How to play?' window not built yet"),
-              },
-            ],
-          },
-        ]}
+      <MinesweeperScorePanel
+        minesRemaining={minesRemaining}
+        seconds={seconds}
+        status={state.status}
+        isPressingBoard={isPressingBoard}
+        onFaceClick={() => actions.newGame(state.difficulty)}
+        faceRef={faceRef}
       />
-      <div
-        className="mine-content-frame flex flex-1 flex-col"
-        onMouseDown={handleContentMouseDown}
-      >
-        <MinesweeperScorePanel
-          minesRemaining={minesRemaining}
-          seconds={seconds}
-          status={state.status}
-          isPressingBoard={isPressingBoard}
-          onFaceClick={() => actions.newGame(state.difficulty)}
-          faceRef={faceRef}
-        />
-        <MinesweeperBoard
-          board={state.board}
-          rows={state.rows}
-          columns={state.columns}
-          onOpenCell={actions.openCell}
-          onChordOpenCell={actions.chordOpenCell}
-          onCycleFlag={actions.cycleCellFlag}
-          onPreviewSingle={actions.previewSingle}
-          onPreviewChord={actions.previewChord}
-        />
-      </div>
+      <MinesweeperBoard
+        board={state.board}
+        rows={state.rows}
+        columns={state.columns}
+        onOpenCell={actions.openCell}
+        onChordOpenCell={actions.chordOpenCell}
+        onCycleFlag={actions.cycleCellFlag}
+        onPreviewSingle={actions.previewSingle}
+        onPreviewChord={actions.previewChord}
+      />
     </div>
   );
 }

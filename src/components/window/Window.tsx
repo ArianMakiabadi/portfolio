@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useWindowManager } from "../../context/useWindowManager";
 import type { WindowPosition, WindowSize } from "../../types/window";
+import type { MenuBarMenu } from "../../types/menuBar";
+import MenuBar from "./MenuBar";
 import WindowCloseButton from "./WindowCloseButton";
 import WindowMaximizeButton from "./WindowMaximizeButton";
 import WindowMinimizeButton from "./WindowMinimizeButton";
@@ -12,6 +14,7 @@ type WindowProps = {
   title: string;
   iconSrc: string;
   children: ReactNode;
+  menus?: MenuBarMenu[];
   initialPosition: WindowPosition;
   initialSize: WindowSize;
   minSize?: WindowSize;
@@ -35,6 +38,7 @@ function Window({
   title,
   iconSrc,
   children,
+  menus,
   initialPosition,
   initialSize,
   minSize = DEFAULT_MIN_SIZE,
@@ -276,8 +280,9 @@ function Window({
         </div>
       </div>
 
-      <div className="absolute top-7 right-0 bottom-0 left-0 overflow-hidden px-0.75 pb-0.75">
-        {children}
+      <div className="absolute top-7 right-0 bottom-0 left-0 flex flex-col overflow-hidden px-0.75 pb-0.75">
+        {menus && <MenuBar menus={menus} />}
+        <div className="min-h-0 flex-1">{children}</div>
       </div>
 
       {resizable && !isMaximized && (
