@@ -1,7 +1,7 @@
 import { useState } from "react";
 import xpBliss from "../../assets/xp-bliss.webp";
 import Taskbar from "../taskbar/Taskbar";
-import MinesweeperWindow from "../minesweeper/MinesweeperWindow";
+import MinesweeperWindow from "../../programs/minesweeper/MinesweeperWindow";
 import PinballWindow from "../../programs/pinball/PinballWindow";
 import { WindowManagerProvider } from "../../context/WindowManagerProvider";
 

@@ -1,4 +1,4 @@
-import Window from "../window/Window";
+import Window from "../../components/window/Window";
 import Minesweeper from "./Minesweeper";
 import minesweeperIcon from "../../assets/taskbar/icons/minesweeper-icon.webp";
 import { getMinesweeperWindowSize } from "../../data/minesweeperConfig";
