@@ -2,7 +2,7 @@ import contactMeIcon from "../assets/taskbar/icons/contact-me.webp";
 import cvIcon from "../assets/taskbar/icons/cv-icon-lg.webp";
 import githubIcon from "../assets/taskbar/icons/github.webp";
 import instagramIcon from "../assets/taskbar/icons/instagram.webp";
-import cmdIcon from "../assets/taskbar/icons/cmd-icon.webp";
+import pinballIcon from "../assets/taskbar/icons/pinball-icon.png";
 import linkedinIcon from "../assets/taskbar/icons/linkedin.webp";
 import noteIcon from "../assets/taskbar/icons/note.webp";
 import paintIcon from "../assets/taskbar/icons/paint.webp";
@@ -51,10 +51,10 @@ export const startMenuApps: StartMenuAppItem[] = [
     icon: playerIcon,
   },
   {
-    id: "terminal",
-    title: "Command Prompt",
-    subtitle: "Explore through the CLI",
-    icon: cmdIcon,
+    id: "pinball",
+    title: "3D Pinball",
+    subtitle: "Space Cadet awaits",
+    icon: pinballIcon,
   },
 
   {

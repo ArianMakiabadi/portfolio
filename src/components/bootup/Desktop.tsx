@@ -2,6 +2,7 @@ import { useState } from "react";
 import xpBliss from "../../assets/xp-bliss.webp";
 import Taskbar from "../taskbar/Taskbar";
 import MinesweeperWindow from "../minesweeper/MinesweeperWindow";
+import PinballWindow from "../../programs/pinball/PinballWindow";
 import { WindowManagerProvider } from "../../context/WindowManagerProvider";
 
 function Desktop() {
@@ -23,6 +24,9 @@ function Desktop() {
       <WindowManagerProvider>
         {openApps.minesweeper && (
           <MinesweeperWindow onClose={() => closeApp("minesweeper")} />
+        )}
+        {openApps.pinball && (
+          <PinballWindow onClose={() => closeApp("pinball")} />
         )}
         <Taskbar onSelectApp={openApp} />
       </WindowManagerProvider>
