@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMinesweeper } from "../../hooks/useMinesweeper";
 import type { Difficulty } from "../../types/minesweeper";
-import MinesweeperMenuBar from "./MinesweeperMenuBar";
+import MenuBar from "../window/MenuBar";
 import MinesweeperScorePanel from "./MinesweeperScorePanel";
 import MinesweeperBoard from "./MinesweeperBoard";
 
@@ -10,7 +10,12 @@ type MinesweeperProps = {
   onDifficultyChange?: (difficulty: Difficulty) => void;
 };
 
-function Minesweeper({ initialDifficulty = "Beginner", onDifficultyChange }: MinesweeperProps) {
+const DIFFICULTIES: Difficulty[] = ["Beginner", "Intermediate", "Expert"];
+
+function Minesweeper({
+  initialDifficulty = "Beginner",
+  onDifficultyChange,
+}: MinesweeperProps) {
   const { state, seconds, actions } = useMinesweeper(initialDifficulty);
   const [isPressingBoard, setIsPressingBoard] = useState(false);
   const faceRef = useRef<HTMLButtonElement>(null);
@@ -36,19 +41,46 @@ function Minesweeper({ initialDifficulty = "Beginner", onDifficultyChange }: Min
 
   const minesRemaining =
     state.mines -
-    state.board.filter((cell) => cell.state === "flag" || cell.state === "misflagged")
-      .length;
+    state.board.filter(
+      (cell) => cell.state === "flag" || cell.state === "misflagged",
+    ).length;
 
   return (
     <div
       className="flex h-full w-full flex-col"
       onContextMenu={(event) => event.preventDefault()}
     >
-      <MinesweeperMenuBar
-        difficulty={state.difficulty}
-        onNewGame={() => actions.newGame()}
-        onSelectDifficulty={(difficulty) => actions.newGame(difficulty)}
-        onHelp={() => console.log("TODO: 'How to play?' window not built yet")}
+      <MenuBar
+        menus={[
+          {
+            label: "Game",
+            items: [
+              {
+                type: "action",
+                label: "New Game",
+                onSelect: () => actions.newGame(),
+              },
+              { type: "separator" },
+              ...DIFFICULTIES.map((level) => ({
+                type: "checkable" as const,
+                label: level,
+                checked: state.difficulty === level,
+                onSelect: () => actions.newGame(level),
+              })),
+            ],
+          },
+          {
+            label: "Help",
+            items: [
+              {
+                type: "action",
+                label: "How to play?",
+                onSelect: () =>
+                  console.log("TODO: 'How to play?' window not built yet"),
+              },
+            ],
+          },
+        ]}
       />
       <div
         className="mine-content-frame flex flex-1 flex-col"
