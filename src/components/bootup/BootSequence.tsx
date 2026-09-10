@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BlackScreen from "./BlackScreen";
 import StartupScreen from "./StartupScreen";
 import WelcomeScreen from "./WelcomeScreen";
@@ -21,7 +21,7 @@ type Stage =
 
 function BootSequence() {
   const [stage, setStage] = useState<Stage>("black-1");
-  const audio = new Audio(startupSound);
+  const audioRef = useRef(new Audio(startupSound));
 
   // preload images
   useEffect(() => {
@@ -64,7 +64,7 @@ function BootSequence() {
         <LoginScreen
           onLogin={() => {
             setStage("desktop");
-            playSound(audio);
+            playSound(audioRef.current);
           }}
         />
       );
