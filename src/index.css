@@ -22,7 +22,8 @@ body,
   cursor: url(/src/assets/cursors/default_pointer.cur), pointer;
 }
 
-.progress {
+.progress,
+#root.progress {
   cursor: url(/src/assets/cursors/default_wait.cur), progress;
 }
 

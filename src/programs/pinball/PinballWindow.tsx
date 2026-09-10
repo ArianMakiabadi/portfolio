@@ -4,12 +4,19 @@ import Pinball from "./Pinball";
 import pinballIcon from "../../assets/taskbar/icons/pinball-icon.png";
 import type { MenuBarMenu } from "../../types/menuBar";
 import type { PinballBridge } from "../../types/pinball";
+import { wait } from "../../utils/wait";
 
 type PinballWindowProps = {
   onClose: () => void;
 };
 
-type PinballFrameWindow = Window & { pinballBridge?: PinballBridge };
+type PinballFrameWindow = Window & {
+  pinballBridge?: PinballBridge;
+  mute_game_audio?: () => void;
+  unmute_game_audio?: () => void;
+};
+
+const MIN_LOADING_MS = 3000;
 
 function PinballWindow({ onClose }: PinballWindowProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -19,17 +26,46 @@ function PinballWindow({ onClose }: PinballWindowProps) {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    function handleLoaded() {
-      setLoaded(true);
-    }
+    let cancelled = false;
+    let handleLoaded: () => void;
 
-    iframe.addEventListener("game-loaded", handleLoaded);
-    iframe.addEventListener("game-load-failed", handleLoaded);
+    const gameLoadedPromise = new Promise<void>((resolve) => {
+      handleLoaded = () => {
+        // space-cadet.html dispatches "game-loaded" before it finishes wiring up
+        // window.mute_game_audio in the same synchronous call, so mute_game_audio
+        // isn't defined yet here — defer to a microtask so it runs right after.
+        queueMicrotask(() => {
+          (
+            iframe.contentWindow as PinballFrameWindow | null
+          )?.mute_game_audio?.();
+        });
+        resolve();
+      };
+      iframe.addEventListener("game-loaded", handleLoaded);
+      iframe.addEventListener("game-load-failed", handleLoaded);
+    });
+
+    Promise.all([gameLoadedPromise, wait(MIN_LOADING_MS)]).then(() => {
+      if (cancelled) return;
+      (
+        iframe.contentWindow as PinballFrameWindow | null
+      )?.unmute_game_audio?.();
+      setLoaded(true);
+    });
+
     return () => {
+      cancelled = true;
       iframe.removeEventListener("game-loaded", handleLoaded);
       iframe.removeEventListener("game-load-failed", handleLoaded);
     };
   }, []);
+
+  useEffect(() => {
+    if (loaded) return;
+    const root = document.getElementById("root");
+    root?.classList.add("progress");
+    return () => root?.classList.remove("progress");
+  }, [loaded]);
 
   function bridge(): PinballBridge | undefined {
     const contentWindow = iframeRef.current
