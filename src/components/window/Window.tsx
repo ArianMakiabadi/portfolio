@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useWindowManager } from "../../context/useWindowManager";
 import type { WindowPosition, WindowSize } from "../../types/window";
 import type { MenuBarMenu } from "../../types/menuBar";
+import type { InfoStripConfig } from "../../types/infoStrip";
 import MenuBar from "./MenuBar";
+import InfoStrip from "./InfoStrip";
 import WindowCloseButton from "./WindowCloseButton";
 import WindowMaximizeButton from "./WindowMaximizeButton";
 import WindowMinimizeButton from "./WindowMinimizeButton";
@@ -15,6 +17,7 @@ type WindowProps = {
   iconSrc: string;
   children: ReactNode;
   menus?: MenuBarMenu[];
+  infoStrip?: InfoStripConfig;
   initialPosition: WindowPosition;
   initialSize: WindowSize;
   minSize?: WindowSize;
@@ -24,6 +27,8 @@ type WindowProps = {
 };
 
 const DEFAULT_MIN_SIZE: WindowSize = { width: 200, height: 160 };
+// Matches the height of the `.infostrip` class in index.css.
+const INFO_STRIP_HEIGHT = 20;
 
 function getTaskbarHeight() {
   const value = getComputedStyle(document.documentElement).getPropertyValue(
@@ -39,6 +44,7 @@ function Window({
   iconSrc,
   children,
   menus,
+  infoStrip,
   initialPosition,
   initialSize,
   minSize = DEFAULT_MIN_SIZE,
@@ -67,6 +73,9 @@ function Window({
   const isMinimized =
     openWindows.find((entry) => entry.id === id)?.isMinimized ?? false;
   const zIndex = getZIndex(id);
+  // The info strip renders below the content area rather than shrinking it,
+  // so it needs extra window height on top of `size`.
+  const infoStripHeight = infoStrip ? INFO_STRIP_HEIGHT : 0;
 
   useEffect(() => {
     registerWindow(id, { title, iconSrc });
@@ -127,7 +136,8 @@ function Window({
     const deltaY = event.clientY - drag.startMouseY;
 
     const maxX = window.innerWidth - size.width;
-    const maxY = window.innerHeight - getTaskbarHeight() - size.height;
+    const maxY =
+      window.innerHeight - getTaskbarHeight() - size.height - infoStripHeight;
 
     setPosition({
       x: Math.min(
@@ -179,7 +189,8 @@ function Window({
     const deltaY = event.clientY - resize.startMouseY;
 
     const maxWidth = window.innerWidth - position.x;
-    const maxHeight = window.innerHeight - getTaskbarHeight() - position.y;
+    const maxHeight =
+      window.innerHeight - getTaskbarHeight() - position.y - infoStripHeight;
 
     setSize((current) => {
       let { width, height } = current;
@@ -237,7 +248,7 @@ function Window({
           left: position.x,
           top: position.y,
           width: size.width,
-          height: size.height,
+          height: size.height + infoStripHeight,
         }),
   };
 
@@ -283,6 +294,7 @@ function Window({
       <div className="absolute top-7 right-0 bottom-0 left-0 flex flex-col overflow-hidden px-0.75 pb-0.75">
         {menus && <MenuBar menus={menus} />}
         <div className="min-h-0 flex-1">{children}</div>
+        {infoStrip && <InfoStrip info={infoStrip} />}
       </div>
 
       {resizable && !isMaximized && (

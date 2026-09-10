@@ -360,6 +360,59 @@ body,
     white-space: nowrap;
   }
 
+  .infostrip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 20px;
+    flex-shrink: 0;
+    background-color: rgb(236, 233, 216);
+    padding: 0 6px;
+    font-size: 11px;
+    overflow: hidden;
+  }
+
+  .infostrip-items {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .infostrip-item-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .infostrip-item {
+    padding: 0 6px;
+    white-space: nowrap;
+  }
+
+  .infostrip-item-group:first-child .infostrip-item {
+    padding-left: 0;
+  }
+
+  .infostrip-divider {
+    width: 1px;
+    height: 12px;
+    background-color: gray;
+  }
+
+  .infostrip-link {
+    margin-left: auto;
+    padding-left: 6px;
+    white-space: nowrap;
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .infostrip-link:hover {
+    color: white;
+    background-color: #0b61ff;
+  }
+
   .mine-content-frame {
     background-color: rgb(192, 192, 192);
     border-left: rgb(245, 245, 245) solid 3px;
