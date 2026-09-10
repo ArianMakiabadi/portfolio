@@ -122,11 +122,11 @@ function PinballWindow({ onClose }: PinballWindowProps) {
     <XPWindow
       id="pinball"
       iconSrc={pinballIcon}
-      title="3D Pinball for Windows – Space Cadet"
+      title="3D Pinball – Space Cadet"
       resizable={false}
       menus={menus}
       initialSize={{ width: 610, height: 460 }}
-      initialPosition={{ x: 200, y: 100 }}
+      initialPosition={{ x: 350, y: 150 }}
       onClose={onClose}
     >
       <Pinball iframeRef={iframeRef} loaded={loaded} />
