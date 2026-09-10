@@ -5,6 +5,9 @@ import WelcomeScreen from "./WelcomeScreen";
 import LoginScreen from "./LoginScreen";
 import Desktop from "./Desktop";
 import startupSound from "../../assets/sounds/start-windows.mp3";
+import xpBliss from "../../assets/xp-bliss.webp";
+import windowsLogo from "../../assets/logos/windows-logo.webp";
+import profilePhoto from "../../assets/profile-photo.webp";
 import { playSound } from "../../utils/audio";
 import { wait } from "../../utils/wait";
 
@@ -19,6 +22,13 @@ type Stage =
 function BootSequence() {
   const [stage, setStage] = useState<Stage>("black-1");
   const audio = new Audio(startupSound);
+
+  // preload images
+  useEffect(() => {
+    for (const src of [xpBliss, windowsLogo, profilePhoto]) {
+      new Image().src = src;
+    }
+  }, []);
 
   useEffect(() => {
     async function run() {
