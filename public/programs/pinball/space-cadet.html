@@ -110,6 +110,11 @@
 			};
 			window.unmute_game_audio = function () {
 				gainNode.gain.value = 1;
+				setTimeout(function () {
+					if (audioContext.state !== "running") {
+						console.warn("pinball audio: AudioContext is '" + audioContext.state + "', sound may not play until a real click/keypress reaches the game");
+					}
+				}, 500);
 			};
 			gainNode.connect(audioContext.destination);
 			Module.SDL2.audio.scriptProcessorNode.disconnect();
