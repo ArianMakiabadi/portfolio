@@ -14,6 +14,8 @@ type PinballFrameWindow = Window & {
   pinballBridge?: PinballBridge;
   mute_game_audio?: () => void;
   unmute_game_audio?: () => void;
+  resume_game_audio?: () => void;
+  Module?: { SDL2?: { audioContext?: AudioContext } };
 };
 
 const MIN_LOADING_MS = 3000;
@@ -47,9 +49,13 @@ function PinballWindow({ onClose }: PinballWindowProps) {
 
     Promise.all([gameLoadedPromise, wait(MIN_LOADING_MS)]).then(() => {
       if (cancelled) return;
-      (
-        iframe.contentWindow as PinballFrameWindow | null
-      )?.unmute_game_audio?.();
+      const contentWindow = iframe.contentWindow as PinballFrameWindow | null;
+      contentWindow?.unmute_game_audio?.();
+      // The click that opened this window happened in the parent document,
+      // so it never reached the game's own iframe-scoped gesture listeners.
+      // If the browser's user-activation is still "sticky" from that click,
+      // this resumes audio immediately instead of waiting for another gesture.
+      contentWindow?.resume_game_audio?.();
       // Give the game canvas real browser focus so the Space bar (launch
       // ball) works immediately, instead of only after a menu action
       // focuses it. Focusing the iframe's window alone isn't enough —
