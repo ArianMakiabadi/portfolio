@@ -1,3 +1,5 @@
+import profilePhoto from "./../../assets/profile-photo.webp";
+
 type props = {
   onLogin: () => void;
 };
@@ -16,7 +18,7 @@ function LoginButton({ onLogin }: props) {
         <div className="flex gap-4">
           <div className="box-border h-16 w-16">
             <img
-              src="/src/assets/profile-photo.webp"
+              src={profilePhoto}
               alt="user"
               className="rounded-md border-[3px] border-white transition-colors duration-300 group-hover:border-amber-400"
             />
