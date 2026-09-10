@@ -131,7 +131,10 @@ function PinballWindow({ onClose }: PinballWindowProps) {
       title="3D Pinball – Space Cadet"
       resizable={false}
       menus={menus}
-      initialSize={{ width: 610, height: 460 }}
+      infoStrip={{
+        items: ["Launch: Space", "L Paddle: Z", "R Paddle: Forward Slash"],
+      }}
+      initialSize={{ width: 610, height: 470 }}
       initialPosition={{ x: 350, y: 150 }}
       onClose={onClose}
     >
