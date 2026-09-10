@@ -50,6 +50,11 @@ function PinballWindow({ onClose }: PinballWindowProps) {
       (
         iframe.contentWindow as PinballFrameWindow | null
       )?.unmute_game_audio?.();
+      // Give the game canvas real browser focus so the Space bar (launch
+      // ball) works immediately, instead of only after a menu action
+      // focuses it. Focusing the iframe's window alone isn't enough —
+      // the canvas element itself must receive focus.
+      iframe.contentDocument?.getElementById("canvas")?.focus();
       setLoaded(true);
     });
 
