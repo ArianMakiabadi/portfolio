@@ -659,13 +659,22 @@ const win = () => {
     document.addEventListener('click', removeAnimation, false);
 };
 
-function initSolitaire() {
-
-    const backStyleIndex = Math.floor(Math.random() * 12) + 1;
+let backStyleIndex = 0;
+function setBackStyle(index) {
+    backStyleIndex = index;
     document.body.style.setProperty(
         "--background-position-facing-down",
-        `${cardWidth * -backStyleIndex}px ${cardHeight * -4}px`
+        `${cardWidth * -index}px ${cardHeight * -4}px`
     );
+}
+
+function changeBack() {
+    setBackStyle((backStyleIndex % 12) + 1);
+}
+
+function initSolitaire() {
+
+    setBackStyle(Math.floor(Math.random() * 12) + 1);
 
     // create all cards
     for (let i = 0; i < 4; i++) {
@@ -728,4 +737,4 @@ function initSolitaire() {
 
 window.onload = initSolitaire;
 window.resetGame = resetGame;
-window.solitaireBridge = { deal: resetGame };
+window.solitaireBridge = { deal: resetGame, changeBack: changeBack };

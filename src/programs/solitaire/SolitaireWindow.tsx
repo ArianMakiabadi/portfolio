@@ -29,6 +29,12 @@ function SolitaireWindow({ onClose }: SolitaireWindowProps) {
       items: [
         { type: "action", label: "New Game", onSelect: () => bridge()?.deal() },
         { type: "separator" },
+        {
+          type: "action",
+          label: "Change Card Design",
+          onSelect: () => bridge()?.changeBack(),
+        },
+        { type: "separator" },
         { type: "action", label: "Exit", onSelect: () => onClose() },
       ],
     },
