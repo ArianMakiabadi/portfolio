@@ -7,8 +7,8 @@ import linkedinIcon from "../assets/taskbar/icons/linkedin.webp";
 import noteIcon from "../assets/taskbar/icons/note.webp";
 import paintIcon from "../assets/taskbar/icons/paint.webp";
 import pdfIcon from "../assets/taskbar/icons/pdf.webp";
-import playerIcon from "../assets/taskbar/icons/player.webp";
 import projectsIcon from "../assets/taskbar/icons/projects-icon-lg.webp";
+import solitaireIcon from "../assets/taskbar/icons/solitaire-icon.png";
 import minesweeper from "../assets/taskbar/icons/minesweeper-icon.webp";
 
 import type { StartMenuAppItem, StartMenuLinkItem } from "../types/startMenu";
@@ -45,10 +45,10 @@ export const startMenuApps: StartMenuAppItem[] = [
     icon: minesweeper,
   },
   {
-    id: "player",
-    title: "Music Player",
-    subtitle: "Listen to my playlist",
-    icon: playerIcon,
+    id: "solitaire",
+    title: "Solitaire",
+    subtitle: "Deal yourself a game",
+    icon: solitaireIcon,
   },
   {
     id: "pinball",

@@ -3,6 +3,7 @@ import xpBliss from "../../assets/xp-bliss.webp";
 import Taskbar from "../taskbar/Taskbar";
 import MinesweeperWindow from "../../programs/minesweeper/MinesweeperWindow";
 import PinballWindow from "../../programs/pinball/PinballWindow";
+import SolitaireWindow from "../../programs/solitaire/SolitaireWindow";
 import { WindowManagerProvider } from "../../context/WindowManagerProvider";
 
 function Desktop() {
@@ -27,6 +28,9 @@ function Desktop() {
         )}
         {openApps.pinball && (
           <PinballWindow onClose={() => closeApp("pinball")} />
+        )}
+        {openApps.solitaire && (
+          <SolitaireWindow onClose={() => closeApp("solitaire")} />
         )}
         <Taskbar onSelectApp={openApp} />
       </WindowManagerProvider>
