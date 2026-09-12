@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
 import Window from "../../components/window/Window";
 import Minesweeper from "./Minesweeper";
 import minesweeperIcon from "../../assets/taskbar/icons/minesweeper-icon.webp";
 import { getMinesweeperWindowSize } from "../../data/minesweeperConfig";
 import { useMinesweeper } from "../../hooks/useMinesweeper";
+import { MINESWEEPER_ASSET_URLS } from "./minesweeperAssets";
+import { preloadImages } from "../../utils/preloadImages";
 import type { Difficulty } from "../../types/minesweeper";
 import type { MenuBarMenu } from "../../types/menuBar";
 
@@ -15,6 +18,26 @@ const DIFFICULTIES: Difficulty[] = ["Beginner", "Intermediate", "Expert"];
 function MinesweeperWindow({ onClose }: MinesweeperWindowProps) {
   const minesweeper = useMinesweeper("Beginner");
   const { state, actions } = minesweeper;
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    preloadImages(MINESWEEPER_ASSET_URLS).then(() => {
+      if (!cancelled) setLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loaded) return;
+    const root = document.getElementById("root");
+    root?.classList.add("progress");
+    return () => root?.classList.remove("progress");
+  }, [loaded]);
+
+  if (!loaded) return null;
 
   const menus: MenuBarMenu[] = [
     {
