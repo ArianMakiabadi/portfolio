@@ -4,6 +4,7 @@ import Solitaire from "./Solitaire";
 import solitaireIcon from "../../assets/taskbar/icons/solitaire-icon.png";
 import type { MenuBarMenu } from "../../types/menuBar";
 import type { SolitaireBridge } from "../../types/solitaire";
+import { useProgressCursor } from "../../hooks/useProgressCursor";
 
 type SolitaireWindowProps = {
   onClose: () => void;
@@ -16,6 +17,8 @@ type SolitaireFrameWindow = Window & {
 function SolitaireWindow({ onClose }: SolitaireWindowProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loaded, setLoaded] = useState(false);
+
+  useProgressCursor(!loaded);
 
   function bridge(): SolitaireBridge | undefined {
     const contentWindow = iframeRef.current

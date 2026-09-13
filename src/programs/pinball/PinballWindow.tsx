@@ -5,6 +5,7 @@ import pinballIcon from "../../assets/taskbar/icons/pinball-icon.png";
 import type { MenuBarMenu } from "../../types/menuBar";
 import type { PinballBridge } from "../../types/pinball";
 import { wait } from "../../utils/wait";
+import { useProgressCursor } from "../../hooks/useProgressCursor";
 
 type PinballWindowProps = {
   onClose: () => void;
@@ -71,12 +72,7 @@ function PinballWindow({ onClose }: PinballWindowProps) {
     };
   }, []);
 
-  useEffect(() => {
-    if (loaded) return;
-    const root = document.getElementById("root");
-    root?.classList.add("progress");
-    return () => root?.classList.remove("progress");
-  }, [loaded]);
+  useProgressCursor(!loaded);
 
   function bridge(): PinballBridge | undefined {
     const contentWindow = iframeRef.current

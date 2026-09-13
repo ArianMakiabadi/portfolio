@@ -6,6 +6,7 @@ import { getMinesweeperWindowSize } from "../../data/minesweeperConfig";
 import { useMinesweeper } from "../../hooks/useMinesweeper";
 import { MINESWEEPER_ASSET_URLS } from "./minesweeperAssets";
 import { preloadImages } from "../../utils/preloadImages";
+import { useProgressCursor } from "../../hooks/useProgressCursor";
 import type { Difficulty } from "../../types/minesweeper";
 import type { MenuBarMenu } from "../../types/menuBar";
 
@@ -30,12 +31,7 @@ function MinesweeperWindow({ onClose }: MinesweeperWindowProps) {
     };
   }, []);
 
-  useEffect(() => {
-    if (loaded) return;
-    const root = document.getElementById("root");
-    root?.classList.add("progress");
-    return () => root?.classList.remove("progress");
-  }, [loaded]);
+  useProgressCursor(!loaded);
 
   if (!loaded) return null;
 
