@@ -1,0 +1,29 @@
+- generic [ref=e3]:
+    - generic [ref=e65]:
+        - generic [ref=e66]:
+            - heading "Minesweeper" [level=4] [ref=e69]
+            - generic [ref=e70]:
+                - button "Minimize" [ref=e71]
+                - button "Maximize" [disabled] [ref=e72]
+                - button "Close" [ref=e73]
+        - generic [ref=e74]:
+            - generic [ref=e75]:
+                - generic [ref=e76]: Game
+                - generic [ref=e77]: Help
+            - generic [ref=e80]:
+                - generic [ref=e81]:
+                    - img "0"
+                    - img "1"
+                    - img "0"
+                - button "new" [ref=e83]:
+                    - img "new"
+                - generic [ref=e84]:
+                    - img "0"
+                    - img "0"
+                    - img "0"
+    - generic [ref=e4]:
+        - button [ref=e5]:
+            - img "start" [ref=e6]
+        - button "Minesweeper" [ref=e249]
+        - img "system-tray" [ref=e7]
+        - generic [ref=e8]: 2:40 AM

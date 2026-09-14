@@ -1,0 +1,78 @@
+- generic [ref=e3]:
+    - generic [ref=e65]:
+        - generic [ref=e66]:
+            - heading "Minesweeper" [level=4] [ref=e69]
+            - generic [ref=e70]:
+                - button "Minimize" [ref=e71]
+                - button "Maximize" [disabled] [ref=e72]
+                - button "Close" [ref=e73]
+        - generic [ref=e74]:
+            - generic [ref=e75]:
+                - generic [ref=e76]: Game
+                - generic [ref=e77]: Help
+            - generic [ref=e80]:
+                - generic [ref=e81]:
+                    - img "0"
+                    - img "1"
+                    - img "0"
+                - button "new" [ref=e83]:
+                    - img "new"
+                - generic [ref=e84]:
+                    - img "0"
+                    - img "0"
+                    - img "0"
+    - generic [ref=e4]:
+        - generic [ref=e251]:
+            - heading "Arian Makiabadi" [level=2] [ref=e253]
+            - generic [ref=e255]:
+                - generic [ref=e256]:
+                    - button "My Projects See all my projects" [ref=e257]:
+                        - generic [ref=e258]:
+                            - generic [ref=e259]: My Projects
+                            - generic [ref=e260]: See all my projects
+                    - button "My CV View my resume" [ref=e261]:
+                        - generic [ref=e262]:
+                            - generic [ref=e263]: My CV
+                            - generic [ref=e264]: View my resume
+                    - button "Notepad Read my notes" [ref=e265]:
+                        - generic [ref=e266]:
+                            - generic [ref=e267]: Notepad
+                            - generic [ref=e268]: Read my notes
+                    - button "Paint Doodle something fun!" [ref=e269]:
+                        - generic [ref=e270]:
+                            - generic [ref=e271]: Paint
+                            - generic [ref=e272]: Doodle something fun!
+                    - button "Minesweeper Can you clear the board?" [ref=e273]:
+                        - generic [ref=e274]:
+                            - generic [ref=e275]: Minesweeper
+                            - generic [ref=e276]: Can you clear the board?
+                    - button "Solitaire Deal yourself a game" [ref=e277]:
+                        - generic [ref=e278]:
+                            - generic [ref=e279]: Solitaire
+                            - generic [ref=e280]: Deal yourself a game
+                    - button "3D Pinball Space Cadet awaits" [ref=e281]:
+                        - generic [ref=e282]:
+                            - generic [ref=e283]: 3D Pinball
+                            - generic [ref=e284]: Space Cadet awaits
+                    - button "Contact Me Get in touch" [ref=e285]:
+                        - generic [ref=e286]:
+                            - generic [ref=e287]: Contact Me
+                            - generic [ref=e288]: Get in touch
+                    - button "All Programs" [ref=e290]
+                - generic [ref=e293]:
+                    - link "GitHub" [ref=e294]:
+                        - /url: https://github.com/ArianMakiabadi
+                    - link "LinkedIn" [ref=e296]:
+                        - /url: https://linkedin.com/in/ArianMakiabadi
+                    - link "Instagram" [ref=e298]:
+                        - /url: https://instagram.com/Arian.Maki
+                    - link "Download CV" [ref=e300]:
+                        - /url: "#"
+            - generic [ref=e302]:
+                - button "Log Off" [ref=e303]
+                - button "Shut Down" [ref=e305]
+        - button [active] [ref=e5]:
+            - img "start" [ref=e6]
+        - button "Minesweeper" [ref=e249]
+        - img "system-tray" [ref=e7]
+        - generic [ref=e8]: 2:40 AM

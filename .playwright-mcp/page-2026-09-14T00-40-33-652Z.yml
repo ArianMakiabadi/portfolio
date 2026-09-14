@@ -1,0 +1,54 @@
+- generic [ref=e4]:
+    - generic [ref=e9]:
+        - heading "Arian Makiabadi" [level=2] [ref=e11]
+        - generic [ref=e13]:
+            - generic [ref=e14]:
+                - button "My Projects See all my projects" [ref=e15]:
+                    - generic [ref=e16]:
+                        - generic [ref=e17]: My Projects
+                        - generic [ref=e18]: See all my projects
+                - button "My CV View my resume" [ref=e19]:
+                    - generic [ref=e20]:
+                        - generic [ref=e21]: My CV
+                        - generic [ref=e22]: View my resume
+                - button "Notepad Read my notes" [ref=e23]:
+                    - generic [ref=e24]:
+                        - generic [ref=e25]: Notepad
+                        - generic [ref=e26]: Read my notes
+                - button "Paint Doodle something fun!" [ref=e27]:
+                    - generic [ref=e28]:
+                        - generic [ref=e29]: Paint
+                        - generic [ref=e30]: Doodle something fun!
+                - button "Minesweeper Can you clear the board?" [ref=e31]:
+                    - generic [ref=e32]:
+                        - generic [ref=e33]: Minesweeper
+                        - generic [ref=e34]: Can you clear the board?
+                - button "Solitaire Deal yourself a game" [ref=e35]:
+                    - generic [ref=e36]:
+                        - generic [ref=e37]: Solitaire
+                        - generic [ref=e38]: Deal yourself a game
+                - button "3D Pinball Space Cadet awaits" [ref=e39]:
+                    - generic [ref=e40]:
+                        - generic [ref=e41]: 3D Pinball
+                        - generic [ref=e42]: Space Cadet awaits
+                - button "Contact Me Get in touch" [ref=e43]:
+                    - generic [ref=e44]:
+                        - generic [ref=e45]: Contact Me
+                        - generic [ref=e46]: Get in touch
+                - button "All Programs" [ref=e48]
+            - generic [ref=e51]:
+                - link "GitHub" [ref=e52]:
+                    - /url: https://github.com/ArianMakiabadi
+                - link "LinkedIn" [ref=e54]:
+                    - /url: https://linkedin.com/in/ArianMakiabadi
+                - link "Instagram" [ref=e56]:
+                    - /url: https://instagram.com/Arian.Maki
+                - link "Download CV" [ref=e58]:
+                    - /url: "#"
+        - generic [ref=e60]:
+            - button "Log Off" [ref=e61]
+            - button "Shut Down" [ref=e63]
+    - button [active] [ref=e5]:
+        - img "start" [ref=e6]
+    - img "system-tray" [ref=e7]
+    - generic [ref=e8]: 2:40 AM
