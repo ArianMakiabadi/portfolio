@@ -10,12 +10,11 @@ Two items below (R7, R8) describe things that are already-known, intentional ope
 
 ## Performance findings
 
-### P1. Window-manager context: new value object every render, single coarse context
-**File**: `src/context/WindowManagerProvider.tsx:108-119`
+### P1. ~~Window-manager context: new value object every render, single coarse context~~ — DONE
 
-The provider's `<WindowManagerContext.Provider value={{...}}>` passes a brand-new object literal every render, and that one context bundles unrelated pieces of state together (`activeWindowId`, `openWindows`, z-index data, etc.). Every consumer (every open `Window`, plus `Taskbar`) re-renders whenever *any* piece changes. For example, clicking a window's title bar calls `focusWindow` on every `mousedown` (`Window.tsx:259`), which updates `activeWindowId`/`zIndexes` — this re-renders *all other* open windows and the taskbar even though only one window's focus/z-index actually changed.
+Originally: the provider's `<WindowManagerContext.Provider value={{...}}>` passed a brand-new object literal every render, and that one context bundled unrelated state (`activeWindowId`, `openWindows`, z-index data) together, so every consumer (every open `Window`, plus `Taskbar`) re-rendered whenever *any* piece changed — e.g. focusing one window re-rendered all other open windows and the taskbar.
 
-**Fix direction**: wrap the context value in `useMemo` with correct deps, and consider splitting into separate contexts (e.g. a stacking/focus context vs. a windows-registry context) so a consumer that only cares about one slice doesn't re-render on unrelated updates.
+**Shipped fix** (went further than a `useMemo`/context-split patch): reactive state moved out of React state entirely into a plain pub/sub store (`src/context/windowStore.ts`, `createWindowStore()`), handed through context as a stable reference that never changes. Consumers read it via per-slice `useSyncExternalStore` hooks in `src/context/useWindowManager.ts` (`useIsWindowActive(id)`, `useIsWindowMinimized(id)`, `useWindowZIndex(id)`, `useWindowList()`, `useActiveWindowId()`), so a store mutation only re-renders the components whose specific selected value actually changed — focusing one window no longer re-renders others. See `CLAUDE.md`'s "Window management" section for the full design.
 
 ### P2. `useMinesweeper` clones the entire board on every mouse-hover
 **File**: `src/hooks/useMinesweeper.ts:166-181` (the `OPENING_CEIL`/`OPENING_CEILS` reducer cases)
@@ -64,12 +63,9 @@ Even with throttling, each tick calls `setPosition`/`setSize`, causing a full Re
 
 **Fix direction**: add a dependency array (likely `[state.board]` or the specific derived value it checks).
 
-### P9. Linear scan for a window's own state
-**File**: `Window.tsx:73-74`
+### P9. ~~Linear scan for a window's own state~~ — DONE (fixed as a byproduct of P1)
 
-Each `Window` does `openWindows.find(...)` to read its own `isMinimized` flag — an O(n) scan, minor with few windows, but redundant given the provider already keys windows by id (`WindowManagerProvider.tsx:19`) before flattening to an array (`WindowManagerProvider.tsx:26-33`).
-
-**Fix direction**: expose a lookup-by-id accessor from the context instead of an array the consumer has to `find()` on.
+Originally: each `Window` did `openWindows.find(...)` to read its own `isMinimized` flag — an O(n) scan, redundant given the provider already keyed windows by id. The P1 rewrite replaced this with `useIsWindowMinimized(id)`, a direct id-keyed lookup into the store (`windowStore.ts`'s `getIsMinimized(id)`) — no scan involved.
 
 ### P10. `new Audio(...)` re-evaluated every render
 **File**: `src/components/bootup/BootSequence.tsx:23`
@@ -133,12 +129,11 @@ Pinball uses a custom-event + `MIN_LOADING_MS` + `queueMicrotask` sequence (`Pin
 
 **R10. Repeated unchecked type casts**
 - `PinballWindow.tsx:42,53,79` / `SolitaireWindow.tsx:25` — repeated `as *FrameWindow | null` casts on `iframe.contentWindow` (ties to R1 — a shared hook would centralize this).
-- `MenuBar.tsx:17`, `Taskbar.tsx:49`, `WindowManagerProvider.tsx:95`, `Minesweeper.tsx:23` — four separate `event.target as Node` casts, all implementing the same "did this click land outside my ref" check.
+- `MenuBar.tsx:17`, `Taskbar.tsx:49`, `WindowManagerProvider.tsx:12`, `Minesweeper.tsx:23` — four separate `event.target as Node` casts, all implementing the same "did this click land outside my ref" check.
 **Fix direction**: extract a `useClickOutside(ref, handler)` hook to remove the duplicated cast + listener logic; extract `useIframeBridge` per R1 for the other cast.
 
-**R11. Shared types live outside `src/types/`**
-`OpenWindow` and `WindowManagerContextValue` are defined in `src/context/windowManagerContext.ts` rather than `src/types/`, breaking the documented convention (contrast with `types/menuBar.ts`, `types/infoStrip.ts`, `types/window.ts`, which do follow it).
-**Fix direction**: move these type definitions into `src/types/`, import them into the context file.
+**R11. ~~Shared types live outside `src/types/`~~ — resolved (as a byproduct of P1)**
+Originally: `OpenWindow` and `WindowManagerContextValue` were defined in `src/context/windowManagerContext.ts` rather than `src/types/`, breaking the documented convention. The P1 rewrite removed both types entirely — the context now just holds a `WindowStore` (typed in `windowStore.ts`) — so the convention violation no longer applies. `WindowStore`/`WindowMeta`/`WindowListEntry` living in `windowStore.ts` alongside the store that produces them is intentional, not a repeat of this issue.
 
 **R12. Window/app ids typed as bare `string`**
 `types/startMenu.ts` and the window `id` props (`Window.tsx`, `windowManagerContext.ts`) type `id` as plain `string`, even though `CLAUDE.md` documents ids as hardcoded literals (`"minesweeper"`, `"pinball"`, `"solitaire"`). A string-literal union would catch drift like R7 at compile time.
@@ -195,7 +190,8 @@ The 289-line hook combines board-generation math (`createBoard`, `getNearIndexes
 
 ## Recommended triage
 
-- **High-value, low-risk (worth doing regardless of scale)**: P1 (memoize/split context), P2 + P3 (fix Minesweeper hover reallocation + memoize hot components), P4 (lazy-load game windows), P8 (missing effect dep), R5 (remove console.log stub), R6 (fix or remove dead Start Menu controls), R1 + R10 (extract `useIframeBridge`/`useClickOutside`).
+- **Done**: P1 (window-manager store + selective subscriptions), P9 (fixed as a byproduct of P1), R11 (resolved as a byproduct of P1).
+- **High-value, low-risk (worth doing regardless of scale)**: P2 + P3 (fix Minesweeper hover reallocation + memoize hot components), P4 (lazy-load game windows), P8 (missing effect dep), R5 (remove console.log stub), R6 (fix or remove dead Start Menu controls), R1 + R10 (extract `useIframeBridge`/`useClickOutside`).
 - **Nice-to-have polish**: P5 (resize throttle), P6 (ref-based drag/resize), P10 (`Audio` lazy-init), P11/R20 (real taskbar clock), R16-R18 (named magic-number constants), R13-R14 (split `Window.tsx`/`useMinesweeper.ts`).
 - **Bigger lift, scope before starting**: R21-R22 (keyboard accessibility for `MenuBar` and Minesweeper — touches core interaction model), R12 (string-literal union for ids — touches several files).
-- **Skip unless it becomes a real issue**: P7 (inline literals in menus), P9 (`find()` scan), R19 (naming alias inconsistency) — cosmetic/negligible at current app scale.
+- **Skip unless it becomes a real issue**: P7 (inline literals in menus), R19 (naming alias inconsistency) — cosmetic/negligible at current app scale.
