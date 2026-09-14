@@ -3,13 +3,7 @@ export type Difficulty = "Beginner" | "Intermediate" | "Expert";
 export type GameStatus = "new" | "started" | "died" | "won";
 
 export type CellState =
-  | "cover"
-  | "flag"
-  | "unknown"
-  | "open"
-  | "die"
-  | "misflagged"
-  | "mine";
+  "cover" | "flag" | "unknown" | "open" | "die" | "misflagged" | "mine";
 
 export type Cell = {
   state: CellState;

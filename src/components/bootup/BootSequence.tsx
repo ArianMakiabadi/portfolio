@@ -11,12 +11,7 @@ import { preloadImages } from "../../utils/preloadImages";
 import { BOOT_PRELOAD_ASSET_URLS } from "./bootupAssets";
 
 type Stage =
-  | "black-1"
-  | "startup"
-  | "black-2"
-  | "welcome"
-  | "login"
-  | "desktop";
+  "black-1" | "startup" | "black-2" | "welcome" | "login" | "desktop";
 
 function BootSequence() {
   const [stage, setStage] = useState<Stage>("black-1");

@@ -12,11 +12,12 @@ Two items below (R7, R8) describe things that are already-known, intentional ope
 
 ### P1. ~~Window-manager context: new value object every render, single coarse context~~ — DONE
 
-Originally: the provider's `<WindowManagerContext.Provider value={{...}}>` passed a brand-new object literal every render, and that one context bundled unrelated state (`activeWindowId`, `openWindows`, z-index data) together, so every consumer (every open `Window`, plus `Taskbar`) re-rendered whenever *any* piece changed — e.g. focusing one window re-rendered all other open windows and the taskbar.
+Originally: the provider's `<WindowManagerContext.Provider value={{...}}>` passed a brand-new object literal every render, and that one context bundled unrelated state (`activeWindowId`, `openWindows`, z-index data) together, so every consumer (every open `Window`, plus `Taskbar`) re-rendered whenever _any_ piece changed — e.g. focusing one window re-rendered all other open windows and the taskbar.
 
 **Shipped fix** (went further than a `useMemo`/context-split patch): reactive state moved out of React state entirely into a plain pub/sub store (`src/context/windowStore.ts`, `createWindowStore()`), handed through context as a stable reference that never changes. Consumers read it via per-slice `useSyncExternalStore` hooks in `src/context/useWindowManager.ts` (`useIsWindowActive(id)`, `useIsWindowMinimized(id)`, `useWindowZIndex(id)`, `useWindowList()`, `useActiveWindowId()`), so a store mutation only re-renders the components whose specific selected value actually changed — focusing one window no longer re-renders others. See `CLAUDE.md`'s "Window management" section for the full design.
 
 ### P2. `useMinesweeper` clones the entire board on every mouse-hover
+
 **File**: `src/hooks/useMinesweeper.ts:166-181` (the `OPENING_CEIL`/`OPENING_CEILS` reducer cases)
 
 `state.board.map((cell) => ({ ...cell, opening: false }))` allocates a new array and a new object for **every cell** on the board. This action is dispatched from `MinesweeperBoard.tsx`'s `handleCellMouseEnter` (around lines 61-63, wired via an effect at lines 33-41) on every single `mousemove` across the grid. On an Expert board (480 cells), this means a full board reallocation + re-render on every pixel the mouse crosses while hovering — likely the most visible source of jank in the app today.
@@ -24,18 +25,21 @@ Originally: the provider's `<WindowManagerContext.Provider value={{...}}>` passe
 **Fix direction**: only update the cells whose `opening` flag actually changes (e.g. track the previously-opened set and diff), or store "currently opening" as a separate small piece of state (a `Set<index>` or single index) rather than a flag baked into every cell object.
 
 ### P3. Zero `React.memo` usage anywhere in the codebase
+
 Confirmed via grep — no `memo(` calls in `src/`. Components rendered in loops inside frequently-updating parents — `MinesweeperCell` (`src/programs/minesweeper/MinesweeperCell.tsx`), `TaskbarPellet` (`src/components/taskbar/TaskbarPellet.tsx`), start-menu buttons — always re-render when their parent does, regardless of whether their own props changed. This compounds P1 and P2: a context update or a board hover re-renders far more than necessary.
 
 **Fix direction**: wrap leaf components rendered in loops/hot paths in `React.memo`, once their props are stable (pairs well with fixing P1/P7 so props aren't recreated every render anyway).
 
 ### P4. No code-splitting for game windows
+
 **File**: `src/components/bootup/Desktop.tsx:4-6` (imports), `vite.config.ts` (no `manualChunks`)
 
-`MinesweeperWindow`, `PinballWindow`, `SolitaireWindow` are static top-level imports, conditionally *rendered* (`openApps.x && <...>`) but not conditionally *loaded*. There's no `React.lazy`/`Suspense` anywhere in `src` (grep-confirmed) and no `build.rollupOptions.output.manualChunks` in `vite.config.ts`. All three games' wrapper components, hooks, and asset modules (e.g. `minesweeperSprites.ts`, `minesweeperAssets.ts`) ship in the main bundle even for a visitor who never opens the Start Menu.
+`MinesweeperWindow`, `PinballWindow`, `SolitaireWindow` are static top-level imports, conditionally _rendered_ (`openApps.x && <...>`) but not conditionally _loaded_. There's no `React.lazy`/`Suspense` anywhere in `src` (grep-confirmed) and no `build.rollupOptions.output.manualChunks` in `vite.config.ts`. All three games' wrapper components, hooks, and asset modules (e.g. `minesweeperSprites.ts`, `minesweeperAssets.ts`) ship in the main bundle even for a visitor who never opens the Start Menu.
 
 **Fix direction**: `React.lazy(() => import("./MinesweeperWindow"))` + `Suspense` per game window in `Desktop.tsx`, so each game's code/assets only load on first open.
 
 ### P5. Window resize has no throttle (drag does)
+
 **File**: `src/components/window/Window.tsx:184-213` (resize) vs `127-152` (drag)
 
 `handleDragMove` throttles to ~16ms via `performance.now()` (`Window.tsx:131-133`), but `handleResizeMove` has no equivalent throttle — `setSize` fires on every raw `mousemove` event during a resize.
@@ -43,6 +47,7 @@ Confirmed via grep — no `memo(` calls in `src/`. Components rendered in loops 
 **Fix direction**: apply the same throttle pattern used in `handleDragMove` to `handleResizeMove`.
 
 ### P6. Drag/resize commit to React state on every tick
+
 **File**: `Window.tsx:142-151` (drag), `195-212` (resize)
 
 Even with throttling, each tick calls `setPosition`/`setSize`, causing a full React re-render/reconciliation of the window's subtree (title bar, icon, control buttons, `MenuBar`, children) rather than mutating position/size directly.
@@ -50,6 +55,7 @@ Even with throttling, each tick calls `setPosition`/`setSize`, causing a full Re
 **Fix direction**: during drag/resize, mutate `left`/`top`/`width`/`height` directly on the DOM node via a ref, and only call `setPosition`/`setSize` once on drag/resize end to commit to React state.
 
 ### P7. Inline object/array/function literals rebuilt every render
+
 **Files**: `MinesweeperWindow.tsx:38-67`, `PinballWindow.tsx:83-121`, `SolitaireWindow.tsx:29-44`, `Window.tsx:237-253` (`windowStyle`)
 
 `menus` arrays (with nested `onSelect` arrow functions) passed to `MenuBar` are rebuilt from scratch every render. Low-impact today since `MenuBar` isn't memoized either, but it blocks memoizing `MenuBar` later, and the pattern repeats across all three game windows.
@@ -57,9 +63,10 @@ Even with throttling, each tick calls `setPosition`/`setSize`, causing a full Re
 **Fix direction**: wrap each `menus` array in `useMemo`, and the `onSelect` callbacks in `useCallback`, once `MenuBar` is memoized (pairs with P3).
 
 ### P8. Missing dependency array on win-check effect
+
 **File**: `src/hooks/useMinesweeper.ts:205-211`
 
-`useEffect(() => {...})` has no third argument, so it runs after *every* render of any consumer of the hook, re-filtering the entire board array each time rather than only when the board actually changes.
+`useEffect(() => {...})` has no third argument, so it runs after _every_ render of any consumer of the hook, re-filtering the entire board array each time rather than only when the board actually changes.
 
 **Fix direction**: add a dependency array (likely `[state.board]` or the specific derived value it checks).
 
@@ -68,6 +75,7 @@ Even with throttling, each tick calls `setPosition`/`setSize`, causing a full Re
 Originally: each `Window` did `openWindows.find(...)` to read its own `isMinimized` flag — an O(n) scan, redundant given the provider already keyed windows by id. The P1 rewrite replaced this with `useIsWindowMinimized(id)`, a direct id-keyed lookup into the store (`windowStore.ts`'s `getIsMinimized(id)`) — no scan involved.
 
 ### P10. `new Audio(...)` re-evaluated every render
+
 **File**: `src/components/bootup/BootSequence.tsx:23`
 
 `useRef(new Audio(startupSound))` — React evaluates the argument expression to `useRef` on every render even though only the first call's result is kept, so a throwaway `Audio` element is constructed and discarded on every render after the first. Low-impact since `BootSequence` rarely re-renders, but it's a lazy-init anti-pattern.
@@ -75,6 +83,7 @@ Originally: each `Window` did `openWindows.find(...)` to read its own `isMinimiz
 **Fix direction**: `useRef<HTMLAudioElement | null>(null)` + initialize once in an effect, or use the lazy-initializer function form.
 
 ### P11. Taskbar clock has no timer
+
 **File**: `src/components/taskbar/Taskbar.tsx:16-21`
 
 `const now = new Date()` is computed directly in the render body with no `setInterval`/state — the displayed time only updates when `Taskbar` happens to re-render for an unrelated reason (e.g. a focus change via P1), not on any actual timer.
@@ -115,11 +124,11 @@ Pinball uses a custom-event + `MIN_LOADING_MS` + `queueMicrotask` sequence (`Pin
 `StartMenu.tsx:48-58` — "All Programs" button has no `onClick` at all. `startMenuItems.ts`'s `resume` link uses `href: "#"`. Both silently do nothing when clicked.
 **Fix direction**: wire them up, or remove/disable them until they're implemented, so a user click isn't a silent dead end.
 
-**R7. Start-menu apps with no window behind them** *(known open work per CLAUDE.md, not a bug)*
+**R7. Start-menu apps with no window behind them** _(known open work per CLAUDE.md, not a bug)_
 5 of 8 `startMenuApps` entries (`projects`, `cv`, `notepad`, `paint`, `contact`) have no corresponding `<Window>` in `Desktop.tsx` yet. Worth noting for whoever picks this up: `id` is typed as bare `string` (see R12) with no compile-time link to what `Desktop.openApp` actually handles, so this drift is invisible to the type checker.
 
-**R8. Commented-out dev toggle committed** *(currently in the correct state)*
-`src/App.tsx:2,5` — the `Desktop` import and `return <Desktop />` are commented out (documented in `CLAUDE.md` as a normal dev-only toggle to skip the boot animation). It's currently in the *correct* state for committing (BootSequence active), but leaving commented-out code around rather than toggling it live is itself a minor smell worth being mindful of before each commit.
+**R8. Commented-out dev toggle committed** _(currently in the correct state)_
+`src/App.tsx:2,5` — the `Desktop` import and `return <Desktop />` are commented out (documented in `CLAUDE.md` as a normal dev-only toggle to skip the boot animation). It's currently in the _correct_ state for committing (BootSequence active), but leaving commented-out code around rather than toggling it live is itself a minor smell worth being mindful of before each commit.
 
 ### TypeScript looseness
 
@@ -128,9 +137,10 @@ Pinball uses a custom-event + `MIN_LOADING_MS` + `queueMicrotask` sequence (`Pin
 **Fix direction**: remove the assertion; TypeScript should already narrow the type in that scope (if it doesn't due to closure timing, that's worth understanding rather than suppressing with `!`).
 
 **R10. Repeated unchecked type casts**
+
 - `PinballWindow.tsx:42,53,79` / `SolitaireWindow.tsx:25` — repeated `as *FrameWindow | null` casts on `iframe.contentWindow` (ties to R1 — a shared hook would centralize this).
 - `MenuBar.tsx:17`, `Taskbar.tsx:49`, `WindowManagerProvider.tsx:12`, `Minesweeper.tsx:23` — four separate `event.target as Node` casts, all implementing the same "did this click land outside my ref" check.
-**Fix direction**: extract a `useClickOutside(ref, handler)` hook to remove the duplicated cast + listener logic; extract `useIframeBridge` per R1 for the other cast.
+  **Fix direction**: extract a `useClickOutside(ref, handler)` hook to remove the duplicated cast + listener logic; extract `useIframeBridge` per R1 for the other cast.
 
 **R11. ~~Shared types live outside `src/types/`~~ — resolved (as a byproduct of P1)**
 Originally: `OpenWindow` and `WindowManagerContextValue` were defined in `src/context/windowManagerContext.ts` rather than `src/types/`, breaking the documented convention. The P1 rewrite removed both types entirely — the context now just holds a `WindowStore` (typed in `windowStore.ts`) — so the convention violation no longer applies. `WindowStore`/`WindowMeta`/`WindowListEntry` living in `windowStore.ts` alongside the store that produces them is intentional, not a repeat of this issue.

@@ -22,7 +22,9 @@ function MinesweeperDigitDisplay({ value }: MinesweeperDigitDisplayProps) {
       {digits.map((digit, index) => (
         <img
           key={index}
-          src={digit === "-" ? DIGIT_MINUS_SPRITE : DIGIT_SPRITES[Number(digit)]}
+          src={
+            digit === "-" ? DIGIT_MINUS_SPRITE : DIGIT_SPRITES[Number(digit)]
+          }
           alt={digit}
           className="pointer-events-none select-none"
         />

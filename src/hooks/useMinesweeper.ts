@@ -38,7 +38,11 @@ function getInitState(difficulty: Difficulty): MinesweeperState {
   };
 }
 
-function getNearIndexes(index: number, rows: number, columns: number): number[] {
+function getNearIndexes(
+  index: number,
+  rows: number,
+  columns: number,
+): number[] {
   if (index < 0 || index >= rows * columns) return [];
   const row = Math.floor(index / columns);
   const column = index % columns;
@@ -93,7 +97,8 @@ function floodFillIndexes(state: MinesweeperState, index: number): number[] {
   const result: number[] = [];
   function walk(current: number) {
     const cell = board[current];
-    if (visited[current] || cell.minesAround < 0 || cell.state === "flag") return;
+    if (visited[current] || cell.minesAround < 0 || cell.state === "flag")
+      return;
     visited[current] = true;
     result.push(current);
     if (cell.minesAround > 0) return;
@@ -199,7 +204,10 @@ function useTimer(status: GameStatus) {
 }
 
 export function useMinesweeper(initialDifficulty: Difficulty = "Beginner") {
-  const [state, dispatch] = useReducer(reducer, getInitState(initialDifficulty));
+  const [state, dispatch] = useReducer(
+    reducer,
+    getInitState(initialDifficulty),
+  );
   const [seconds, setSeconds] = useTimer(state.status);
 
   useEffect(() => {
@@ -233,11 +241,17 @@ export function useMinesweeper(initialDifficulty: Difficulty = "Beginner") {
 
   function chordOpenCell(index: number) {
     const cell = state.board[index];
-    if (cell.state !== "open" || cell.minesAround <= 0 || state.status !== "started") {
+    if (
+      cell.state !== "open" ||
+      cell.minesAround <= 0 ||
+      state.status !== "started"
+    ) {
       return;
     }
     const indexes = getNearIndexes(index, state.rows, state.columns);
-    const flaggedCount = indexes.filter((i) => state.board[i].state === "flag").length;
+    const flaggedCount = indexes.filter(
+      (i) => state.board[i].state === "flag",
+    ).length;
     if (flaggedCount !== cell.minesAround) return;
 
     const mineIndex = indexes.find(
@@ -252,7 +266,11 @@ export function useMinesweeper(initialDifficulty: Difficulty = "Beginner") {
 
   function cycleCellFlag(index: number) {
     const cell = state.board[index];
-    if (cell.state === "open" || state.status === "won" || state.status === "died") {
+    if (
+      cell.state === "open" ||
+      state.status === "won" ||
+      state.status === "died"
+    ) {
       return;
     }
     dispatch({ type: "CHANGE_CEIL_STATE", payload: index });

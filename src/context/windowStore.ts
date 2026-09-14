@@ -32,11 +32,13 @@ export function createWindowStore() {
   }
 
   function rebuildListSnapshot() {
-    listSnapshot = Array.from(windows.entries()).map(([id, { title, iconSrc }]) => ({
-      id,
-      title,
-      iconSrc,
-    }));
+    listSnapshot = Array.from(windows.entries()).map(
+      ([id, { title, iconSrc }]) => ({
+        id,
+        title,
+        iconSrc,
+      }),
+    );
   }
 
   return {

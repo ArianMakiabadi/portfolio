@@ -41,7 +41,9 @@ function MenuBar({ menus }: MenuBarProps) {
         <div
           key={menu.label}
           className={
-            menu.disabled ? "menubar-item menubar-item-disabled" : "menubar-item pointer"
+            menu.disabled
+              ? "menubar-item menubar-item-disabled"
+              : "menubar-item pointer"
           }
           onMouseDown={() => !menu.disabled && handleTabMouseDown(menu.label)}
           onMouseOver={() => handleTabMouseOver(menu)}
@@ -56,7 +58,9 @@ function MenuBar({ menus }: MenuBarProps) {
             <div key={menu.label} className="menubar-dropdown">
               {menu.items.map((item, index) => {
                 if (item.type === "separator") {
-                  return <div key={index} className="menubar-dropdown-separator" />;
+                  return (
+                    <div key={index} className="menubar-dropdown-separator" />
+                  );
                 }
 
                 return (
