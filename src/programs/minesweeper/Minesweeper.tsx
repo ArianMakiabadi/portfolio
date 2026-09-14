@@ -48,6 +48,7 @@ function Minesweeper({ state, seconds, actions }: MinesweeperProps) {
         board={state.board}
         rows={state.rows}
         columns={state.columns}
+        openingIndexes={state.openingIndexes}
         onOpenCell={actions.openCell}
         onChordOpenCell={actions.chordOpenCell}
         onCycleFlag={actions.cycleCellFlag}

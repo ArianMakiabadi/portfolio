@@ -22,7 +22,6 @@ function createBoard(rows: number, columns: number): Board {
   return Array.from({ length: rows * columns }, () => ({
     state: "cover",
     minesAround: 0,
-    opening: false,
   }));
 }
 
@@ -35,6 +34,7 @@ function getInitState(difficulty: Difficulty): MinesweeperState {
     columns,
     mines,
     board: createBoard(rows, columns),
+    openingIndexes: [],
   };
 }
 
@@ -153,10 +153,10 @@ function reducer(state: MinesweeperState, action: Action): MinesweeperState {
         if (cell.state === "flag" && cell.minesAround >= 0) {
           return { ...cell, state: "misflagged" };
         }
-        return { ...cell, opening: false };
+        return cell;
       });
       board[action.payload] = { ...board[action.payload], state: "die" };
-      return { ...state, status: "died", board };
+      return { ...state, status: "died", board, openingIndexes: [] };
     }
 
     case "WON": {
@@ -165,24 +165,18 @@ function reducer(state: MinesweeperState, action: Action): MinesweeperState {
           ? { ...cell, state: "open" }
           : { ...cell, state: "flag" },
       );
-      return { ...state, status: "won", board };
+      return { ...state, status: "won", board, openingIndexes: [] };
     }
 
-    case "OPENING_CEIL": {
-      const board = state.board.map((cell) => ({ ...cell, opening: false }));
-      if (action.payload >= 0) {
-        board[action.payload] = { ...board[action.payload], opening: true };
-      }
-      return { ...state, board };
-    }
+    case "OPENING_CEIL":
+      return {
+        ...state,
+        openingIndexes: action.payload >= 0 ? [action.payload] : [],
+      };
 
     case "OPENING_CEILS": {
       const indexes = getNearIndexes(action.payload, state.rows, state.columns);
-      const board = state.board.map((cell) => ({ ...cell, opening: false }));
-      [...indexes, action.payload].forEach((i) => {
-        board[i] = { ...board[i], opening: true };
-      });
-      return { ...state, board };
+      return { ...state, openingIndexes: [...indexes, action.payload] };
     }
 
     default:

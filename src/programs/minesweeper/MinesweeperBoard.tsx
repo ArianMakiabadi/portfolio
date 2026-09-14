@@ -8,6 +8,7 @@ type MinesweeperBoardProps = {
   board: Board;
   rows: number;
   columns: number;
+  openingIndexes: number[];
   onOpenCell: (index: number) => void;
   onChordOpenCell: (index: number) => void;
   onCycleFlag: (index: number) => void;
@@ -19,6 +20,7 @@ function MinesweeperBoard({
   board,
   rows,
   columns,
+  openingIndexes,
   onOpenCell,
   onChordOpenCell,
   onCycleFlag,
@@ -69,6 +71,8 @@ function MinesweeperBoard({
     else if (behavior === "multi") onChordOpenCell(index);
   }
 
+  const openingSet = new Set(openingIndexes);
+
   return (
     <div
       className="mine-board-frame"
@@ -82,6 +86,7 @@ function MinesweeperBoard({
         <MinesweeperCell
           key={index}
           cell={cell}
+          opening={openingSet.has(index)}
           onMouseDown={(event) => handleCellMouseDown(event, index)}
           onMouseEnter={() => handleCellMouseEnter(index)}
         />

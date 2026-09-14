@@ -8,6 +8,7 @@ import { NUMBER_SPRITES } from "./minesweeperSprites";
 
 type MinesweeperCellProps = {
   cell: Cell;
+  opening: boolean;
   onMouseDown: (event: React.MouseEvent) => void;
   onMouseEnter: () => void;
 };
@@ -18,10 +19,11 @@ function CellBackground({ sunken }: { sunken: boolean }) {
 
 function MinesweeperCell({
   cell,
+  opening,
   onMouseDown,
   onMouseEnter,
 }: MinesweeperCellProps) {
-  const { state, minesAround, opening } = cell;
+  const { state, minesAround } = cell;
 
   function renderContent() {
     switch (state) {

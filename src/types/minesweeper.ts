@@ -8,7 +8,6 @@ export type CellState =
 export type Cell = {
   state: CellState;
   minesAround: number;
-  opening: boolean;
 };
 
 export type Board = Cell[];
@@ -26,4 +25,5 @@ export type MinesweeperState = {
   columns: number;
   mines: number;
   board: Board;
+  openingIndexes: number[];
 };
