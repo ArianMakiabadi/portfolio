@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import startButton from "../../assets/taskbar/start-button.webp";
 import taskbarBg from "../../assets/taskbar/taskbar-bg.webp";
 import systemTray from "../../assets/taskbar/system-tray.webp";
-import { useWindowManager } from "../../context/useWindowManager";
+import {
+  useActiveWindowId,
+  useWindowList,
+  useWindowManager,
+} from "../../context/useWindowManager";
 import StartMenu from "./startmenu/StartMenu";
 import TaskbarPellet from "./TaskbarPellet";
 
@@ -11,7 +15,11 @@ type TaskbarProps = {
 };
 
 function Taskbar({ onSelectApp }: TaskbarProps) {
-  const { openWindows, activeWindowId, focusWindow } = useWindowManager();
+  const { focusWindow } = useWindowManager();
+  // windowList only changes when a window opens/closes (not on focus/minimize/
+  // drag), so this doesn't re-render on every unrelated window-manager update.
+  const windowList = useWindowList();
+  const activeWindowId = useActiveWindowId();
 
   const now = new Date();
   const time = now.toLocaleTimeString("en-US", {
@@ -96,7 +104,7 @@ function Taskbar({ onSelectApp }: TaskbarProps) {
         />
       </button>
       <div className="flex h-full flex-1 items-center gap-1 overflow-hidden pl-1">
-        {openWindows.map((openWindow) => (
+        {windowList.map((openWindow) => (
           <TaskbarPellet
             key={openWindow.id}
             title={openWindow.title}

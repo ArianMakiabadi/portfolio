@@ -27,15 +27,17 @@ A personal portfolio built as a recreation of the Windows XP desktop in React 19
 
 **Boot flow.** `App.tsx` renders either `BootSequence` (the full black screen → startup logo → welcome → login → desktop chain, driven by a `Stage` union and `await wait(ms)` in a single effect) or `Desktop` directly. During development it's normal to toggle which one is commented out in `App.tsx` so the desktop renders immediately, skipping the boot animation — restore `<BootSequence />` before committing.
 
-**Window management.** The system is a context (`src/context/`), split across three files so Fast Refresh stays happy: `windowManagerContext.ts` (the `createContext` + types), `WindowManagerProvider.tsx` (the state), `useWindowManager.ts` (the throwing hook). Only import the hook from consumers.
+**Window management.** State lives outside React entirely, in a plain pub/sub store (`src/context/windowStore.ts`, `createWindowStore()`) — not `useState`/Context value objects — so that focusing/minimizing one window doesn't re-render every other open window. Split across four files so Fast Refresh stays happy: `windowStore.ts` (the store factory + types), `windowManagerContext.ts` (a `createContext` whose value is the store instance itself, never recreated), `WindowManagerProvider.tsx` (creates one store via `useState(createWindowStore)` for the app's lifetime and owns the document-level `mousedown` listener), `useWindowManager.ts` (the hooks). Only import hooks from `useWindowManager.ts` in consumers, never the context or store directly.
 
-State lives in the provider, not in the `Window` components:
+`useWindowManager()` returns the stable action callbacks (`registerWindow`, `unregisterWindow`, `focusWindow`, `minimizeWindow`, `registerWindowElement`) — memoized off the store instance, safe to destructure without causing re-renders. Reactive state is read through separate `useSyncExternalStore`-backed hooks scoped to exactly what a consumer needs, so a store mutation only re-renders the components whose selected value actually changed:
 
-- `windows: Record<id, {title, iconSrc, isMinimized}>` — the registry the taskbar renders from
-- `zIndexes` + `highestZIndexRef` — focusing a window bumps it to a new highest z-index
-- `elementsRef: Map<id, HTMLElement>` — a document-level `mousedown` listener clears `activeWindowId` when the click lands outside every registered window element
+- `useIsWindowActive(id)` / `useIsWindowMinimized(id)` / `useWindowZIndex(id)` — per-window primitives, used by `Window.tsx`
+- `useWindowList()` — the `{id, title, iconSrc}[]` the taskbar renders from; the store only rebuilds this array on register/unregister, so it doesn't change on focus/minimize/drag
+- `useActiveWindowId()` — used by both `Window.tsx` (to compute `isActive`) and `Taskbar.tsx` (to highlight the active pellet)
 
-`Window.tsx` is the only component that talks to the registry directly. On mount it calls `registerWindow(id, meta)` + `focusWindow(id)`, and unregisters on unmount — deliberately a mount-only effect with an `exhaustive-deps` disable. It owns its own position/size/maximize/closed state locally; the provider owns focus, minimize, and stacking. Minimize hides via `display: none` (state preserved), close unmounts content via a local `isClosed` flag.
+Internally the store also tracks a z-index map (focusing a window bumps it to a new highest z-index) and an `elements` map of registered DOM nodes — a document-level `mousedown` listener (in the provider) calls the store's `blurActive()` when the click lands outside every registered window element.
+
+`Window.tsx` is the only component that talks to the store's mutators directly. On mount it calls `registerWindow(id, meta)` + `focusWindow(id)`, and unregisters on unmount — deliberately a mount-only effect with an `exhaustive-deps` disable. It owns its own position/size/maximize/closed state locally; the store owns focus, minimize, and stacking. Minimize hides via `display: none` (state preserved), close unmounts content via a local `isClosed` flag.
 
 Windows are single-instance: `id` is a hardcoded literal (`"minesweeper"`, `"pinball"`, `"solitaire"`) and `Desktop.tsx` tracks open/closed per id in a plain `Record<string, boolean>` state (`openApps`), not a list — opening the same app twice just re-shows the one window.
 

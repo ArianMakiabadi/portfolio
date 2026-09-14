@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useWindowManager } from "../../context/useWindowManager";
+import {
+  useIsWindowActive,
+  useIsWindowMinimized,
+  useWindowManager,
+  useWindowZIndex,
+} from "../../context/useWindowManager";
 import type { WindowPosition, WindowSize } from "../../types/window";
 import type { MenuBarMenu } from "../../types/menuBar";
 import type { InfoStripConfig } from "../../types/infoStrip";
@@ -53,26 +58,23 @@ function Window({
   onMinimize,
 }: WindowProps) {
   const {
-    activeWindowId,
-    openWindows,
-    getZIndex,
     registerWindow,
     unregisterWindow,
     focusWindow,
     minimizeWindow,
     registerWindowElement,
   } = useWindowManager();
+  // Scoped to this window's own id, so another window being focused/minimized
+  // doesn't re-render this one.
+  const isActive = useIsWindowActive(id);
+  const isMinimized = useIsWindowMinimized(id);
+  const zIndex = useWindowZIndex(id);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const [isClosed, setIsClosed] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [position, setPosition] = useState<WindowPosition>(initialPosition);
   const [size, setSize] = useState<WindowSize>(initialSize);
-
-  const isActive = activeWindowId === id;
-  const isMinimized =
-    openWindows.find((entry) => entry.id === id)?.isMinimized ?? false;
-  const zIndex = getZIndex(id);
   // The info strip renders below the content area rather than shrinking it,
   // so it needs extra window height on top of `size`.
   const infoStripHeight = infoStrip ? INFO_STRIP_HEIGHT : 0;
