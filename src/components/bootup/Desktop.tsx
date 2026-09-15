@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import xpBliss from "../../assets/xp-bliss.webp";
 import Taskbar from "../taskbar/Taskbar";
 import MinesweeperWindow from "../../programs/minesweeper/MinesweeperWindow";
@@ -9,13 +9,13 @@ import { WindowManagerProvider } from "../../context/WindowManagerProvider";
 function Desktop() {
   const [openApps, setOpenApps] = useState<Record<string, boolean>>({});
 
-  function openApp(id: string) {
+  const openApp = useCallback((id: string) => {
     setOpenApps((prev) => ({ ...prev, [id]: true }));
-  }
+  }, []);
 
-  function closeApp(id: string) {
+  const closeApp = useCallback((id: string) => {
     setOpenApps((prev) => ({ ...prev, [id]: false }));
-  }
+  }, []);
 
   return (
     <div

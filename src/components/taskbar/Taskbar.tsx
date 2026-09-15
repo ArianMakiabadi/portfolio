@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import startButton from "../../assets/taskbar/start-button.webp";
 import taskbarBg from "../../assets/taskbar/taskbar-bg.webp";
 import systemTray from "../../assets/taskbar/system-tray.webp";
@@ -68,14 +68,17 @@ function Taskbar({ onSelectApp }: TaskbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isStartMenuOpen]);
 
-  function closeStartMenu() {
+  const closeStartMenu = useCallback(() => {
     setIsStartMenuOpen(false);
-  }
+  }, []);
 
-  function handleSelectApp(id: string) {
-    closeStartMenu();
-    onSelectApp(id);
-  }
+  const handleSelectApp = useCallback(
+    (id: string) => {
+      closeStartMenu();
+      onSelectApp(id);
+    },
+    [closeStartMenu, onSelectApp],
+  );
 
   return (
     <div
@@ -107,10 +110,11 @@ function Taskbar({ onSelectApp }: TaskbarProps) {
         {windowList.map((openWindow) => (
           <TaskbarPellet
             key={openWindow.id}
+            id={openWindow.id}
             title={openWindow.title}
             iconSrc={openWindow.iconSrc}
             isActive={activeWindowId === openWindow.id}
-            onClick={() => focusWindow(openWindow.id)}
+            onFocus={focusWindow}
           />
         ))}
       </div>

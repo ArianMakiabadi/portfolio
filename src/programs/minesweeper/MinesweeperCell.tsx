@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Cell } from "../../types/minesweeper";
 import flagSprite from "../../assets/minesweeper/flag.png";
 import questionSprite from "../../assets/minesweeper/question.png";
@@ -9,8 +10,9 @@ import { NUMBER_SPRITES } from "./minesweeperSprites";
 type MinesweeperCellProps = {
   cell: Cell;
   opening: boolean;
-  onMouseDown: (event: React.MouseEvent) => void;
-  onMouseEnter: () => void;
+  index: number;
+  onMouseDown: (event: React.MouseEvent, index: number) => void;
+  onMouseEnter: (index: number) => void;
 };
 
 function CellBackground({ sunken }: { sunken: boolean }) {
@@ -20,6 +22,7 @@ function CellBackground({ sunken }: { sunken: boolean }) {
 function MinesweeperCell({
   cell,
   opening,
+  index,
   onMouseDown,
   onMouseEnter,
 }: MinesweeperCellProps) {
@@ -101,12 +104,12 @@ function MinesweeperCell({
   return (
     <div
       className="relative h-6 w-6"
-      onMouseDown={onMouseDown}
-      onMouseEnter={onMouseEnter}
+      onMouseDown={(event) => onMouseDown(event, index)}
+      onMouseEnter={() => onMouseEnter(index)}
     >
       {renderContent()}
     </div>
   );
 }
 
-export default MinesweeperCell;
+export default memo(MinesweeperCell);

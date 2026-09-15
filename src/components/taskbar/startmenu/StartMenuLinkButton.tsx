@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { StartMenuLinkItem } from "../../../types/startMenu";
 
 type StartMenuLinkButtonProps = {
@@ -20,4 +21,4 @@ function StartMenuLinkButton({ item }: StartMenuLinkButtonProps) {
   );
 }
 
-export default StartMenuLinkButton;
+export default memo(StartMenuLinkButton);

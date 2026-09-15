@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { StartMenuAppItem } from "../../../types/startMenu";
 
 type StartMenuAppButtonProps = {
@@ -25,4 +26,4 @@ function StartMenuAppButton({ item, onSelect }: StartMenuAppButtonProps) {
   );
 }
 
-export default StartMenuAppButton;
+export default memo(StartMenuAppButton);

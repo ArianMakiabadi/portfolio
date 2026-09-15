@@ -1,20 +1,24 @@
+import { memo } from "react";
+
 type TaskbarPelletProps = {
+  id: string;
   title: string;
   iconSrc: string;
   isActive: boolean;
-  onClick: () => void;
+  onFocus: (id: string) => void;
 };
 
 function TaskbarPellet({
+  id,
   title,
   iconSrc,
   isActive,
-  onClick,
+  onFocus,
 }: TaskbarPelletProps) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => onFocus(id)}
       className={`pointer mt-px flex h-full min-w-44 shrink-0 items-center gap-1 rounded-sm px-2 py-1 hover:brightness-110 ${
         isActive ? "taskbar-pellet-active" : "taskbar-pellet-deactivated"
       }`}
@@ -27,4 +31,4 @@ function TaskbarPellet({
   );
 }
 
-export default TaskbarPellet;
+export default memo(TaskbarPellet);

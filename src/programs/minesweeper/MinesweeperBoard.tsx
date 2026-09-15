@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Board } from "../../types/minesweeper";
 import MinesweeperCell from "./MinesweeperCell";
 
@@ -37,10 +37,12 @@ function MinesweeperBoard({
     else if (openBehavior.behavior === "multi")
       onPreviewChord(openBehavior.index);
     else onPreviewSingle(-1);
-    // onPreviewSingle/onPreviewChord come from useMinesweeper without stable
-    // identity across renders; only the behavior pair should re-trigger this.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openBehavior.index, openBehavior.behavior]);
+  }, [
+    openBehavior.index,
+    openBehavior.behavior,
+    onPreviewSingle,
+    onPreviewChord,
+  ]);
 
   useEffect(() => {
     function handleWindowMouseUp() {
@@ -50,19 +52,22 @@ function MinesweeperBoard({
     return () => window.removeEventListener("mouseup", handleWindowMouseUp);
   }, []);
 
-  function handleCellMouseDown(event: React.MouseEvent, index: number) {
-    if (event.button === 2 && event.buttons === 2) {
-      onCycleFlag(index);
-    } else if (event.button === 0 && event.buttons === 1) {
-      setOpenBehavior({ index, behavior: "single" });
-    } else if (event.buttons === 3) {
-      setOpenBehavior({ index, behavior: "multi" });
-    }
-  }
+  const handleCellMouseDown = useCallback(
+    (event: React.MouseEvent, index: number) => {
+      if (event.button === 2 && event.buttons === 2) {
+        onCycleFlag(index);
+      } else if (event.button === 0 && event.buttons === 1) {
+        setOpenBehavior({ index, behavior: "single" });
+      } else if (event.buttons === 3) {
+        setOpenBehavior({ index, behavior: "multi" });
+      }
+    },
+    [onCycleFlag],
+  );
 
-  function handleCellMouseEnter(index: number) {
+  const handleCellMouseEnter = useCallback((index: number) => {
     setOpenBehavior((current) => ({ index, behavior: current.behavior }));
-  }
+  }, []);
 
   function handleGridMouseUp() {
     const { behavior, index } = openBehavior;
@@ -85,10 +90,11 @@ function MinesweeperBoard({
       {board.map((cell, index) => (
         <MinesweeperCell
           key={index}
+          index={index}
           cell={cell}
           opening={openingSet.has(index)}
-          onMouseDown={(event) => handleCellMouseDown(event, index)}
-          onMouseEnter={() => handleCellMouseEnter(index)}
+          onMouseDown={handleCellMouseDown}
+          onMouseEnter={handleCellMouseEnter}
         />
       ))}
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { DIFFICULTY_CONFIG } from "../data/minesweeperConfig";
 import type {
   Board,
@@ -204,6 +204,17 @@ export function useMinesweeper(initialDifficulty: Difficulty = "Beginner") {
   );
   const [seconds, setSeconds] = useTimer(state.status);
 
+  // Actions read the latest state via this ref (synced after every commit)
+  // rather than closing over `state` directly, so they can be wrapped in
+  // useCallback with an empty dependency array — giving them a stable
+  // identity across renders instead of a new function object every time
+  // `state` changes (which happens on every hover tick). Stable identity
+  // lets consumers like MinesweeperCell be wrapped in React.memo effectively.
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  });
+
   useEffect(() => {
     if (state.status !== "started") return;
     const remaining = state.board.filter(
@@ -212,7 +223,8 @@ export function useMinesweeper(initialDifficulty: Difficulty = "Beginner") {
     if (remaining === 0) dispatch({ type: "WON" });
   });
 
-  function openCell(index: number) {
+  const openCell = useCallback((index: number) => {
+    const state = stateRef.current;
     switch (state.status) {
       case "new":
         dispatch({ type: "START_GAME", payload: index });
@@ -231,9 +243,10 @@ export function useMinesweeper(initialDifficulty: Difficulty = "Beginner") {
       default:
         break;
     }
-  }
+  }, []);
 
-  function chordOpenCell(index: number) {
+  const chordOpenCell = useCallback((index: number) => {
+    const state = stateRef.current;
     const cell = state.board[index];
     if (
       cell.state !== "open" ||
@@ -256,9 +269,10 @@ export function useMinesweeper(initialDifficulty: Difficulty = "Beginner") {
     } else {
       indexes.forEach((i) => dispatch({ type: "OPEN_CEIL", payload: i }));
     }
-  }
+  }, []);
 
-  function cycleCellFlag(index: number) {
+  const cycleCellFlag = useCallback((index: number) => {
+    const state = stateRef.current;
     const cell = state.board[index];
     if (
       cell.state === "open" ||
@@ -268,22 +282,27 @@ export function useMinesweeper(initialDifficulty: Difficulty = "Beginner") {
       return;
     }
     dispatch({ type: "CHANGE_CEIL_STATE", payload: index });
-  }
+  }, []);
 
-  function newGame(difficulty?: Difficulty) {
-    dispatch({ type: "CLEAR_MAP", payload: difficulty });
-    setSeconds(0);
-  }
+  const newGame = useCallback(
+    (difficulty?: Difficulty) => {
+      dispatch({ type: "CLEAR_MAP", payload: difficulty });
+      setSeconds(0);
+    },
+    [setSeconds],
+  );
 
-  function previewSingle(index: number) {
+  const previewSingle = useCallback((index: number) => {
+    const state = stateRef.current;
     if (state.status === "won" || state.status === "died") return;
     dispatch({ type: "OPENING_CEIL", payload: index });
-  }
+  }, []);
 
-  function previewChord(index: number) {
+  const previewChord = useCallback((index: number) => {
+    const state = stateRef.current;
     if (state.status === "won" || state.status === "died") return;
     dispatch({ type: "OPENING_CEILS", payload: index });
-  }
+  }, []);
 
   return {
     state,

@@ -16,19 +16,24 @@ Originally: the provider's `<WindowManagerContext.Provider value={{...}}>` passe
 
 **Shipped fix** (went further than a `useMemo`/context-split patch): reactive state moved out of React state entirely into a plain pub/sub store (`src/context/windowStore.ts`, `createWindowStore()`), handed through context as a stable reference that never changes. Consumers read it via per-slice `useSyncExternalStore` hooks in `src/context/useWindowManager.ts` (`useIsWindowActive(id)`, `useIsWindowMinimized(id)`, `useWindowZIndex(id)`, `useWindowList()`, `useActiveWindowId()`), so a store mutation only re-renders the components whose specific selected value actually changed — focusing one window no longer re-renders others. See `CLAUDE.md`'s "Window management" section for the full design.
 
-### P2. `useMinesweeper` clones the entire board on every mouse-hover
+### P2. ~~`useMinesweeper` clones the entire board on every mouse-hover~~ — DONE
 
-**File**: `src/hooks/useMinesweeper.ts:166-181` (the `OPENING_CEIL`/`OPENING_CEILS` reducer cases)
+Originally: `state.board.map((cell) => ({ ...cell, opening: false }))` in the `OPENING_CEIL`/`OPENING_CEILS` reducer cases allocated a new array and a new object for every cell on the board, dispatched from `MinesweeperBoard.tsx`'s `handleCellMouseEnter` on every single `mousemove` across the grid — a full board reallocation + re-render per pixel crossed while hovering on an Expert board (480 cells).
 
-`state.board.map((cell) => ({ ...cell, opening: false }))` allocates a new array and a new object for **every cell** on the board. This action is dispatched from `MinesweeperBoard.tsx`'s `handleCellMouseEnter` (around lines 61-63, wired via an effect at lines 33-41) on every single `mousemove` across the grid. On an Expert board (480 cells), this means a full board reallocation + re-render on every pixel the mouse crosses while hovering — likely the most visible source of jank in the app today.
+**Shipped fix**: moved "opening" out of per-cell state entirely into a small `openingIndexes: number[]` field on `MinesweeperState` (`src/types/minesweeper.ts`), sized to the handful of cells actually being previewed (at most 9, the chord neighborhood) instead of the whole board. `OPENING_CEIL`/`OPENING_CEILS` (`src/hooks/useMinesweeper.ts`) now just replace that array and no longer touch `state.board` at all. Rendering derives each cell's sunken/opening look by membership in that array via a `Set` built once per `MinesweeperBoard` render, passed down to `MinesweeperCell` as its own `opening` prop rather than read off the cell object.
 
-**Fix direction**: only update the cells whose `opening` flag actually changes (e.g. track the previously-opened set and diff), or store "currently opening" as a separate small piece of state (a `Set<index>` or single index) rather than a flag baked into every cell object.
+### P3. ~~Zero `React.memo` usage anywhere in the codebase~~ — DONE
 
-### P3. Zero `React.memo` usage anywhere in the codebase
+Originally: no `memo(` calls anywhere in `src/`. Components rendered in loops inside frequently-updating parents — `MinesweeperCell`, `TaskbarPellet`, start-menu buttons — always re-rendered when their parent did, regardless of whether their own props changed, compounding P1 and P2.
 
-Confirmed via grep — no `memo(` calls in `src/`. Components rendered in loops inside frequently-updating parents — `MinesweeperCell` (`src/programs/minesweeper/MinesweeperCell.tsx`), `TaskbarPellet` (`src/components/taskbar/TaskbarPellet.tsx`), start-menu buttons — always re-render when their parent does, regardless of whether their own props changed. This compounds P1 and P2: a context update or a board hover re-renders far more than necessary.
+**Shipped fix**: wrapped `MinesweeperCell.tsx`, `TaskbarPellet.tsx`, `StartMenuAppButton.tsx`, and `StartMenuLinkButton.tsx` in `memo`. Critically, also did the prop-stabilization the original fix direction called out as a precondition — otherwise the `memo` calls would be inert, since these components' callback props were being recreated every parent render:
 
-**Fix direction**: wrap leaf components rendered in loops/hot paths in `React.memo`, once their props are stable (pairs well with fixing P1/P7 so props aren't recreated every render anyway).
+- `useMinesweeper.ts`'s returned actions (`openCell`, `chordOpenCell`, `cycleCellFlag`, `newGame`, `previewSingle`, `previewChord`) now have stable identity via `useCallback` + a `stateRef` kept in sync by a no-dep `useEffect`, so they no longer change reference every time reducer state changes (e.g. on every hover-driven `OPENING_CEIL` dispatch).
+- `MinesweeperBoard.tsx` wraps `handleCellMouseDown`/`handleCellMouseEnter` in `useCallback` and passes them straight through (plus a new `index` prop) instead of allocating a fresh closure per cell per render.
+- `TaskbarPellet` takes `id` + the already-stable `focusWindow` reference (`onFocus`) instead of a fresh per-item `onClick` closure.
+- The Start Menu's callback chain (`Desktop.openApp`/`closeApp` → `Taskbar.handleSelectApp`/`closeStartMenu`) is now `useCallback`-wrapped end to end, and `startMenuApps`/`startMenuLinks` item objects were already stable (module-level constants), so `StartMenuAppButton`/`StartMenuLinkButton` memoization is effective too.
+
+Net effect: hovering the Minesweeper board only re-renders the cell(s) whose `opening`/`cell` props actually changed, not all 480; switching/focusing taskbar windows and opening the Start Menu no longer re-render every pellet/button.
 
 ### P4. No code-splitting for game windows
 
@@ -200,8 +205,8 @@ The 289-line hook combines board-generation math (`createBoard`, `getNearIndexes
 
 ## Recommended triage
 
-- **Done**: P1 (window-manager store + selective subscriptions), P9 (fixed as a byproduct of P1), R11 (resolved as a byproduct of P1).
-- **High-value, low-risk (worth doing regardless of scale)**: P2 + P3 (fix Minesweeper hover reallocation + memoize hot components), P4 (lazy-load game windows), P8 (missing effect dep), R5 (remove console.log stub), R6 (fix or remove dead Start Menu controls), R1 + R10 (extract `useIframeBridge`/`useClickOutside`).
+- **Done**: P1 (window-manager store + selective subscriptions), P2 (Minesweeper hover no longer reallocates the board), P3 (hot-path leaf components memoized with stabilized props), P9 (fixed as a byproduct of P1), R11 (resolved as a byproduct of P1).
+- **High-value, low-risk (worth doing regardless of scale)**: P4 (lazy-load game windows), P8 (missing effect dep), R5 (remove console.log stub), R6 (fix or remove dead Start Menu controls), R1 + R10 (extract `useIframeBridge`/`useClickOutside`).
 - **Nice-to-have polish**: P5 (resize throttle), P6 (ref-based drag/resize), P10 (`Audio` lazy-init), P11/R20 (real taskbar clock), R16-R18 (named magic-number constants), R13-R14 (split `Window.tsx`/`useMinesweeper.ts`).
 - **Bigger lift, scope before starting**: R21-R22 (keyboard accessibility for `MenuBar` and Minesweeper — touches core interaction model), R12 (string-literal union for ids — touches several files).
 - **Skip unless it becomes a real issue**: P7 (inline literals in menus), R19 (naming alias inconsistency) — cosmetic/negligible at current app scale.
