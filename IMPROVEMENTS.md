@@ -205,8 +205,8 @@ The 289-line hook combines board-generation math (`createBoard`, `getNearIndexes
 
 ## Recommended triage
 
-- **Done**: P1 (window-manager store + selective subscriptions), P2 (Minesweeper hover no longer reallocates the board), P3 (hot-path leaf components memoized with stabilized props), P9 (fixed as a byproduct of P1), R11 (resolved as a byproduct of P1).
+- **Done**: P1 (window-manager store + selective subscriptions), P2 (Minesweeper hover no longer reallocates the board), P3 (hot-path leaf components memoized with stabilized props), P9 (fixed as a byproduct of P1), P11/R20 (taskbar clock now driven by a `setInterval` timer), R11 (resolved as a byproduct of P1).
 - **High-value, low-risk (worth doing regardless of scale)**: P4 (lazy-load game windows), P8 (missing effect dep), R5 (remove console.log stub), R6 (fix or remove dead Start Menu controls), R1 + R10 (extract `useIframeBridge`/`useClickOutside`).
-- **Nice-to-have polish**: P5 (resize throttle), P6 (ref-based drag/resize), P10 (`Audio` lazy-init), P11/R20 (real taskbar clock), R16-R18 (named magic-number constants), R13-R14 (split `Window.tsx`/`useMinesweeper.ts`).
+- **Nice-to-have polish**: P5 (resize throttle), P6 (ref-based drag/resize), P10 (`Audio` lazy-init), R16-R18 (named magic-number constants), R13-R14 (split `Window.tsx`/`useMinesweeper.ts`).
 - **Bigger lift, scope before starting**: R21-R22 (keyboard accessibility for `MenuBar` and Minesweeper — touches core interaction model), R12 (string-literal union for ids — touches several files).
 - **Skip unless it becomes a real issue**: P7 (inline literals in menus), R19 (naming alias inconsistency) — cosmetic/negligible at current app scale.

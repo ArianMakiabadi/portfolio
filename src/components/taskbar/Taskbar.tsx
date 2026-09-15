@@ -14,6 +14,14 @@ type TaskbarProps = {
   onSelectApp: (id: string) => void;
 };
 
+function formatTime(date: Date) {
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 function Taskbar({ onSelectApp }: TaskbarProps) {
   const { focusWindow } = useWindowManager();
   // windowList only changes when a window opens/closes (not on focus/minimize/
@@ -21,12 +29,12 @@ function Taskbar({ onSelectApp }: TaskbarProps) {
   const windowList = useWindowList();
   const activeWindowId = useActiveWindowId();
 
-  const now = new Date();
-  const time = now.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const [time, setTime] = useState(() => formatTime(new Date()));
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(formatTime(new Date())), 30_000);
+    return () => clearInterval(timer);
+  }, []);
 
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const startButtonRef = useRef<HTMLButtonElement>(null);
