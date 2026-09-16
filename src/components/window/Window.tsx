@@ -29,6 +29,7 @@ type WindowProps = {
   resizable?: boolean;
   onClose?: () => void;
   onMinimize?: (isMinimized: boolean) => void;
+  onDragEnd?: () => void;
 };
 
 const DEFAULT_MIN_SIZE: WindowSize = { width: 200, height: 160 };
@@ -56,6 +57,7 @@ function Window({
   resizable = true,
   onClose,
   onMinimize,
+  onDragEnd,
 }: WindowProps) {
   const {
     registerWindow,
@@ -157,6 +159,7 @@ function Window({
     dragState.current = null;
     document.removeEventListener("mousemove", handleDragMove);
     document.removeEventListener("mouseup", handleDragEnd);
+    onDragEnd?.();
   }
 
   const resizeState = useRef<{

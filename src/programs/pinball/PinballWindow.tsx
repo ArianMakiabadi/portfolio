@@ -80,6 +80,18 @@ function PinballWindow({ onClose }: PinballWindowProps) {
     return contentWindow?.pinballBridge;
   }
 
+  function refocusGame() {
+    // Dragging the window's title bar shifts native browser focus away from
+    // the iframe, which the compiled game treats as losing focus and pauses
+    // itself. Re-assert focus the same way space-cadet-menus.js's
+    // handle_menu_item does for bridge-driven actions: a synthetic "focus"
+    // event on the iframe's window plus real focus on the canvas.
+    const iframe = iframeRef.current;
+    const contentWindow = iframe?.contentWindow as PinballFrameWindow | null;
+    contentWindow?.dispatchEvent(new Event("focus"));
+    iframe?.contentDocument?.getElementById("canvas")?.focus();
+  }
+
   const menus: MenuBarMenu[] = [
     {
       label: "Game",
@@ -133,6 +145,7 @@ function PinballWindow({ onClose }: PinballWindowProps) {
       initialSize={{ width: 610, height: 470 }}
       initialPosition={{ x: 350, y: 150 }}
       onClose={onClose}
+      onDragEnd={refocusGame}
     >
       <Pinball iframeRef={iframeRef} loaded={loaded} />
     </XPWindow>
