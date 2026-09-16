@@ -66,8 +66,14 @@ function MenuBar({ menus }: MenuBarProps) {
                 return (
                   <div
                     key={item.label}
-                    className="menubar-dropdown-row pointer"
-                    onMouseUp={() => handleRowSelect(item.onSelect)}
+                    className={
+                      item.disabled
+                        ? "menubar-dropdown-row menubar-dropdown-row-disabled"
+                        : "menubar-dropdown-row pointer"
+                    }
+                    onMouseUp={() =>
+                      !item.disabled && handleRowSelect(item.onSelect)
+                    }
                   >
                     <div className="menubar-dropdown-check">
                       {item.type === "checkable" && item.checked && (

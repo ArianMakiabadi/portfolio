@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   useIsWindowActive,
   useIsWindowMinimized,
@@ -36,6 +43,10 @@ const DEFAULT_MIN_SIZE: WindowSize = { width: 200, height: 160 };
 // Matches the height of the `.infostrip` class in index.css.
 const INFO_STRIP_HEIGHT = 20;
 
+export type WindowHandle = {
+  toggleMaximize: () => void;
+};
+
 function getTaskbarHeight() {
   const value = getComputedStyle(document.documentElement).getPropertyValue(
     "--taskbar-height",
@@ -44,21 +55,24 @@ function getTaskbarHeight() {
   return Number.isFinite(parsed) ? parsed : 30;
 }
 
-function Window({
-  id,
-  title,
-  iconSrc,
-  children,
-  menus,
-  infoStrip,
-  initialPosition,
-  initialSize,
-  minSize = DEFAULT_MIN_SIZE,
-  resizable = true,
-  onClose,
-  onMinimize,
-  onDragEnd,
-}: WindowProps) {
+const Window = forwardRef<WindowHandle, WindowProps>(function Window(
+  {
+    id,
+    title,
+    iconSrc,
+    children,
+    menus,
+    infoStrip,
+    initialPosition,
+    initialSize,
+    minSize = DEFAULT_MIN_SIZE,
+    resizable = true,
+    onClose,
+    onMinimize,
+    onDragEnd,
+  },
+  ref,
+) {
   const {
     registerWindow,
     unregisterWindow,
@@ -237,6 +251,12 @@ function Window({
     setIsMaximized((current) => !current);
   }
 
+  useImperativeHandle(
+    ref,
+    () => ({ toggleMaximize: handleToggleMaximize }),
+    [],
+  );
+
   if (isClosed) return null;
 
   const windowStyle: React.CSSProperties = {
@@ -320,6 +340,6 @@ function Window({
       )}
     </div>
   );
-}
+});
 
 export default Window;
