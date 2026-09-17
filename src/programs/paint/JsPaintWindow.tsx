@@ -45,6 +45,11 @@ function JsPaintWindow({ onClose }: JsPaintWindowProps) {
       ],
     },
     {
+      label: "Edit",
+      items: [],
+      disabled: true,
+    },
+    {
       label: "View",
       items: [
         {
@@ -58,6 +63,16 @@ function JsPaintWindow({ onClose }: JsPaintWindowProps) {
           onSelect: () => minimizeWindow(WINDOW_ID),
         },
       ],
+    },
+    {
+      label: "Tools",
+      items: [],
+      disabled: true,
+    },
+    {
+      label: "Help",
+      items: [],
+      disabled: true,
     },
   ];
 
