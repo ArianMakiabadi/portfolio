@@ -1,6 +1,12 @@
 export type MenuBarItem =
-  | { type: "action"; label: string; onSelect: () => void }
-  | { type: "checkable"; label: string; checked: boolean; onSelect: () => void }
+  | { type: "action"; label: string; onSelect: () => void; disabled?: boolean }
+  | {
+      type: "checkable";
+      label: string;
+      checked: boolean;
+      onSelect: () => void;
+      disabled?: boolean;
+    }
   | { type: "separator" };
 
 export type MenuBarMenu = {

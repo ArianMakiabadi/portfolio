@@ -343,6 +343,15 @@ body,
     filter: invert(100%);
   }
 
+  .menubar-dropdown-row-disabled {
+    color: rgb(150, 145, 130);
+  }
+
+  .menubar-dropdown-row-disabled:hover > * {
+    background: transparent;
+    filter: none;
+  }
+
   .menubar-dropdown-separator {
     grid-column: 1 / 5;
     height: 1px;

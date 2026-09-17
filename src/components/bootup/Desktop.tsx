@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import xpBliss from "../../assets/xp-bliss.webp";
 import Taskbar from "../taskbar/Taskbar";
 import MinesweeperWindow from "../../programs/minesweeper/MinesweeperWindow";
+import JsPaintWindow from "../../programs/paint/JsPaintWindow";
 import PinballWindow from "../../programs/pinball/PinballWindow";
 import SolitaireWindow from "../../programs/solitaire/SolitaireWindow";
 import { WindowManagerProvider } from "../../context/WindowManagerProvider";
@@ -26,6 +27,7 @@ function Desktop() {
         {openApps.minesweeper && (
           <MinesweeperWindow onClose={() => closeApp("minesweeper")} />
         )}
+        {openApps.paint && <JsPaintWindow onClose={() => closeApp("paint")} />}
         {openApps.pinball && (
           <PinballWindow onClose={() => closeApp("pinball")} />
         )}
