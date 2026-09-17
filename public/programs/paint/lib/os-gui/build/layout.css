@@ -61,7 +61,7 @@ body > .window-titlebar {
 }
 
 .menus {
-	display: flex;
+	display: none;
 	flex: 0 0 auto;
 	flex-wrap: wrap;
 }
