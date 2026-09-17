@@ -760,81 +760,16 @@ $("body").on("dragover dragenter", (/** @type {JQuery.DragOverEvent | JQuery.Dra
 	if (has_files) {
 		event.preventDefault();
 	}
-}).on("drop", async (event) => {
+}).on("drop", (event) => {
 	if (event.isDefaultPrevented()) {
 		return;
 	}
 	const dt = event.originalEvent.dataTransfer;
 	const has_files = dt && Array.from(dt.types).includes("Files");
 	if (has_files) {
+		// File opening via drag-and-drop is intentionally disabled; just stop the
+		// browser from navigating away to display the dropped file raw.
 		event.preventDefault();
-		// @TODO: sort files/items in priority of image, theme, palette
-		// and then try loading them in series, with async await to avoid race conditions?
-		// or maybe support opening multiple documents in tabs
-		// Note: don't use FS Access API in Electron app because:
-		// 1. it's faulty (permissions problems, 0 byte files maybe due to the perms problems)
-		// 2. we want to save the file.path, which the dt.files code path takes care of
-		if (window.FileSystemHandle && !window.is_electron_app) {
-			for (const item of dt.items) {
-				// kind will be "file" for file/directory entries.
-				if (item.kind === "file") {
-					let handle;
-					try {
-						// Experimental API, not supported on Firefox as of 2024-02-17
-						if ("getAsFileSystemHandle" in item) {
-							// @ts-ignore
-							handle = await item.getAsFileSystemHandle();
-						}
-					} catch (error) {
-						// I'm not sure when this happens.
-						// should this use "An invalid file handle was associated with %1." message?
-						show_error_message(localize("File not found."), error);
-						return;
-					}
-					if (!handle || handle.kind === "file") {
-						let file;
-						try {
-							// instanceof is for the type checker; it should be guaranteed since kind is "file"
-							if (handle && handle instanceof FileSystemFileHandle) {
-								file = await handle.getFile();
-							} else {
-								file = item.getAsFile();
-							}
-						} catch (error) {
-							// NotFoundError can happen when the file was moved or deleted,
-							// then dragged and dropped via the browser's downloads bar, or some other outdated file listing.
-							show_error_message(localize("File not found."), error);
-							return;
-						}
-						open_from_file(file, handle);
-						if (window._open_images_serially) {
-							// For testing a suite of files:
-							await new Promise((resolve) => setTimeout(resolve, 500));
-						} else {
-							// Normal behavior: only open one file.
-							return;
-						}
-					}
-					// else if (handle.kind === "directory") {}
-				}
-			}
-		} else if (dt.files && dt.files.length) {
-			if (window._open_images_serially) {
-				// For testing a suite of files, such as http://www.schaik.com/pngsuite/
-				let i = 0;
-				const iid = setInterval(() => {
-					console.log("opening", dt.files[i].name);
-					open_from_file(dt.files[i]);
-					i++;
-					if (i >= dt.files.length) {
-						clearInterval(iid);
-					}
-				}, 1500);
-			} else {
-				// Normal behavior: only open one file.
-				open_from_file(dt.files[0]);
-			}
-		}
 	}
 });
 
@@ -1200,28 +1135,9 @@ $G.on("cut copy paste", (e) => {
 				do_sync_clipboard_copy_or_cut();
 			}
 		}
-	} else if (e.type === "paste") {
-		for (const item of cd.items) {
-			if (item.type.match(/^text\/(?:x-data-uri|uri-list|plain)|URL$/)) {
-				item.getAsString((text) => {
-					const uris = get_uris(text);
-					if (uris.length > 0) {
-						load_image_from_uri(uris[0]).then((info) => {
-							paste(info.image || make_canvas(info.image_data));
-						}, (error) => {
-							show_resource_load_error_message(error);
-						});
-					} else {
-						show_error_message("The information on the Clipboard can't be inserted into Paint.");
-					}
-				});
-				break;
-			} else if (item.type.match(/^image\//)) {
-				paste_image_from_file(item.getAsFile());
-				break;
-			}
-		}
 	}
+	// Pasting an image (file or copied image URL/data-URI) is intentionally
+	// disabled — the canvas should only ever contain what's drawn in it.
 });
 // #endregion
 
