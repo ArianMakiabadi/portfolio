@@ -16,13 +16,14 @@
 	--scrollbar-button-inner-size: 9px;
 
 	/* Colors */
-	--ActiveBorder: rgb(192, 192, 192);
+	--ActiveBorder: rgb(155, 155, 155);
 	--ActiveTitle: rgb(0, 0, 128);
 	--AppWorkspace: rgb(128, 128, 128);
 	--Background: rgb(0, 128, 128);
 	--ButtonAlternateFace: rgb(180, 180, 180);
 	--ButtonDkShadow: rgb(0, 0, 0);
-	--ButtonFace: rgb(192, 192, 192);
+	--ButtonFace: rgb(236, 233, 216);
+	--ButtonSelectedFace: rgb(254,254,244);
 	--ButtonHilight: rgb(255, 255, 255);
 	--ButtonLight: rgb(223, 223, 223);
 	--ButtonShadow: rgb(128, 128, 128);
@@ -38,7 +39,7 @@
 	--InactiveTitleText: rgb(192, 192, 192);
 	--InfoText: rgb(0, 0, 0);
 	--InfoWindow: rgb(255, 255, 225);
-	--Menu: rgb(192, 192, 192);
+	--Menu: rgb(236, 233, 216);
 	--MenuText: rgb(0, 0, 0);
 	--Scrollbar: rgb(192, 192, 192);
 	--TitleText: rgb(255, 255, 255);

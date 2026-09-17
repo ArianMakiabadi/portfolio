@@ -138,8 +138,6 @@ body,
 	width: 25px;
 	height: 25px;
 	border: 0;
-	border-right: 1px solid var(--ButtonDkShadow);
-	border-bottom: 1px solid var(--ButtonDkShadow);
 	background: transparent;
 	outline: 0;
 }
@@ -151,14 +149,10 @@ body,
 	left: 0px;
 	right: 0px;
 	bottom: 0px;
-	border-top: 1px solid var(--ButtonHilight);
-	border-left: 1px solid var(--ButtonHilight);
-	border-right: 1px solid var(--ButtonShadow);
-	border-bottom: 1px solid var(--ButtonShadow);
 }
 .tool:hover:active {
 	padding: 1px;
-	background: transparent !important;
+	background: var(--ButtonFace) !important;
 }
 .tool:hover:active,
 .tool.selected {
@@ -167,10 +161,11 @@ body,
 	left: 0px;
 	right: 0px;
 	bottom: 0px;
-	border-top: 1px solid var(--ButtonDkShadow);
-	border-left: 1px solid var(--ButtonDkShadow);
-	border-right: 1px solid var(--ButtonHilight);
-	border-bottom: 1px solid var(--ButtonHilight);
+	border-top: 1px solid var(--ActiveBorder);
+	border-left: 1px solid var(--ActiveBorder);
+	border-right: 1px solid var(--ActiveBorder);
+	border-bottom: 1px solid var(--ActiveBorder);
+	border-radius: 2px;
 }
 .tool:hover:active:before,
 .tool.selected:before {
@@ -178,14 +173,10 @@ body,
 	left: 0px;
 	right: 0px;
 	bottom: 0px;
-	border-top: 1px solid var(--ButtonShadow);
-	border-left: 1px solid var(--ButtonShadow);
-	border-right: 1px solid var(--ButtonFace);
-	border-bottom: 1px solid var(--ButtonFace);
 }
 .tool.selected,
 .current-colors {
-	background: var(--checker);
+	background: var(--ButtonSelectedFace);
 }
 .tool-icon {
 	background-image: url("../../images/classic/tools.png");
