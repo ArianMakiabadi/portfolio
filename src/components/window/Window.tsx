@@ -15,8 +15,12 @@ import {
 import type { WindowPosition, WindowSize } from "../../types/window";
 import type { MenuBarMenu } from "../../types/menuBar";
 import type { InfoStripConfig } from "../../types/infoStrip";
+import type { WindowHeaderBarConfig } from "../../types/windowHeaderBar";
+import type { WindowLeftMenuConfig } from "../../types/windowLeftMenu";
 import MenuBar from "./MenuBar";
 import InfoStrip from "./InfoStrip";
+import WindowHeaderBar from "./WindowHeaderBar";
+import WindowLeftMenu from "./WindowLeftMenu";
 import WindowCloseButton from "./WindowCloseButton";
 import WindowMaximizeButton from "./WindowMaximizeButton";
 import WindowMinimizeButton from "./WindowMinimizeButton";
@@ -29,6 +33,8 @@ type WindowProps = {
   iconSrc: string;
   children: ReactNode;
   menus?: MenuBarMenu[];
+  headerBar?: WindowHeaderBarConfig;
+  leftMenu?: WindowLeftMenuConfig;
   infoStrip?: InfoStripConfig;
   initialPosition: WindowPosition;
   initialSize: WindowSize;
@@ -62,6 +68,8 @@ const Window = forwardRef<WindowHandle, WindowProps>(function Window(
     iconSrc,
     children,
     menus,
+    headerBar,
+    leftMenu,
     infoStrip,
     initialPosition,
     initialSize,
@@ -318,7 +326,11 @@ const Window = forwardRef<WindowHandle, WindowProps>(function Window(
 
       <div className="absolute top-7 right-0 bottom-0 left-0 flex flex-col overflow-hidden px-0.75 pb-0.75">
         {menus && <MenuBar menus={menus} />}
-        <div className="min-h-0 flex-1">{children}</div>
+        {headerBar && <WindowHeaderBar config={headerBar} />}
+        <div className="flex min-h-0 flex-1 flex-row overflow-hidden">
+          {leftMenu && <WindowLeftMenu config={leftMenu} />}
+          <div className="min-h-0 min-w-0 flex-1">{children}</div>
+        </div>
         {infoStrip && <InfoStrip info={infoStrip} />}
       </div>
 
