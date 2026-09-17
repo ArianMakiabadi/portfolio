@@ -1,4 +1,4 @@
-import { useState } from "react";
+import toggleIcon from "../../assets/window/left-menu/top-icon-card-window.webp";
 import type {
   WindowLeftMenuConfig,
   WindowLeftMenuItem,
@@ -20,30 +20,21 @@ function WindowLeftMenu({ config }: WindowLeftMenuProps) {
 }
 
 function Section({ section }: { section: WindowLeftMenuSection }) {
-  const [collapsed, setCollapsed] = useState(false);
-
   return (
     <div className="window-left-menu-section">
-      <div
-        className="window-left-menu-section-header pointer"
-        onMouseDown={() => setCollapsed((current) => !current)}
-      >
+      <div className="window-left-menu-section-header">
         <span className="window-left-menu-section-title">{section.title}</span>
-        <span
-          className={
-            collapsed
-              ? "window-left-menu-section-toggle window-left-menu-section-toggle-collapsed"
-              : "window-left-menu-section-toggle"
-          }
+        <img
+          src={toggleIcon}
+          alt=""
+          className="window-left-menu-section-toggle"
         />
       </div>
-      {!collapsed && (
-        <div className="window-left-menu-section-items">
-          {section.items.map((item) => (
-            <Item key={item.label} item={item} />
-          ))}
-        </div>
-      )}
+      <div className="window-left-menu-section-items">
+        {section.items.map((item) => (
+          <Item key={item.label} item={item} />
+        ))}
+      </div>
     </div>
   );
 }

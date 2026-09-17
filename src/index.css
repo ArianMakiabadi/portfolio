@@ -562,75 +562,82 @@ body,
   .window-left-menu {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    width: 140px;
+    gap: 12px;
+    width: 194px;
     flex-shrink: 0;
     overflow-y: auto;
-    padding: 8px;
+    padding: 10px;
     background: linear-gradient(
       180deg,
-      rgb(107, 142, 235) 0%,
-      rgb(53, 96, 205) 100%
+      rgb(116, 138, 255) 0%,
+      rgb(64, 87, 211) 100%
     );
   }
 
   .window-left-menu-section {
     border-radius: 2px 2px 0 0;
-    background-color: rgba(255, 255, 255, 0.15);
+    background: linear-gradient(
+      to right,
+      rgba(180, 200, 251, 0.87) 0%,
+      rgba(164, 185, 251, 0.87) 50%,
+      rgba(180, 200, 251, 0.87) 100%
+    );
   }
 
   .window-left-menu-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3px 6px;
+    padding: 2px 8px;
     border-radius: 2px 2px 0 0;
     background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.35) 0%,
-      rgba(255, 255, 255, 0.05) 100%
+      to right,
+      rgb(240, 240, 255) 0px,
+      rgb(240, 240, 255) 30%,
+      rgb(168, 188, 255) 100%
     );
-    color: white;
-    font-size: 11px;
+    color: #0c327d;
+    font-size: 10.4px;
     font-weight: bold;
   }
 
-  .window-left-menu-section-toggle {
-    width: 10px;
-    height: 10px;
-    flex-shrink: 0;
-    border-radius: 1px;
-    background-color: white;
-    opacity: 0.8;
+  .window-left-menu-section-header:hover {
+    color: #1c68ff;
+    text-decoration: underline;
   }
 
-  .window-left-menu-section-toggle-collapsed {
-    opacity: 0.5;
+  .window-left-menu-section-toggle {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04))
+      drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1));
   }
 
   .window-left-menu-section-items {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 6px;
   }
 
   .window-left-menu-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    color: white;
-    font-size: 11px;
+    gap: 4px;
+    padding: 3.2px 8px;
+    color: #0c327d;
+    font-size: 10.4px;
+    font-weight: 300;
     text-decoration: none;
   }
 
   .window-left-menu-item:hover {
+    color: #1c68ff;
     text-decoration: underline;
   }
 
   .window-left-menu-item-icon {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
   }
 
