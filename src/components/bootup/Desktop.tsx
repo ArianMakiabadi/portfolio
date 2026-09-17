@@ -5,6 +5,7 @@ import MinesweeperWindow from "../../programs/minesweeper/MinesweeperWindow";
 import JsPaintWindow from "../../programs/paint/JsPaintWindow";
 import PinballWindow from "../../programs/pinball/PinballWindow";
 import SolitaireWindow from "../../programs/solitaire/SolitaireWindow";
+import ProjectsWindow from "../window/ProjectsWindow";
 import { WindowManagerProvider } from "../../context/WindowManagerProvider";
 
 function Desktop() {
@@ -33,6 +34,9 @@ function Desktop() {
         )}
         {openApps.solitaire && (
           <SolitaireWindow onClose={() => closeApp("solitaire")} />
+        )}
+        {openApps.projects && (
+          <ProjectsWindow onClose={() => closeApp("projects")} />
         )}
         <Taskbar onSelectApp={openApp} />
       </WindowManagerProvider>
