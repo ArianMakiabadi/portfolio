@@ -496,69 +496,6 @@ body,
     background-color: rgb(172, 168, 153);
   }
 
-  .window-header-search {
-    display: flex;
-    align-items: center;
-    height: 22px;
-    flex-shrink: 0;
-    gap: 4px;
-    background-color: rgb(236, 233, 216);
-    padding: 0 4px;
-    font-size: 11px;
-  }
-
-  .window-header-search-label {
-    color: rgb(100, 100, 100);
-    white-space: nowrap;
-  }
-
-  .window-header-search-field {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex: 1;
-    min-width: 0;
-    height: 18px;
-    gap: 4px;
-    background-color: white;
-    border: 1px solid rgb(122, 158, 224);
-    padding: 0 4px;
-  }
-
-  .window-header-search-icon {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-
-  .window-header-search-path {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .window-header-search-caret {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-
-  .window-header-search-go {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0 6px;
-    white-space: nowrap;
-  }
-
-  .window-header-search-go-icon {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-
   .window-left-menu {
     display: flex;
     flex-direction: column;
