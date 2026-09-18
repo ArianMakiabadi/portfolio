@@ -39,7 +39,7 @@ function ProjectsWindow({ onClose }: ProjectsWindowProps) {
     tools: {
       groups: [
         [
-          { icon: backIcon, label: "Back", disabled: true },
+          { icon: backIcon, label: "Back", disabled: true, isBack: true },
           { icon: forwardIcon, disabled: true },
         ],
         [

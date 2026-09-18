@@ -25,13 +25,13 @@ function WindowHeaderTools({ config }: WindowHeaderToolsProps) {
 }
 
 function ToolButton({ button }: { button: WindowHeaderToolsButton }) {
+  const classNames = ["window-header-tools-button"];
+  if (button.disabled) classNames.push("window-header-tools-button-disabled");
+  if (button.isBack && !button.disabled) classNames.push("pointer");
+
   return (
     <div
-      className={
-        button.disabled
-          ? "window-header-tools-button window-header-tools-button-disabled"
-          : "window-header-tools-button pointer"
-      }
+      className={classNames.join(" ")}
       onMouseDown={() => !button.disabled && button.onSelect?.()}
     >
       <img src={button.icon} alt="" className="window-header-tools-icon" />

@@ -4,6 +4,7 @@ export type WindowHeaderToolsButton = {
   onSelect?: () => void;
   disabled?: boolean;
   hasDropdown?: boolean;
+  isBack?: boolean;
 };
 
 export type WindowHeaderToolsConfig = {

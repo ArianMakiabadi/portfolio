@@ -18,7 +18,7 @@ function WindowHeaderSearch({ config }: WindowHeaderSearchProps) {
         <img src={downCaret} alt="" className="h-[14px] w-[14px] shrink-0" />
       </div>
       <div
-        className="pointer flex items-center gap-1 whitespace-nowrap px-1.5"
+        className="flex items-center gap-1 whitespace-nowrap px-1.5"
         onMouseDown={() => config.onGo?.()}
       >
         <img src={goArrow} alt="" className="h-[14px] w-[14px] shrink-0" />
