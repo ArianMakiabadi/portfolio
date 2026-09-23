@@ -21,7 +21,6 @@ const menus = {
 	[localize("&File")]: [
 		{
 			label: localize("&New"),
-			...shortcut(window.is_electron_app ? "Ctrl+N" : "Ctrl+Alt+N"), // Ctrl+N opens a new browser window
 			speech_recognition: [
 				"new", "new file", "new document", "create new document", "create a new document", "start new document", "start a new document",
 			],
@@ -30,7 +29,6 @@ const menus = {
 		},
 		{
 			label: localize("&Open"),
-			...shortcut("Ctrl+O"),
 			speech_recognition: [
 				"open", "open document", "open file", "open an image file", "open a document", "open a file",
 				"load document", "load a document", "load an image file", "load an image",
@@ -134,7 +132,6 @@ const menus = {
 		},
 		{
 			label: localize("&Print"),
-			...shortcut("Ctrl+P"), // relies on browser's print shortcut being Ctrl+P
 			speech_recognition: [
 				"print", "send to printer", "show print dialog",
 				"print page", "print image", "print picture", "print drawing",
@@ -160,7 +157,6 @@ const menus = {
 		MENU_DIVIDER,
 		{
 			label: localize("E&xit"),
-			...shortcut(window.is_electron_app ? "Alt+F4" : ""), // Alt+F4 closes the browser window (in most window managers)
 			speech_recognition: [
 				"exit application", "exit paint", "close paint window",
 			],
@@ -211,7 +207,6 @@ const menus = {
 	[localize("&Edit")]: [
 		{
 			label: localize("&Undo"),
-			...shortcut("Ctrl+Z"),
 			speech_recognition: [
 				"undo", "undo that",
 			],
@@ -221,7 +216,6 @@ const menus = {
 		},
 		{
 			label: localize("&Repeat"),
-			...shortcut("F4"), // also supported: Ctrl+Shift+Z, Ctrl+Y
 			speech_recognition: [
 				"repeat", "redo",
 			],
@@ -231,7 +225,6 @@ const menus = {
 		},
 		{
 			label: localize("&History"),
-			...shortcut("Ctrl+Shift+Y"),
 			speech_recognition: [
 				"show history", "history",
 			],
@@ -241,7 +234,6 @@ const menus = {
 		MENU_DIVIDER,
 		{
 			label: localize("Cu&t"),
-			...shortcut("Ctrl+X"),
 			speech_recognition: [
 				"cut", "cut selection", "cut selection to clipboard", "cut the selection", "cut the selection to clipboard", "cut the selection to the clipboard",
 			],
@@ -255,7 +247,6 @@ const menus = {
 		},
 		{
 			label: localize("&Copy"),
-			...shortcut("Ctrl+C"),
 			speech_recognition: [
 				"copy", "copy selection", "copy selection to clipboard", "copy the selection", "copy the selection to clipboard", "copy the selection to the clipboard",
 			],
@@ -269,7 +260,6 @@ const menus = {
 		},
 		{
 			label: localize("&Paste"),
-			...shortcut("Ctrl+V"),
 			speech_recognition: [
 				"paste", "paste from clipboard", "paste from the clipboard", "insert clipboard", "insert clipboard contents", "insert the contents of the clipboard", "paste what's on the clipboard",
 			],
@@ -283,7 +273,6 @@ const menus = {
 		},
 		{
 			label: localize("C&lear Selection"),
-			...shortcut("Del"),
 			speech_recognition: [
 				"delete", "clear selection", "delete selection", "delete selected", "delete selected area", "clear selected area", "erase selected", "erase selected area",
 			],
@@ -293,7 +282,6 @@ const menus = {
 		},
 		{
 			label: localize("Select &All"),
-			...shortcut("Ctrl+A"),
 			speech_recognition: [
 				"select all", "select everything",
 				"select the whole image", "select the whole picture", "select the whole drawing", "select the whole canvas", "select the whole document",
@@ -315,7 +303,6 @@ const menus = {
 	[localize("&View")]: [
 		{
 			label: localize("&Tool Box"),
-			...shortcut(window.is_electron_app ? "Ctrl+T" : ""), // Ctrl+T opens a new browser tab, Ctrl+Alt+T opens a Terminal in Ubuntu, and Ctrl+Shift+Alt+T feels silly.
 			speech_recognition: [
 				"toggle tool box", "toggle tools box", "toggle toolbox", "toggle tool palette", "toggle tools palette",
 				// @TODO: hide/show
@@ -330,7 +317,6 @@ const menus = {
 		},
 		{
 			label: localize("&Color Box"),
-			...shortcut("Ctrl+L"), // focuses browser address bar, but Firefox and Chrome both allow overriding the default behavior
 			speech_recognition: [
 				"toggle color box", "toggle colors box", "toggle palette", "toggle color palette", "toggle colors palette",
 				// @TODO: hide/show
@@ -380,7 +366,6 @@ const menus = {
 			submenu: [
 				{
 					label: localize("&Normal Size"),
-					...shortcut(window.is_electron_app ? "Ctrl+PgUp" : ""), // Ctrl+PageUp cycles thru browser tabs in Chrome & Firefox; can be overridden in Chrome in fullscreen only
 					speech_recognition: [
 						"reset zoom", "zoom to normal size",
 						"zoom to 100%", "set zoom to 100%", "set zoom 100%",
@@ -396,7 +381,6 @@ const menus = {
 				},
 				{
 					label: localize("&Large Size"),
-					...shortcut(window.is_electron_app ? "Ctrl+PgDn" : ""), // Ctrl+PageDown cycles thru browser tabs in Chrome & Firefox; can be overridden in Chrome in fullscreen only
 					speech_recognition: [
 						"zoom to large size",
 						"zoom to 400%", "set zoom to 400%", "set zoom 400%",
@@ -455,7 +439,6 @@ const menus = {
 				MENU_DIVIDER,
 				{
 					label: localize("Show &Grid"),
-					...shortcut("Ctrl+G"),
 					speech_recognition: [
 						"toggle show grid",
 						"toggle grid", "toggle gridlines", "toggle grid lines", "toggle grid cells",
@@ -487,7 +470,6 @@ const menus = {
 		},
 		{
 			label: localize("&View Bitmap"),
-			...shortcut("Ctrl+F"),
 			speech_recognition: [
 				"view bitmap", "show bitmap",
 				"fullscreen", "full-screen", "full screen",
@@ -501,7 +483,6 @@ const menus = {
 		MENU_DIVIDER,
 		{
 			label: localize("&Fullscreen"),
-			...shortcut("F11"), // relies on browser's shortcut
 			speech_recognition: [
 				// won't work with speech recognition, needs a user gesture
 			],
@@ -534,7 +515,6 @@ const menus = {
 		// @TODO: speech recognition: terms that apply to selection
 		{
 			label: localize("&Flip/Rotate"),
-			...shortcut((window.is_electron_app && !window.electron_is_dev) ? "Ctrl+R" : "Ctrl+Alt+R"), // Ctrl+R reloads the browser tab (or Electron window in dev mode via electron-debug)
 			speech_recognition: [
 				"flip",
 				"rotate",
@@ -546,7 +526,6 @@ const menus = {
 		},
 		{
 			label: localize("&Stretch/Skew"),
-			...shortcut(window.is_electron_app ? "Ctrl+W" : "Ctrl+Alt+W"), // Ctrl+W closes the browser tab
 			speech_recognition: [
 				"stretch", "scale", "resize image",
 				"skew",
@@ -558,7 +537,6 @@ const menus = {
 		},
 		{
 			label: localize("&Invert Colors"),
-			...shortcut("Ctrl+I"),
 			speech_recognition: [
 				"invert",
 				"invert colors",
@@ -571,7 +549,6 @@ const menus = {
 		},
 		{
 			label: `${localize("&Attributes")}...`,
-			...shortcut("Ctrl+E"),
 			speech_recognition: [
 				"attributes", "image attributes", "picture attributes", "image options", "picture options",
 				"dimensions", "image dimensions", "picture dimensions",
@@ -585,7 +562,6 @@ const menus = {
 		},
 		{
 			label: localize("&Clear Image"),
-			...shortcut((window.is_electron_app || !looksLikeChrome) ? "Ctrl+Shift+N" : ""), // Ctrl+Shift+N opens incognito window in chrome
 			speech_recognition: [
 				"clear image", "clear canvas", "clear picture", "clear page", "clear drawing",
 				// @TODO: erase?
@@ -661,7 +637,6 @@ const menus = {
 		{
 			emoji_icon: "⌚",
 			label: localize("&History"),
-			...shortcut("Ctrl+Shift+Y"),
 			speech_recognition: [
 				// This is a duplicate menu item (for easy access), so it doesn't need speech recognition data here.
 			],
@@ -1207,115 +1182,3 @@ for (const [top_level_menu_key, menu] of Object.entries(menus)) {
 
 export { menus };
 
-/**
- * Expands a shortcut label into an object with the label and a corresponding ARIA key shortcuts value.
- * Could handle "CtrlOrCmd" like Electron does, here, or just treat "Ctrl" as control or command.
- * Of course it would be more ergonomic if OS-GUI.js handled this sort of thing,
- * and I have thought about rewriting the OS-GUI API to mimic Electron's.
- * I also have some munging logic in electron-main.js related to this.
- * @param {string} shortcutLabel
- * @returns {{shortcutLabel?: string, ariaKeyShortcuts?: string}}
- */
-function shortcut(shortcutLabel) {
-	if (!shortcutLabel) return {};
-	const ariaKeyShortcuts = shortcutLabel.replace(/Ctrl/g, "Control").replace(/\bDel\b/, "Delete");//.replace(/\bEsc\b/, "Escape").replace(/\bIns\b/, "Insert");
-	if (!validateAriaKeyshortcuts(ariaKeyShortcuts)) {
-		console.error(`Invalid ARIA key shortcuts: ${JSON.stringify(ariaKeyShortcuts)} (from shortcut label: ${JSON.stringify(shortcutLabel)}) (or validator is incomplete)`);
-	}
-	return {
-		shortcutLabel,
-		ariaKeyShortcuts,
-	};
-}
-
-/**
- * Validates an aria-keyshortcuts value.
- *
- * AI-generated code (ChatGPT), prompted with the spec section: https://w3c.github.io/aria/#aria-keyshortcuts
- *
- * @param {string} value
- * @returns {boolean} valid
- */
-function validateAriaKeyshortcuts(value) {
-	// Define valid modifier and non-modifier keys based on UI Events KeyboardEvent key Values spec
-	const modifiers = ["Alt", "Control", "Shift", "Meta", "AltGraph"];
-	const nonModifiers = [
-		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-		"N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-		"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-		"Delete",
-		"Enter", "Tab", "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown",
-		"PageUp", "PageDown", "End", "Home", "Escape", "Space", "Plus",
-		"Minus", "Comma", "Period", "Slash", "Backslash", "Quote", "Semicolon",
-		"BracketLeft", "BracketRight", "F1", "F2", "F3", "F4", "F5", "F6",
-		"F7", "F8", "F9", "F10", "F11", "F12",
-		// Add more non-modifier keys as needed
-	];
-
-	// Split the value into individual shortcuts
-	const shortcuts = value.split(" ");
-
-	// Function to validate a single shortcut
-	function validateShortcut(shortcut) {
-		const keys = shortcut.split("+");
-
-		if (keys.length === 0) {
-			return false;
-		}
-
-		let nonModifierFound = false;
-
-		// Check each key in the shortcut
-		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i];
-
-			if (modifiers.includes(key)) {
-				if (nonModifierFound) {
-					// Modifier key found after a non-modifier key
-					return false;
-				}
-			} else if (nonModifiers.includes(key)) {
-				if (nonModifierFound) {
-					// Multiple non-modifier keys found
-					return false;
-				}
-				nonModifierFound = true;
-			} else {
-				// Invalid key
-				return false;
-			}
-		}
-
-		// Ensure at least one non-modifier key is present
-		return nonModifierFound;
-	}
-
-	// Validate all shortcuts
-	for (let i = 0; i < shortcuts.length; i++) {
-		if (!validateShortcut(shortcuts[i])) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-/** @type {[string, boolean][]} */
-const ariaKeyShortcutsTestCases = [
-	["Control+A Shift+Alt+B", true],
-	["Control+Shift+1", true],
-	["Shift+Alt+T Control+5", true],
-	["T", true],
-	["ArrowLeft", true],
-	["Shift+T Alt+Control", false],
-	["T+Shift", false],
-	["Alt", false],
-	["IncredibleKey", false],
-	["Ctrl+Shift+A", false],
-];
-for (const [ariaKeyShortcuts, expectedValidity] of ariaKeyShortcutsTestCases) {
-	const returnedValidity = validateAriaKeyshortcuts(ariaKeyShortcuts);
-	if (returnedValidity !== expectedValidity) {
-		console.error(`validateAriaKeyshortcuts("${ariaKeyShortcuts}") returned ${returnedValidity} but expected ${expectedValidity}`);
-	}
-}
