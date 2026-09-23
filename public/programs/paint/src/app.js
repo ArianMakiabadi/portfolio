@@ -14,7 +14,6 @@ import { $G, E, TAU, get_file_extension, get_help_folder_icon, is_discord_embed,
 import { init_webgl_stuff, rotate } from "./image-manipulation.js";
 import { menus } from "./menus.js";
 import { showMessageBox } from "./msgbox.js";
-import { stopSimulatingGestures } from "./simulate-random-gestures.js";
 import { disable_speech_recognition, enable_speech_recognition, trace_and_sketch_stop } from "./speech-recognition.js";
 import { localStore } from "./storage.js";
 import { get_theme, set_theme } from "./theme.js";
@@ -722,7 +721,6 @@ $G.on("keydown", (e) => {
 		} else {
 			cancel();
 		}
-		stopSimulatingGestures();
 		trace_and_sketch_stop();
 	} else if (e.key === "Enter") {
 		if (selection) {

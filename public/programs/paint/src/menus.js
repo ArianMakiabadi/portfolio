@@ -9,7 +9,6 @@ import { $G, get_rgba_from_color, is_discord_embed } from "./helpers.js";
 import { show_imgur_uploader } from "./imgur.js";
 import { manage_storage } from "./manage-storage.js";
 import { showMessageBox } from "./msgbox.js";
-import { simulateRandomGesturesPeriodically, simulatingGestures, stopSimulatingGestures } from "./simulate-random-gestures.js";
 import { speech_recognition_active, speech_recognition_available } from "./speech-recognition.js";
 import { get_theme, set_theme } from "./theme.js";
 
@@ -827,27 +826,6 @@ const menus = {
 		// 	},
 		// 	description: localize("Configures JS Paint."),
 		// }
-		{
-			emoji_icon: "🤪",
-			label: localize("&Draw Randomly"),
-			speech_recognition: [
-				"draw randomly", "draw pseudorandomly", "draw wildly", "make random art",
-			],
-			checkbox: {
-				toggle: () => {
-					if (simulatingGestures) {
-						stopSimulatingGestures();
-					} else {
-						simulateRandomGesturesPeriodically();
-					}
-				},
-				check: () => {
-					return simulatingGestures;
-				},
-			},
-			description: localize("Draws randomly with different tools."),
-		},
-		MENU_DIVIDER,
 		{
 			emoji_icon: "👥",
 			label: localize("&Multi-User"),
