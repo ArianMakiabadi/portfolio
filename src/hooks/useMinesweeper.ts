@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { DIFFICULTY_CONFIG } from "../data/minesweeperConfig";
+import { DIFFICULTY_CONFIG } from "@/data/minesweeperConfig";
 import type {
   Board,
   CellState,
   Difficulty,
   GameStatus,
   MinesweeperState,
-} from "../types/minesweeper";
+} from "@/types/minesweeper";
 
 type Action =
   | { type: "CLEAR_MAP"; payload?: Difficulty }

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import startButton from "../../assets/taskbar/start-button.webp";
-import taskbarBg from "../../assets/taskbar/taskbar-bg.webp";
-import systemTray from "../../assets/taskbar/system-tray.webp";
+import startButton from "@/assets/taskbar/start-button.webp";
+import taskbarBg from "@/assets/taskbar/taskbar-bg.webp";
+import systemTray from "@/assets/taskbar/system-tray.webp";
 import {
   useActiveWindowId,
   useWindowList,
   useWindowManager,
-} from "../../context/useWindowManager";
+} from "@/context/useWindowManager";
 import StartMenu from "./startmenu/StartMenu";
 import TaskbarPellet from "./TaskbarPellet";
 

@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { StartMenuAppItem } from "../../../types/startMenu";
+import type { StartMenuAppItem } from "@/types/startMenu";
 
 type StartMenuAppButtonProps = {
   item: StartMenuAppItem;

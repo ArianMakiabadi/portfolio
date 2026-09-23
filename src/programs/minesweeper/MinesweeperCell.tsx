@@ -1,10 +1,10 @@
 import { memo } from "react";
-import type { Cell } from "../../types/minesweeper";
-import flagSprite from "../../assets/minesweeper/flag.png";
-import questionSprite from "../../assets/minesweeper/question.png";
-import mineSprite from "../../assets/minesweeper/mine-ceil.png";
-import mineDeathSprite from "../../assets/minesweeper/mine-death.png";
-import misflaggedSprite from "../../assets/minesweeper/misflagged.png";
+import type { Cell } from "@/types/minesweeper";
+import flagSprite from "@/assets/minesweeper/flag.png";
+import questionSprite from "@/assets/minesweeper/question.png";
+import mineSprite from "@/assets/minesweeper/mine-ceil.png";
+import mineDeathSprite from "@/assets/minesweeper/mine-death.png";
+import misflaggedSprite from "@/assets/minesweeper/misflagged.png";
 import { NUMBER_SPRITES } from "./minesweeperSprites";
 
 type MinesweeperCellProps = {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import type { MenuBarMenu } from "../../types/menuBar";
-import checkedSprite from "../../assets/window/checked.png";
+import type { MenuBarMenu } from "@/types/menuBar";
+import checkedSprite from "@/assets/window/checked.png";
 
 type MenuBarProps = {
   menus: MenuBarMenu[];

@@ -1,5 +1,5 @@
-import type { WindowSize } from "../types/window";
-import type { Difficulty, MinesweeperConfig } from "../types/minesweeper";
+import type { WindowSize } from "@/types/window";
+import type { Difficulty, MinesweeperConfig } from "@/types/minesweeper";
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, MinesweeperConfig> = {
   Beginner: { rows: 9, columns: 9, mines: 10 },

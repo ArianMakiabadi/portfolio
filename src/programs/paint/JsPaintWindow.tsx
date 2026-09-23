@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import XPWindow, { type WindowHandle } from "../../components/window/Window";
+import XPWindow, { type WindowHandle } from "@/components/window/Window";
 import JsPaint from "./JsPaint";
-import paintIcon from "../../assets/taskbar/icons/paint.webp";
-import type { MenuBarMenu } from "../../types/menuBar";
-import { useProgressCursor } from "../../hooks/useProgressCursor";
-import { useWindowManager } from "../../context/useWindowManager";
+import paintIcon from "@/assets/taskbar/icons/paint.webp";
+import type { MenuBarMenu } from "@/types/menuBar";
+import { useProgressCursor } from "@/hooks/useProgressCursor";
+import { useWindowManager } from "@/context/useWindowManager";
 
 const WINDOW_ID = "paint";
 // jspaint's own About dialog (hidden, but still eagerly requested per the

@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
-import XPWindow from "../../components/window/Window";
+import XPWindow from "@/components/window/Window";
 import Solitaire from "./Solitaire";
-import solitaireIcon from "../../assets/taskbar/icons/solitaire-icon.png";
-import type { MenuBarMenu } from "../../types/menuBar";
-import type { SolitaireBridge } from "../../types/solitaire";
-import { useProgressCursor } from "../../hooks/useProgressCursor";
+import solitaireIcon from "@/assets/taskbar/icons/solitaire-icon.png";
+import type { MenuBarMenu } from "@/types/menuBar";
+import type { SolitaireBridge } from "@/types/solitaire";
+import { useProgressCursor } from "@/hooks/useProgressCursor";
 
 type SolitaireWindowProps = {
   onClose: () => void;

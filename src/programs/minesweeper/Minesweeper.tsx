@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { useMinesweeper } from "../../hooks/useMinesweeper";
+import type { useMinesweeper } from "@/hooks/useMinesweeper";
 import MinesweeperScorePanel from "./MinesweeperScorePanel";
 import MinesweeperBoard from "./MinesweeperBoard";
 
