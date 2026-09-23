@@ -1,7 +1,7 @@
 import type {
   WindowHeaderToolsButton,
   WindowHeaderToolsConfig,
-} from "../../types/windowHeaderTools";
+} from "@/types/windowHeaderTools";
 
 type WindowHeaderToolsProps = {
   config: WindowHeaderToolsConfig;

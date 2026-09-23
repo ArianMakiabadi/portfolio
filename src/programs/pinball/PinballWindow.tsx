@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import XPWindow from "../../components/window/Window";
+import XPWindow from "@/components/window/Window";
 import Pinball from "./Pinball";
-import pinballIcon from "../../assets/taskbar/icons/pinball-icon.png";
-import type { MenuBarMenu } from "../../types/menuBar";
-import type { PinballBridge } from "../../types/pinball";
-import { wait } from "../../utils/wait";
-import { useProgressCursor } from "../../hooks/useProgressCursor";
+import pinballIcon from "@/assets/taskbar/icons/pinball-icon.png";
+import type { MenuBarMenu } from "@/types/menuBar";
+import type { PinballBridge } from "@/types/pinball";
+import { wait } from "@/utils/wait";
+import { useProgressCursor } from "@/hooks/useProgressCursor";
 
 type PinballWindowProps = {
   onClose: () => void;

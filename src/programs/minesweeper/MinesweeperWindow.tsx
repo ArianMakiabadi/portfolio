@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import Window from "../../components/window/Window";
+import Window from "@/components/window/Window";
 import Minesweeper from "./Minesweeper";
-import minesweeperIcon from "../../assets/taskbar/icons/minesweeper-icon.webp";
-import { getMinesweeperWindowSize } from "../../data/minesweeperConfig";
-import { useMinesweeper } from "../../hooks/useMinesweeper";
+import minesweeperIcon from "@/assets/taskbar/icons/minesweeper-icon.webp";
+import { getMinesweeperWindowSize } from "@/data/minesweeperConfig";
+import { useMinesweeper } from "@/hooks/useMinesweeper";
 import { MINESWEEPER_ASSET_URLS } from "./minesweeperAssets";
-import { preloadImages } from "../../utils/preloadImages";
-import { useProgressCursor } from "../../hooks/useProgressCursor";
-import type { Difficulty } from "../../types/minesweeper";
-import type { MenuBarMenu } from "../../types/menuBar";
+import { preloadImages } from "@/utils/preloadImages";
+import { useProgressCursor } from "@/hooks/useProgressCursor";
+import type { Difficulty } from "@/types/minesweeper";
+import type { MenuBarMenu } from "@/types/menuBar";
 
 type MinesweeperWindowProps = {
   onClose: () => void;

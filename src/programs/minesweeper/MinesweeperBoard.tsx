@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Board } from "../../types/minesweeper";
+import type { Board } from "@/types/minesweeper";
 import MinesweeperCell from "./MinesweeperCell";
 
 type OpenBehavior = { index: number; behavior: "single" | "multi" | null };

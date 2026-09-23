@@ -13,7 +13,7 @@ import {
   minesweeperIcon,
 } from "./startMenuIcons";
 
-import type { StartMenuAppItem, StartMenuLinkItem } from "../types/startMenu";
+import type { StartMenuAppItem, StartMenuLinkItem } from "@/types/startMenu";
 
 export const startMenuApps: StartMenuAppItem[] = [
   {

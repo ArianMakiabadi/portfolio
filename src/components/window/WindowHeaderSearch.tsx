@@ -1,6 +1,6 @@
-import type { WindowHeaderSearchConfig } from "../../types/windowHeaderSearch";
-import downCaret from "../../assets/window/header-tools/down-icon.webp";
-import goArrow from "../../assets/window/header-tools/right-green-arrow-icon.webp";
+import type { WindowHeaderSearchConfig } from "@/types/windowHeaderSearch";
+import downCaret from "@/assets/window/header-tools/down-icon.webp";
+import goArrow from "@/assets/window/header-tools/right-green-arrow-icon.webp";
 
 type WindowHeaderSearchProps = {
   config: WindowHeaderSearchConfig;

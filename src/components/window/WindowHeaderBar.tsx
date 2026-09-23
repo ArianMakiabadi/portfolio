@@ -1,4 +1,4 @@
-import type { WindowHeaderBarConfig } from "../../types/windowHeaderBar";
+import type { WindowHeaderBarConfig } from "@/types/windowHeaderBar";
 import WindowHeaderTools from "./WindowHeaderTools";
 import WindowHeaderSearch from "./WindowHeaderSearch";
 

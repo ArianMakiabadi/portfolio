@@ -1,9 +1,9 @@
-import toggleIcon from "../../assets/window/left-menu/top-icon-card-window.webp";
+import toggleIcon from "@/assets/window/left-menu/top-icon-card-window.webp";
 import type {
   WindowLeftMenuConfig,
   WindowLeftMenuItem,
   WindowLeftMenuSection,
-} from "../../types/windowLeftMenu";
+} from "@/types/windowLeftMenu";
 
 type WindowLeftMenuProps = {
   config: WindowLeftMenuConfig;

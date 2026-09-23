@@ -1,10 +1,10 @@
 import type { RefObject } from "react";
-import type { GameStatus } from "../../types/minesweeper";
+import type { GameStatus } from "@/types/minesweeper";
 import MinesweeperDigitDisplay from "./MinesweeperDigitDisplay";
-import smileSprite from "../../assets/minesweeper/smile.png";
-import ohhSprite from "../../assets/minesweeper/ohh.png";
-import deadSprite from "../../assets/minesweeper/dead.png";
-import winSprite from "../../assets/minesweeper/win.png";
+import smileSprite from "@/assets/minesweeper/smile.png";
+import ohhSprite from "@/assets/minesweeper/ohh.png";
+import deadSprite from "@/assets/minesweeper/dead.png";
+import winSprite from "@/assets/minesweeper/win.png";
 
 type MinesweeperScorePanelProps = {
   minesRemaining: number;

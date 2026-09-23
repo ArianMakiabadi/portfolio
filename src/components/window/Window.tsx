@@ -11,12 +11,12 @@ import {
   useIsWindowMinimized,
   useWindowManager,
   useWindowZIndex,
-} from "../../context/useWindowManager";
-import type { WindowPosition, WindowSize } from "../../types/window";
-import type { MenuBarMenu } from "../../types/menuBar";
-import type { InfoStripConfig } from "../../types/infoStrip";
-import type { WindowHeaderBarConfig } from "../../types/windowHeaderBar";
-import type { WindowLeftMenuConfig } from "../../types/windowLeftMenu";
+} from "@/context/useWindowManager";
+import type { WindowPosition, WindowSize } from "@/types/window";
+import type { MenuBarMenu } from "@/types/menuBar";
+import type { InfoStripConfig } from "@/types/infoStrip";
+import type { WindowHeaderBarConfig } from "@/types/windowHeaderBar";
+import type { WindowLeftMenuConfig } from "@/types/windowLeftMenu";
 import MenuBar from "./MenuBar";
 import InfoStrip from "./InfoStrip";
 import WindowHeaderBar from "./WindowHeaderBar";

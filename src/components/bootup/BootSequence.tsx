@@ -4,10 +4,10 @@ import StartupScreen from "./StartupScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import LoginScreen from "./LoginScreen";
 import Desktop from "./Desktop";
-import startupSound from "../../assets/sounds/start-windows.mp3";
-import { playSound } from "../../utils/audio";
-import { wait } from "../../utils/wait";
-import { preloadImages } from "../../utils/preloadImages";
+import startupSound from "@/assets/sounds/start-windows.mp3";
+import { playSound } from "@/utils/audio";
+import { wait } from "@/utils/wait";
+import { preloadImages } from "@/utils/preloadImages";
 import { BOOT_PRELOAD_ASSET_URLS } from "./bootupAssets";
 
 type Stage =

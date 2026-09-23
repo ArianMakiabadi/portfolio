@@ -1,4 +1,4 @@
-import type { InfoStripConfig } from "../../types/infoStrip";
+import type { InfoStripConfig } from "@/types/infoStrip";
 
 type InfoStripProps = {
   info: InfoStripConfig;
