@@ -9,7 +9,7 @@ import { Handles } from "./Handles.js";
 // import { get_direction, localize } from "./app-localization.js";
 import { default_palette, get_winter_palette } from "./color-data.js";
 import { image_formats } from "./file-format-data.js";
-import { $this_version_news, cancel, change_url_param, clear, confirm_overwrite_capability, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_new, file_open, file_save, file_save_as, get_tool_by_id, get_uris, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, make_or_update_undoable, open_from_file, paste, paste_image_from_file, redo, render_history_as_gif, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, save_as_prompt, select_all, select_tool, select_tools, set_magnification, show_document_history, show_error_message, show_news, show_resource_load_error_message, toggle_grid, undo, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size, view_bitmap, write_image_file } from "./functions.js";
+import { cancel, change_url_param, clear, confirm_overwrite_capability, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_new, file_open, file_save, file_save_as, get_tool_by_id, get_uris, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, make_or_update_undoable, open_from_file, paste, paste_image_from_file, redo, render_history_as_gif, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, save_as_prompt, select_all, select_tool, select_tools, set_magnification, show_document_history, show_error_message, show_resource_load_error_message, toggle_grid, undo, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size, view_bitmap, write_image_file } from "./functions.js";
 import { $G, E, TAU, get_file_extension, get_help_folder_icon, is_discord_embed, make_canvas, to_canvas_coords } from "./helpers.js";
 import { init_webgl_stuff, rotate } from "./image-manipulation.js";
 import { menus } from "./menus.js";
@@ -452,112 +452,6 @@ window.$status_position = $status_position;
 const $status_size = $(E("div")).addClass("status-coordinates status-field inset-shallow").appendTo($status_area);
 window.$status_size = $status_size;
 
-// #region News Indicator
-const news_seen_key = "jspaint latest news seen";
-const latest_news_datetime = $this_version_news.find("time").attr("datetime");
-const $news_indicator = $(`
-	<a class="news-indicator" href="#project-news">
-		<!--<img src="images/winter/present.png" width="24" height="22" alt=""/>-->
-		<img src="images/about/news.gif" width="40" height="16" alt="" style="filter: hue-rotate(234deg);"/>
-		<!--<img src="images/new.gif" width="40" height="16" alt=""/>-->
-		<!--<span class="marquee" dir="ltr" style="--text-width: 44ch; --animation-duration: 3s;">
-			<span>
-				<b>Cool new things</b> — One thing! Another thing! Something else!
-			</span>
-		</span>-->
-		<span>
-			<b>Bubblegum theme</b>
-		</span>
-	</a>
-`);
-$news_indicator.on("click auxclick", (event) => {
-	event.preventDefault();
-	show_news();
-	$news_indicator.remove();
-	try {
-		localStorage[news_seen_key] = latest_news_datetime;
-	} catch (_error) { /* ignore */ }
-});
-let news_seen;
-let local_storage_unavailable;
-try {
-	news_seen = localStorage[news_seen_key];
-} catch (_error) {
-	local_storage_unavailable = true;
-}
-const day = 24 * 60 * 60 * 1000;
-const news_period_if_can_dismiss = 15 * day;
-const news_period_if_cannot_dismiss = 5 * day;
-const news_period = local_storage_unavailable ? news_period_if_cannot_dismiss : news_period_if_can_dismiss;
-if (Date.now() < Date.parse(latest_news_datetime) + news_period && news_seen !== latest_news_datetime) {
-	$status_area.append($news_indicator);
-}
-if ($news_indicator.text().includes("Bubblegum")) {
-	let bubbles_raf_id = -1;
-	const bubbles = [];
-	const make_bubble = () => {
-		const $bubble = $(E("img")).attr({
-			src: "images/bubblegum/bubble.png",
-			width: 24,
-			height: 24,
-			alt: "",
-		}).css({
-			position: "absolute",
-			pointerEvents: "none",
-			top: 0,
-			left: 0,
-			zIndex: 10,
-		}).appendTo("body");
-		const rect = $news_indicator[0].getBoundingClientRect();
-		const x = rect.left + Math.random() * rect.width;
-		const y = rect.top + rect.height;
-		const scale = Math.random() * 0.5 + 0.5;
-		const bubble = { $bubble, x, y, scale, vx: Math.random() * 2 - 1, vy: -Math.random() * 2 };
-		bubbles.push(bubble);
-		if (bubbles_raf_id === -1) {
-			animate_bubbles();
-		}
-		setTimeout(() => {
-			$bubble.remove();
-			bubbles.splice(bubbles.indexOf(bubble), 1);
-			if (bubbles.length === 0) {
-				cancelAnimationFrame(bubbles_raf_id);
-				bubbles_raf_id = -1;
-			}
-		}, 10000);
-	};
-	let last_time = performance.now();
-	const animate_bubbles = () => {
-		bubbles_raf_id = requestAnimationFrame(animate_bubbles);
-		const now = performance.now();
-		const dt = now - last_time;
-		for (const bubble of bubbles) {
-			// not actually frame rate independent physics, I don't think
-			bubble.x += bubble.vx * dt / 16;
-			bubble.y += bubble.vy * dt / 16;
-			const wind_x = Math.sin(bubble.y / 100 + now / 3000) * 0.01;
-			const wind_y = Math.cos(bubble.x / 100 + now / 3000) * 0.01;
-			bubble.vx += wind_x;
-			bubble.vy += wind_y;
-			bubble.$bubble.css({
-				transform: `translate(${bubble.x}px, ${bubble.y}px) scale(${bubble.scale})`,
-			});
-		}
-		last_time = now;
-	};
-	$news_indicator.on("pointerenter", () => {
-		for (let i = 0; i < 10; i++) {
-			setTimeout(make_bubble, i * 100);
-		}
-	});
-	$news_indicator.on("pointerdown", () => {
-		for (let i = 0; i < 50; i++) {
-			setTimeout(make_bubble, i * 1);
-		}
-	});
-}
-// #endregion
-
 $status_text.default = () => {
 	$status_text.text(localize("For Help, click Help Topics on the Help Menu."));
 };
@@ -591,24 +485,6 @@ $(menu_bar.element).on("info", (event) => {
 $(menu_bar.element).on("default-info", () => {
 	$status_text.default();
 });
-
-// Hidden in a menu, these GIFs are not as obtrusive even though they can't be dismissed
-const theme_updated_period = 20 * day;
-const theme_new_period = 40 * day;
-const theme_soon_period = 40 * day;
-if (Date.now() < Date.parse("2024-02-22") + theme_new_period) {
-	$("[role=menuitem][aria-label*='Modern Dark'] .menu-item-shortcut").append("<img src='images/new2.gif' alt='New!'/>");
-}
-if (Date.now() < Date.parse("2024-02-24") + theme_soon_period) {
-	// $("[role=menuitem][aria-label*='Bubblegum'] .menu-item-shortcut").append("<img src='images/soon-twist-anim.gif' alt='Coming Soon!' class='too-big-soon-gif'/>");
-	// $("[role=menuitem][aria-label*='Retro Futurist'] .menu-item-shortcut").append("<img src='images/soon.gif' alt='Coming Soon!'/>");
-	// $("[role=menuitem][aria-label*='Picnic'] .menu-item-shortcut").append("<img src='images/soon.gif' alt='Coming Soon!'/>");
-}
-if (Date.now() < Date.parse("2024-02-22") + theme_updated_period) {
-	$("[role=menuitem][aria-label*='Modern Light'] .menu-item-shortcut").append("<img src='images/updated.gif' alt='Updated!'/>");
-	$("[role=menuitem][aria-label*='Classic Dark'] .menu-item-shortcut").append("<img src='images/updated.gif' alt='Updated!'/>");
-	$("[role=menuitem][aria-label*='Occult'] .menu-item-shortcut").append("<img src='images/updated.gif' alt='Updated!'/>");
-}
 
 // Extras menu emoji icons
 // (OS-GUI.js doesn't support icons yet but I wanted to spruce it up a bit.)
