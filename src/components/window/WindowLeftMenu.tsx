@@ -43,7 +43,7 @@ function Item({ item }: { item: WindowLeftMenuItem }) {
   const content = (
     <>
       <img src={item.icon} alt="" className="window-left-menu-item-icon" />
-      <span className="window-left-menu-item-label">{item.label}</span>
+      <span className="text-twilight-blue font-light">{item.label}</span>
     </>
   );
 
