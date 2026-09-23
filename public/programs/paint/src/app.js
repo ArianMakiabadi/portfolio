@@ -8,9 +8,8 @@ import { $ToolBox } from "./$ToolBox.js";
 import { Handles } from "./Handles.js";
 // import { get_direction, localize } from "./app-localization.js";
 import { default_palette, get_winter_palette } from "./color-data.js";
-import { image_formats } from "./file-format-data.js";
-import { cancel, change_url_param, clear, confirm_overwrite_capability, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_new, file_open, file_save, file_save_as, get_tool_by_id, get_uris, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, make_or_update_undoable, open_from_file, paste, paste_image_from_file, redo, render_history_as_gif, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, save_as_prompt, select_all, select_tool, select_tools, set_magnification, show_document_history, show_error_message, show_resource_load_error_message, toggle_grid, undo, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size, view_bitmap, write_image_file } from "./functions.js";
-import { $G, E, TAU, get_file_extension, get_help_folder_icon, is_discord_embed, make_canvas, to_canvas_coords } from "./helpers.js";
+import { cancel, change_url_param, clear, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_new, file_open, get_tool_by_id, get_uris, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, make_or_update_undoable, open_from_file, paste, paste_image_from_file, redo, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, select_all, select_tool, select_tools, set_magnification, show_document_history, show_error_message, show_resource_load_error_message, toggle_grid, undo, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size, view_bitmap } from "./functions.js";
+import { $G, E, TAU, get_file_extension, get_help_folder_icon, is_discord_embed, to_canvas_coords } from "./helpers.js";
 import { init_webgl_stuff, rotate } from "./image-manipulation.js";
 import { menus } from "./menus.js";
 import { showMessageBox } from "./msgbox.js";
@@ -62,143 +61,6 @@ const getMimeType = (format) => "mimeType" in format ? format.mimeType : `applic
 window.systemHooks = window.systemHooks || {};
 /** @type {SystemHooks} */
 window.systemHookDefaults = {
-	// named to be distinct from various platform APIs (showSaveFilePicker, saveAs, electron's showSaveDialog; and saveFile is too ambiguous)
-	// could call it saveFileAs maybe but then it'd be weird that you don't pass in the file directly
-	showSaveFileDialog: async ({ formats, defaultFileName, defaultPath, defaultFileFormatID, getBlob, savedCallbackUnreliable, dialogTitle }) => {
-
-		// Note: showSaveFilePicker currently doesn't support suggesting a filename,
-		// or retrieving which file type was selected in the dialog (you have to get it (guess it) from the file name)
-		// In particular, some formats are ambiguous with the file name, e.g. different bit depths of BMP files.
-		// So, it's a tradeoff with the benefit of overwriting on Save.
-		// https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker
-		// Also, if you're using accessibility options Speech Recognition or Eye Gaze Mode,
-		// `showSaveFilePicker` fails based on a notion of it not being a "user gesture".
-		// `saveAs` will likely also fail on the same basis,
-		// but at least in chrome, there's a "Downloads Blocked" icon with a popup where you can say Always Allow.
-		// I can't detect when it's allowed or blocked, but `saveAs` has a better chance of working,
-		// so in Speech Recognition and Eye Gaze Mode, I set a global flag temporarily to disable File System Access API (window.untrusted_gesture).
-		if (window.showSaveFilePicker && !window.untrusted_gesture && enable_fs_access_api) {
-			// We can't get the selected file type, not even from newHandle.getFile()
-			// so limit formats shown to a set that can all be used by their unique file extensions
-			// formats = formats_unique_per_file_extension(formats);
-			// OR, show two dialogs, one for the format and then one for the save location.
-			const { newFileFormatID } = await save_as_prompt({ dialogTitle, defaultFileName, defaultFileFormatID, formats, promptForName: false });
-			const new_format = formats.find((format) => format.formatID === newFileFormatID);
-			const blob = await getBlob(new_format && new_format.formatID);
-			formats = [new_format];
-			let newHandle;
-			let newFileName;
-			try {
-				newHandle = await showSaveFilePicker({
-					types: formats.map((format) => {
-						return {
-							description: format.name,
-							accept: {
-								[getMimeType(format)]: format.extensions.map(prependDot),
-							},
-						};
-					}),
-				});
-				newFileName = newHandle.name;
-				const newFileExtension = get_file_extension(newFileName);
-				const doItAgain = async (message) => {
-					const button_value = await showMessageBox({
-						message: `${message}\n\nTry adding .${new_format.extensions[0]} to the name. Sorry about this.`,
-						iconID: "error",
-						buttons: [
-							{
-								label: localize("Save As"), // or "Retry"
-								value: "show-save-as-dialog-again",
-								default: true,
-							},
-							{
-								label: localize("Save"), // or "Ignore"
-								value: "save-without-extension",
-							},
-							{
-								label: localize("Cancel"), // or "Abort"
-								value: "cancel",
-							},
-						],
-					});
-					if (button_value === "show-save-as-dialog-again") {
-						return window.systemHookDefaults.showSaveFileDialog({
-							formats,
-							defaultFileName,
-							defaultPath,
-							defaultFileFormatID,
-							getBlob,
-							savedCallbackUnreliable,
-							dialogTitle,
-						});
-					} else if (button_value === "save-without-extension") {
-						// @TODO: DRY
-						const writableStream = await newHandle.createWritable();
-						await writableStream.write(blob);
-						await writableStream.close();
-						savedCallbackUnreliable?.({
-							newFileName: newFileName,
-							newFileFormatID: new_format && new_format.formatID,
-							newFileHandle: newHandle,
-							newBlob: blob,
-						});
-					} else {
-						// user canceled save
-					}
-				};
-				if (!newFileExtension) {
-					// return await doItAgain(`Missing file extension.`);
-					return await doItAgain(`'${newFileName}' doesn't have an extension.`);
-				}
-				if (!new_format.extensions.includes(newFileExtension)) {
-					// Closest translation: "Paint cannot save to the same filename with a different file type."
-					// return await doItAgain(`Wrong file extension for selected file type.`);
-					return await doItAgain(`File extension '.${newFileExtension}' does not match the selected file type ${new_format.name}.`);
-				}
-				// const new_format =
-				// 	get_format_from_extension(formats, newHandle.name) ||
-				// 	formats.find((format)=> format.formatID === defaultFileFormatID);
-				// const blob = await getBlob(new_format && new_format.formatID);
-				const writableStream = await newHandle.createWritable();
-				await writableStream.write(blob);
-				await writableStream.close();
-			} catch (error) {
-				if (error.name === "AbortError") {
-					// user canceled save
-					return;
-				}
-				// console.warn("Error during showSaveFileDialog (for showSaveFilePicker; now falling back to saveAs)", error);
-				// newFileName = (newFileName || file_name || localize("untitled"))
-				// 	.replace(/\.(bmp|dib|a?png|gif|jpe?g|jpe|jfif|tiff?|webp|raw)$/i, "") +
-				// 	"." + new_format.extensions[0];
-				// saveAs(blob, newFileName);
-				if (error.message.match(/gesture|activation/)) {
-					// show_error_message("Your browser blocked the file from being saved, because you didn't use the mouse or keyboard directly to save. Try looking for a Downloads Blocked icon and say Always Allow, or save again with the keyboard or mouse.", error);
-					show_error_message("Sorry, due to browser security measures, you must use the keyboard or mouse directly to save.");
-					return;
-				}
-				show_error_message(localize("Failed to save document."), error);
-				return;
-			}
-			savedCallbackUnreliable?.({
-				newFileName: newFileName,
-				newFileFormatID: new_format && new_format.formatID,
-				newFileHandle: newHandle,
-				newBlob: blob,
-			});
-		} else {
-
-			const { newFileName, newFileFormatID } = await save_as_prompt({ dialogTitle, defaultFileName, defaultFileFormatID, formats });
-			const blob = await getBlob(newFileFormatID);
-			saveAs(blob, newFileName);
-			savedCallbackUnreliable?.({
-				newFileName,
-				newFileFormatID,
-				newFileHandle: null,
-				newBlob: blob,
-			});
-		}
-	},
 	showOpenFileDialog: async ({ formats }) => {
 		if (window.untrusted_gesture) {
 			// We can't show a file picker RELIABLY.
@@ -233,40 +95,6 @@ window.systemHookDefaults = {
 			});
 		}
 	},
-	writeBlobToHandle: async (save_file_handle, blob) => {
-		if (save_file_handle && save_file_handle.createWritable && enable_fs_access_api) {
-			const acknowledged = await confirm_overwrite_capability();
-			if (!acknowledged) {
-				return false;
-			}
-			try {
-				const writableStream = await save_file_handle.createWritable();
-				await writableStream.write(blob);
-				await writableStream.close();
-				return true;
-			} catch (error) {
-				if (error.name === "AbortError") {
-					// user canceled save (this might not be a real error code that can occur here)
-					return false;
-				}
-				if (error.name === "NotAllowedError") {
-					// use didn't give permission to save
-					// is this too much of a warning?
-					show_error_message(localize("Save was interrupted, so your file has not been saved."), error);
-					return false;
-				}
-				if (error.name === "SecurityError") {
-					// not in a user gesture ("User activation is required to request permissions.")
-					saveAs(blob, file_name);
-					return undefined;
-				}
-			}
-		} else {
-			saveAs(blob, file_name);
-			// hopefully if the page reloads/closes the save dialog/download will persist and succeed?
-			return undefined;
-		}
-	},
 	readBlobFromHandle: async (file_handle) => {
 		if (file_handle && file_handle.getFile) {
 			const file = await file_handle.getFile();
@@ -275,29 +103,6 @@ window.systemHookDefaults = {
 			throw new Error(`Unknown file handle (${file_handle})`);
 			// show_error_message(`${localize("Failed to open document.")}\n${localize("An unsupported operation was attempted.")}`, error);
 		}
-	},
-	setWallpaperTiled: (canvas) => {
-		const wallpaperCanvas = make_canvas(screen.width, screen.height);
-		const pattern = wallpaperCanvas.ctx.createPattern(canvas, "repeat");
-		wallpaperCanvas.ctx.fillStyle = pattern;
-		wallpaperCanvas.ctx.fillRect(0, 0, wallpaperCanvas.width, wallpaperCanvas.height);
-
-		systemHooks.setWallpaperCentered(wallpaperCanvas);
-	},
-	setWallpaperCentered: (canvas) => {
-		systemHooks.showSaveFileDialog({
-			dialogTitle: localize("Save As"),
-			defaultFileName: `${file_name.replace(/\.(bmp|dib|a?png|gif|jpe?g|jpe|jfif|tiff?|webp|raw)$/i, "")} wallpaper.png`,
-			defaultFileFormatID: "image/png",
-			formats: image_formats,
-			getBlob: (new_file_type) => {
-				return new Promise((resolve) => {
-					write_image_file(canvas, new_file_type, (blob) => {
-						resolve(blob);
-					});
-				});
-			},
-		});
 	},
 };
 
@@ -845,11 +650,7 @@ $G.on("keydown", (e) => {
 				redo();
 				break;
 			case "G":
-				if (e.shiftKey) {
-					render_history_as_gif();
-				} else {
-					toggle_grid();
-				}
+				toggle_grid();
 				break;
 			case "F":
 				// @ts-ignore (repeat doesn't exist on jQuery.Event, I guess, but this is fine)
@@ -859,13 +660,6 @@ $G.on("keydown", (e) => {
 				break;
 			case "O":
 				file_open();
-				break;
-			case "S":
-				if (e.shiftKey) {
-					file_save_as();
-				} else {
-					file_save();
-				}
 				break;
 			case "A":
 				select_all();

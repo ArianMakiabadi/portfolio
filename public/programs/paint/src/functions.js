@@ -1136,109 +1136,6 @@ function file_load_from_url() {
 	$input[0].focus();
 }
 
-// Native FS API / File Access API allows you to overwrite files, but people are not used to it.
-// So we ask them to confirm it the first time.
-let acknowledged_overwrite_capability = false;
-const confirmed_overwrite_key = "jspaint confirmed overwrite capable";
-try {
-	acknowledged_overwrite_capability = localStorage[confirmed_overwrite_key] === "true";
-} catch (_error) {
-	// no localStorage
-	// In the year 2033, people will be more used to it, right?
-	// This will be known as the "Y2T bug"
-	acknowledged_overwrite_capability = Date.now() >= 2000000000000;
-}
-async function confirm_overwrite_capability() {
-	if (acknowledged_overwrite_capability) {
-		return true;
-	}
-	const { $window, promise } = showMessageBox({
-		messageHTML: `
-			<p>JS Paint can now save over existing files.</p>
-			<p>Do you want to overwrite the file?</p>
-			<p>
-				<input type="checkbox" id="do-not-ask-me-again-checkbox"/>
-				<label for="do-not-ask-me-again-checkbox">Don't ask me again</label>
-			</p>
-		`,
-		buttons: [
-			{ label: localize("Yes"), value: "overwrite", default: true },
-			{ label: localize("Cancel"), value: "cancel" },
-		],
-	});
-	const result = await promise;
-	if (result === "overwrite") {
-		acknowledged_overwrite_capability = $window.$content.find("#do-not-ask-me-again-checkbox").prop("checked");
-		try {
-			localStorage[confirmed_overwrite_key] = acknowledged_overwrite_capability;
-		} catch (_error) {
-			// no localStorage... @TODO: don't show the checkbox in this case
-		}
-		return true;
-	}
-	return false;
-}
-
-
-function file_save(maybe_saved_callback = () => { }, update_from_saved = true) {
-	deselect();
-	// store and use file handle at this point in time, to avoid race conditions
-	const save_file_handle = system_file_handle;
-	if (!save_file_handle || file_name.match(/\.(svg|pdf)$/i)) {
-		return file_save_as(maybe_saved_callback, update_from_saved);
-	}
-	write_image_file(main_canvas, file_format, async (blob) => {
-		// An error may be shown by `systemHooks.writeBlobToHandle`,
-		// or it may be unknown whether the save will succeed,
-		// so for now: true means definite success, false means failure or cancelation, and undefined means it's unknown.
-		const success = await systemHooks.writeBlobToHandle(save_file_handle, blob);
-		// When using a file download, where it's unknown whether the save will succeed,
-		// we don't want to mark the file as saved, as it would prevent the user from retrying the save.
-		// So only mark the file as saved if it's definite.
-		if (success === true) {
-			saved = true;
-			update_title();
-		}
-		// However, we can still apply format-specific color reduction to the canvas,
-		// and call the "maybe saved" callback, which, as the name implies, is intended to handle the uncertainty.
-		if (success !== false) {
-			if (update_from_saved) {
-				update_from_saved_file(blob);
-			}
-			maybe_saved_callback();
-		}
-	});
-}
-
-function file_save_as(maybe_saved_callback = () => { }, update_from_saved = true) {
-	deselect();
-	systemHooks.showSaveFileDialog({
-		dialogTitle: localize("Save As"),
-		formats: image_formats,
-		defaultFileName: file_name,
-		defaultPath: typeof system_file_handle === "string" ? system_file_handle : null,
-		defaultFileFormatID: file_format,
-		getBlob: (new_file_type) => {
-			return new Promise((resolve) => {
-				write_image_file(main_canvas, new_file_type, (blob) => {
-					resolve(blob);
-				});
-			});
-		},
-		savedCallbackUnreliable: ({ newFileName, newFileFormatID, newFileHandle, newBlob }) => {
-			saved = true;
-			system_file_handle = newFileHandle;
-			file_name = newFileName;
-			file_format = newFileFormatID;
-			update_title();
-			maybe_saved_callback();
-			if (update_from_saved) {
-				update_from_saved_file(newBlob);
-			}
-		},
-	});
-}
-
 function file_print() {
 	if (is_discord_embed) {
 		// closest localized string: "Could not start print job."
@@ -1269,24 +1166,15 @@ function are_you_sure(action, canceled, from_session_load) {
 			message: localize("You've modified the document while an existing document was loading.\nSave the new document?", file_name),
 			buttons: [
 				{
-					// label: localize("Save"),
-					label: localize("Yes"),
-					value: "save",
-					default: true,
-				},
-				{
 					// label: "Discard",
 					label: localize("No"),
 					value: "discard",
+					default: true,
 				},
 			],
 			// @TODO: not closable with Escape or close button
 		}).then((result) => {
-			if (result === "save") {
-				file_save(() => {
-					action();
-				}, false);
-			} else if (result === "discard") {
+			if (result === "discard") {
 				action({ canvas_modified_while_loading: true });
 			} else {
 				// should not ideally happen
@@ -1302,15 +1190,10 @@ function are_you_sure(action, canceled, from_session_load) {
 			message: localize("Save changes to %1?", file_name),
 			buttons: [
 				{
-					// label: localize("Save"),
-					label: localize("Yes"),
-					value: "save",
-					default: true,
-				},
-				{
 					// label: "Discard",
 					label: localize("No"),
 					value: "discard",
+					default: true,
 				},
 				{
 					label: localize("Cancel"),
@@ -1318,11 +1201,7 @@ function are_you_sure(action, canceled, from_session_load) {
 				},
 			],
 		}).then((result) => {
-			if (result === "save") {
-				file_save(() => {
-					action();
-				}, false);
-			} else if (result === "discard") {
+			if (result === "discard") {
 				action();
 			} else {
 				canceled?.();
@@ -1671,114 +1550,6 @@ function paste(img_or_canvas) {
 	}
 }
 
-function render_history_as_gif() {
-	const $win = $DialogWindow();
-	$win.title("Rendering GIF");
-
-	const $output = $win.$main;
-	const $progress = $(E("progress")).appendTo($output).addClass("inset-deep");
-	const $progress_percent = $(E("span")).appendTo($output).css({
-		width: "2.3em",
-		display: "inline-block",
-		textAlign: "center",
-	});
-	$win.$main.css({ padding: 5 });
-
-	const $cancel = $win.$Button("Cancel", () => {
-		$win.close();
-	}).focus();
-
-	$win.center();
-
-	try {
-		const width = main_canvas.width;
-		const height = main_canvas.height;
-		const gif = new GIF({
-			//workers: Math.min(5, Math.floor(undos.length/50)+1),
-			workerScript: "lib/gif.js/gif.worker.js",
-			width,
-			height,
-		});
-
-		$win.on("close", () => {
-			gif.abort();
-		});
-
-		gif.on("progress", (p) => {
-			$progress.val(p);
-			$progress_percent.text(`${~~(p * 100)}%`);
-		});
-
-		gif.on("finished", (blob) => {
-			$win.title("Rendered GIF");
-			const blob_url = URL.createObjectURL(blob);
-			$output.empty().append(
-				$(E("div")).addClass("inset-deep").append(
-					$(E("img")).attr({
-						src: blob_url,
-						width,
-						height,
-					}).css({
-						display: "block", // prevent margin below due to inline display (vertical-align can also be used)
-					}),
-				).css({
-					overflow: "auto",
-					maxHeight: "70vh",
-					maxWidth: "70vw",
-				})
-			);
-			$win.on("close", () => {
-				// revoking on image load(+error) breaks right click > "Save image as" and "Open image in new tab"
-				URL.revokeObjectURL(blob_url);
-			});
-			$win.$Button("Upload to Imgur", () => {
-				$win.close();
-				sanity_check_blob(blob, () => {
-					show_imgur_uploader(blob);
-				});
-			}).focus();
-			$win.$Button(localize("Save"), () => {
-				$win.close();
-				sanity_check_blob(blob, () => {
-					const suggested_file_name = `${file_name.replace(/\.(bmp|dib|a?png|gif|jpe?g|jpe|jfif|tiff?|webp|raw)$/i, "")} history.gif`;
-					systemHooks.showSaveFileDialog({
-						dialogTitle: localize("Save As"), // localize("Save Animation As"),
-						getBlob: () => blob,
-						defaultFileName: suggested_file_name,
-						defaultPath: typeof system_file_handle === "string" ? `${system_file_handle.replace(/[/\\][^/\\]*/, "")}/${suggested_file_name}` : null,
-						defaultFileFormatID: "image/gif",
-						formats: [{
-							formatID: "image/gif",
-							mimeType: "image/gif",
-							name: localize("Animated GIF (*.gif)").replace(/\s+\([^(]+$/, ""),
-							nameWithExtensions: localize("Animated GIF (*.gif)"),
-							extensions: ["gif"],
-						}],
-					});
-				});
-			});
-			$cancel.appendTo($win.$buttons);
-			$win.center();
-		});
-
-		const gif_canvas = make_canvas(width, height);
-		const frame_history_nodes = [...undos, current_history_node];
-		for (const frame_history_node of frame_history_nodes) {
-			gif_canvas.ctx.clearRect(0, 0, gif_canvas.width, gif_canvas.height);
-			gif_canvas.ctx.putImageData(frame_history_node.image_data, 0, 0);
-			if (frame_history_node.selection_image_data) {
-				const selection_canvas = make_canvas(frame_history_node.selection_image_data);
-				gif_canvas.ctx.drawImage(selection_canvas, frame_history_node.selection_x, frame_history_node.selection_y);
-			}
-			gif.addFrame(gif_canvas, { delay: 200, copy: true });
-		}
-		gif.render();
-
-	} catch (err) {
-		$win.close();
-		show_error_message("Failed to render GIF.", err);
-	}
-}
 
 /**
  * @param {HistoryNode} target_history_node
@@ -3463,198 +3234,6 @@ function handle_keyshortcuts($container) {
 	});
 }
 
-/**
- * Displays a save prompt dialog with options to specify the file name and format.
- *
- * @param {Object} options
- * @param {string} [options.dialogTitle="Save As"] - The title of the dialog.
- * @param {string} [options.defaultFileName=""] - The default file name.
- * @param {string} [options.defaultFileFormatID] - The file format to select by default.
- * @param {FileFormat[]} options.formats - The file formats available in the dropdown.
- * @param {boolean} [options.promptForName=true] - Whether to prompt for the file name, or just the format.
- *
- * @returns {Promise<{newFileName: string, newFileFormatID: string}>} - A promise that resolves with the new file name and format ID.
- */
-function save_as_prompt({
-	dialogTitle = localize("Save As"),
-	defaultFileName = "",
-	defaultFileFormatID,
-	formats,
-	promptForName = true,
-}) {
-	return new Promise((resolve) => {
-		const $w = $DialogWindow(dialogTitle);
-		$w.addClass("save-as");
-
-		// This is needed to prevent the keyboard from closing when you tap the file name input! in FF mobile
-		// @TODO: Investigate this in os-gui.js; is it literally just the browser default behavior to focus a div with tabindex that's the parent of an input?
-		// That'd be crazy, right?
-		$w.$content.attr("tabIndex", null);
-
-		// @TODO: hotkeys (N, T, S, Enter, Esc)
-		if (promptForName) {
-			$w.$main.append(`
-				<label>
-					File name:
-					<input type="text" class="file-name inset-deep"/>
-				</label>
-			`);
-		}
-		$w.$main.append(`
-			<label>
-				Save as type:
-				<select class="file-type-select inset-deep"></select>
-			</label>
-		`);
-		const $file_type = $w.$main.find(".file-type-select");
-		const $file_name = $w.$main.find(".file-name");
-
-		for (const format of formats) {
-			$file_type.append($("<option>").val(format.formatID).text(format.nameWithExtensions));
-		}
-
-		if (promptForName) {
-			$file_name.val(defaultFileName);
-		}
-
-		const get_selected_format = () => {
-			const selected_format_id = $file_type.val();
-			for (const format of formats) {
-				if (format.formatID === selected_format_id) {
-					return format;
-				}
-			}
-		};
-
-		// Select file type when typing file name
-		const select_file_type_from_file_name = () => {
-			const extension_match = (promptForName ? String($file_name.val()) : defaultFileName).match(/\.([\w\d]+)$/);
-			if (extension_match) {
-				const selected_format = get_selected_format();
-				const matched_ext = extension_match[1].toLowerCase();
-				if (selected_format && selected_format.extensions.includes(matched_ext)) {
-					// File extension already matches selected file type.
-					// Don't select a different file type with the same extension.
-					return;
-				}
-				for (const format of formats) {
-					if (format.extensions.includes(matched_ext)) {
-						$file_type.val(format.formatID);
-					}
-				}
-			}
-		};
-		if (promptForName) {
-			$file_name.on("input", select_file_type_from_file_name);
-		}
-		if (defaultFileFormatID && formats.some((format) => format.formatID === defaultFileFormatID)) {
-			$file_type.val(defaultFileFormatID);
-		} else {
-			select_file_type_from_file_name();
-		}
-
-		// Change file extension when selecting file type
-		// allowing non-default extension like .dib vs .bmp, .jpg vs .jpeg to stay
-		const update_extension_from_file_type = (add_extension_if_absent) => {
-			if (!promptForName) {
-				return;
-			}
-			let file_name = /** @type {string} */($file_name.val());
-			const selected_format = get_selected_format();
-			if (!selected_format) {
-				return;
-			}
-			const extensions_for_type = selected_format.extensions;
-			const primary_extension_for_type = extensions_for_type[0];
-			// This way of removing the file extension doesn't scale very well! But I don't want to delete text the user wanted like in case of a version number...
-			const without_extension = file_name.replace(/\.(\w{1,3}|apng|jpeg|jfif|tiff|webp|psppalette|sketchpalette|gimp|colors|scss|sass|less|styl|html|theme|themepack)$/i, "");
-			const extension_present = without_extension !== file_name;
-			const extension = file_name.slice(without_extension.length + 1).toLowerCase(); // without dot
-			if (
-				(add_extension_if_absent || extension_present) &&
-				extensions_for_type.indexOf(extension) === -1
-			) {
-				file_name = `${without_extension}.${primary_extension_for_type}`;
-				$file_name.val(file_name);
-			}
-		};
-		$file_type.on("change", () => {
-			update_extension_from_file_type(false);
-		});
-		// and initially
-		update_extension_from_file_type(false);
-
-		const $save = $w.$Button(localize("Save"), () => {
-			$w.close();
-			update_extension_from_file_type(true);
-			resolve({
-				newFileName: promptForName ? String($file_name.val()) : defaultFileName,
-				newFileFormatID: String($file_type.val()),
-			});
-		}, { type: "submit" });
-		$w.$Button(localize("Cancel"), () => {
-			$w.close();
-		});
-
-		$w.center();
-		// For mobile devices with on-screen keyboards, move the window to the top
-		if (window.innerWidth < 500 || window.innerHeight < 700) {
-			$w.css({ top: 20 });
-		}
-
-		if (promptForName) {
-			$file_name.focus().select();
-		} else {
-			// $file_type.focus(); // most of the time you don't want to change the type from PNG
-			$save.focus();
-		}
-	});
-}
-
-/**
- * Writes an image file to a blob, in the given format.
- * @param {HTMLCanvasElement} canvas - The canvas to export as an image file. Must have a 2d context.
- * @param {string} mime_type - The MIME type of the image file.
- * @param {(Blob)=> void} blob_callback - This function is called with the blob, or may never be called if there is an error.
- */
-function write_image_file(canvas, mime_type, blob_callback) {
-	const ctx = canvas.getContext("2d");
-	const bmp_match = mime_type.match(/^image\/(?:x-)?bmp\s*(?:-(\d+)bpp)?/);
-	if (bmp_match) {
-		const file_content = encodeBMP(ctx.getImageData(0, 0, canvas.width, canvas.height), parseInt(bmp_match[1] || "24", 10));
-		const blob = new Blob([file_content]);
-		sanity_check_blob(blob, () => {
-			blob_callback(blob);
-		});
-	} else if (mime_type === "image/png") {
-		// UPNG.js gives better compressed PNGs than the built-in browser PNG encoder
-		// In fact you can use it as a minifier! http://upng.photopea.com/
-		const image_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		const array_buffer = UPNG.encode([image_data.data.buffer], image_data.width, image_data.height);
-		const blob = new Blob([array_buffer]);
-		sanity_check_blob(blob, () => {
-			blob_callback(blob);
-		});
-	} else if (mime_type === "image/tiff") {
-		const image_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		const metadata = {
-			t305: ["jspaint (UTIF.js)"],
-		};
-		const array_buffer = UTIF.encodeImage(image_data.data.buffer, image_data.width, image_data.height, metadata);
-		const blob = new Blob([array_buffer]);
-		sanity_check_blob(blob, () => {
-			blob_callback(blob);
-		});
-	} else {
-		canvas.toBlob((blob) => {
-			// Note: could check blob.type (mime type) instead
-			const png_magic_bytes = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
-			sanity_check_blob(blob, () => {
-				blob_callback(blob);
-			}, png_magic_bytes, mime_type === "image/png");
-		}, mime_type);
-	}
-}
 
 /**
  * @param {Blob} blob
@@ -3864,46 +3443,6 @@ function read_image_file(blob, callback) {
 }
 
 /**
- * Updates the canvas to reflect reductions in color when saving to certain file formats.
- * @param {Blob} blob - The saved file blob.
- */
-function update_from_saved_file(blob) {
-	read_image_file(blob, (error, info) => {
-		if (error) {
-			show_error_message("The file has been saved, however... " + localize("Paint cannot read this file."), error);
-			return;
-		}
-		apply_file_format_and_palette_info(info);
-		const format = image_formats.find(({ mimeType }) => mimeType === info.file_format);
-		undoable({
-			name: `${localize("Save As")} ${format ? format.name : info.file_format}`,
-			icon: get_help_folder_icon("p_save.png"),
-			assume_saved: true, // prevent setting saved to false
-		}, () => {
-			main_ctx.copy(info.image || info.image_data);
-		});
-	});
-}
-
-function save_selection_to_file() {
-	if (selection && selection.canvas) {
-		systemHooks.showSaveFileDialog({
-			dialogTitle: localize("Save As"),
-			defaultFileName: "selection.png",
-			defaultFileFormatID: "image/png",
-			formats: image_formats,
-			getBlob: (new_file_type) => {
-				return new Promise((resolve) => {
-					write_image_file(selection.canvas, new_file_type, (blob) => {
-						resolve(blob);
-					});
-				});
-			},
-		});
-	}
-}
-
-/**
  * @param {Blob} blob
  * @param {() => void} okay_callback
  * @param {number[]} [magic_number_bytes]
@@ -3998,12 +3537,12 @@ function show_multi_user_setup_dialog(from_current_document) {
 }
 
 export {
-	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, choose_file_to_paste, cleanup_bitmap_view, clear, confirm_overwrite_capability, delete_selection, deselect, detect_monochrome,
-	edit_copy, edit_cut, edit_paste, exit_fullscreen_if_ios, file_load_from_url, file_new, file_open, file_print, file_save,
-	file_save_as, getSelectionText, get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
-	meld_textbox_into_canvas, open_from_file, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, redo, render_canvas_view, render_history_as_gif, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, save_as_prompt, save_selection_to_file, select_all, select_tool, select_tools, set_all_url_params, set_magnification, show_convert_to_black_and_white, show_custom_zoom_window, show_document_history, show_error_message, show_file_format_errors, show_multi_user_setup_dialog, show_resource_load_error_message, switch_to_polychrome_palette, toggle_grid,
-	toggle_thumbnail, try_exec_command, undo, undoable, update_canvas_rect, update_disable_aa, update_from_saved_file, update_helper_layer,
-	update_helper_layer_immediately, update_magnified_canvas_size, update_title, view_bitmap, write_image_file
+	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, choose_file_to_paste, cleanup_bitmap_view, clear, delete_selection, deselect, detect_monochrome,
+	edit_copy, edit_cut, edit_paste, exit_fullscreen_if_ios, file_load_from_url, file_new, file_open, file_print,
+	getSelectionText, get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
+	meld_textbox_into_canvas, open_from_file, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, redo, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_all, select_tool, select_tools, set_all_url_params, set_magnification, show_convert_to_black_and_white, show_custom_zoom_window, show_document_history, show_error_message, show_file_format_errors, show_multi_user_setup_dialog, show_resource_load_error_message, switch_to_polychrome_palette, toggle_grid,
+	toggle_thumbnail, try_exec_command, undo, undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
+	update_helper_layer_immediately, update_magnified_canvas_size, update_title, view_bitmap
 };
 // Temporary globals until all dependent code is converted to ES Modules
 window.make_history_node = make_history_node; // used by app-state.js

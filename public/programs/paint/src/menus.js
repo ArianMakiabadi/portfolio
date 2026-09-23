@@ -4,8 +4,8 @@
 // import { available_languages, get_iso_language_name, get_language, get_language_emoji, get_language_endonym, localize, set_language } from "./app-localization.js";
 import { show_edit_colors_window } from "./edit-colors.js";
 import { palette_formats } from "./file-format-data.js";
-import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_load_from_url, file_new, file_open, file_print, file_save, file_save_as, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, render_history_as_gif, sanity_check_blob, save_selection_to_file, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, show_multi_user_setup_dialog, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
-import { $G, get_rgba_from_color, is_discord_embed } from "./helpers.js";
+import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_load_from_url, file_new, file_open, file_print, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, sanity_check_blob, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, show_multi_user_setup_dialog, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
+import { $G, is_discord_embed } from "./helpers.js";
 import { show_imgur_uploader } from "./imgur.js";
 import { manage_storage } from "./manage-storage.js";
 import { showMessageBox } from "./msgbox.js";
@@ -40,40 +40,6 @@ const menus = {
 			action: () => { file_open(); },
 			description: localize("Opens an existing document."),
 		},
-		{
-			label: localize("&Save"),
-			...shortcut("Ctrl+S"),
-			speech_recognition: [
-				"save", "save document", "save file", "save image", "save picture", "save image file",
-				// "save a document", "save a file", "save an image", "save an image file", // too "save as"-like
-				"save the document", "save the file", "save the image", "save the image file",
-
-				"download", "download document", "download file", "download image", "download picture", "download image file",
-				"download the document", "download the file", "download the image", "download the image file",
-			],
-			action: () => { file_save(); },
-			description: localize("Saves the active document."),
-		},
-		{
-			label: localize("Save &As"),
-			// in mspaint, no shortcut is listed; it supports F12 (but in a browser that opens the dev tools)
-			// it doesn't support Ctrl+Shift+S but that's a good & common modern shortcut
-			...shortcut("Ctrl+Shift+S"),
-			speech_recognition: [
-				// this is ridiculous
-				// this would be really simple in JSGF format
-				"save as", "save as a new file", "save as a new picture", "save as a new image", "save a new file", "save new file",
-				"save a new document", "save a new image file", "save a new image", "save a new picture",
-				"save as a copy", "save a copy", "save as copy", "save under a new name", "save with a new name",
-				"save document as a copy", "save document copy", "save document as copy", "save document under a new name", "save document with a new name",
-				"save image as a copy", "save image copy", "save image as copy", "save image under a new name", "save image with a new name",
-				"save file as a copy", "save file copy", "save file as copy", "save file under a new name", "save file with a new name",
-				"save image file as a copy", "save image file copy", "save image file as copy", "save image file under a new name", "save image file with a new name",
-			],
-			action: () => { file_save_as(); },
-			description: localize("Saves the active document with a new name."),
-		},
-		MENU_DIVIDER,
 		{
 			label: localize("&Load From URL"),
 			// shortcut: "", // no shortcut: Ctrl+L is taken, and you can paste a URL with Ctrl+V, so it's not really needed
@@ -184,32 +150,6 @@ const menus = {
 				file_print();
 			},
 			description: localize("Prints the active document and sets printing options."),
-		},
-		MENU_DIVIDER,
-		{
-			label: localize("Set As &Wallpaper (Tiled)"),
-			speech_recognition: [
-				"set as wallpaper",
-				"set as wallpaper tiled",
-				"set image as wallpaper tiled", "set picture as wallpaper tiled", "set drawing as wallpaper tiled",
-				"use as wallpaper tiled",
-				"use image as wallpaper tiled", "use picture as wallpaper tiled", "use drawing as wallpaper tiled",
-				"tile image as wallpaper", "tile picture as wallpaper", "tile drawing as wallpaper",
-			],
-			action: () => { systemHooks.setWallpaperTiled(main_canvas); },
-			description: localize("Tiles this bitmap as the desktop background."),
-		},
-		{
-			label: localize("Set As Wallpaper (&Centered)"), // in mspaint it's Wa&llpaper
-			speech_recognition: [
-				"set as wallpaper centered",
-				"set image as wallpaper centered", "set picture as wallpaper centered", "set drawing as wallpaper centered",
-				"use as wallpaper centered",
-				"use image as wallpaper centered", "use picture as wallpaper centered", "use drawing as wallpaper centered",
-				"center image as wallpaper", "center picture as wallpaper", "center drawing as wallpaper",
-			],
-			action: () => { systemHooks.setWallpaperCentered(main_canvas); },
-			description: localize("Centers this bitmap as the desktop background."),
 		},
 		MENU_DIVIDER,
 		{
@@ -363,19 +303,6 @@ const menus = {
 			description: localize("Selects everything."),
 		},
 		MENU_DIVIDER,
-		{
-			label: `${localize("C&opy To")}...`,
-			speech_recognition: [
-				"copy to file", "copy selection to file", "copy selection to a file", "save selection",
-				"save selection as file", "save selection as image", "save selection as picture", "save selection as image file", "save selection as document",
-				"save selection as a file", "save selection as a image", "save selection as a picture", "save selection as a image file", "save selection as a document",
-				"save selection to file", "save selection to image", "save selection to picture", "save selection to image file", "save selection to document",
-				"save selection to a file", "save selection to a image", "save selection to a picture", "save selection to a image file", "save selection to a document",
-			],
-			enabled: () => !!selection,
-			action: () => { save_selection_to_file(); },
-			description: localize("Copies the selection to a file."),
-		},
 		{
 			label: `${localize("Paste &From")}...`,
 			speech_recognition: [
@@ -729,40 +656,6 @@ const menus = {
 			},
 			description: localize("Uses a previously saved palette of colors."),
 		},
-		{
-			label: localize("&Save Colors"),
-			speech_recognition: [
-				"save colors", "save list of colors", "save color palette", "save palette", "save color palette file", "save palette file",
-			],
-			action: () => {
-				const ap = new AnyPalette.Palette();
-				ap.name = "JS Paint Saved Colors";
-				ap.numberOfColumns = 16; // 14?
-				for (const color of palette) {
-					const [r, g, b] = get_rgba_from_color(color);
-					ap.push(new AnyPalette.Color({
-						red: r / 255,
-						green: g / 255,
-						blue: b / 255,
-					}));
-				}
-				systemHooks.showSaveFileDialog({
-					dialogTitle: localize("Save Colors"),
-					defaultFileName: localize("untitled.pal"),
-					formats: palette_formats,
-					getBlob: (format_id) => {
-						const file_content = AnyPalette.writePalette(ap, AnyPalette.formats[format_id]);
-						const blob = new Blob([file_content], { type: "text/plain" });
-						return new Promise((resolve) => {
-							sanity_check_blob(blob, () => {
-								resolve(blob);
-							});
-						});
-					},
-				});
-			},
-			description: localize("Saves the current palette of colors to a file."),
-		},
 	],
 	[localize("E&xtras")]: [
 		{
@@ -774,29 +667,6 @@ const menus = {
 			],
 			action: () => { show_document_history(); },
 			description: localize("Shows the document history and lets you navigate to states not accessible with Undo or Repeat."),
-		},
-		{
-			emoji_icon: "🎞️",
-			label: localize("&Render History As GIF"),
-			...shortcut("Ctrl+Shift+G"),
-			speech_recognition: [
-				// @TODO: animated gif, blah
-				"render history as gif", "render history as a gif", "render history animation", "make history animation", "make animation of history", "make animation of document history", "make animation from document history",
-				"render a gif from the history", "render a gif animation from the history", "render an animation from the history",
-				"make a gif from the history", "make a gif animation from the history", "make an animation from the history",
-				"create a gif from the history", "create a gif animation from the history", "create an animation from the history",
-				// aaaaaaaaaaaaaaaaaaaaaaaaaa *exponentially explodes*
-				"make a gif", "make a gif of the history", "make a gif of the document history", "make a gif from the document history",
-				"create a gif", "create a gif of the history", "create a gif of the document history", "create a gif from the document history",
-				"make gif", "make gif of the history", "make gif of the document history", "make gif from the document history",
-				"create gif", "create gif of the history", "create gif of the document history", "create gif from the document history",
-				"make an animation", "make an animation of the history", "make an animation of the document history", "make an animation from the document history",
-				"create an animation", "create an animation of the history", "create an animation of the document history", "create an animation from the document history",
-				"make animation", "make animation of the history", "make animation of the document history", "make animation from the document history",
-				"create animation", "create animation of the history", "create animation of the document history", "create animation from the document history",
-			],
-			action: () => { render_history_as_gif(); },
-			description: localize("Creates an animation from the document history."),
 		},
 		// {
 		// 	label: localize("Render History as &APNG",
