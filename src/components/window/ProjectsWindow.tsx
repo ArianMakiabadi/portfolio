@@ -13,7 +13,7 @@ import documentsIcon from "../../assets/window/left-menu/documents-icon.webp";
 import sharedDocumentsIcon from "../../assets/window/left-menu/shared-documents-icon.webp";
 import githubIcon from "../../assets/window/left-menu/github-icon.webp";
 import linkedinIcon from "../../assets/window/left-menu/linkedin-icon.webp";
-import buyMeACoffeeIcon from "../../assets/window/left-menu/buy-me-a-coffee-icon.webp";
+import contactMeIcon from "../../assets/taskbar/icons/contact-me.webp";
 import type { MenuBarMenu } from "../../types/menuBar";
 import type { WindowHeaderBarConfig } from "../../types/windowHeaderBar";
 import type { WindowLeftMenuConfig } from "../../types/windowLeftMenu";
@@ -86,8 +86,8 @@ function ProjectsWindow({ onClose }: ProjectsWindowProps) {
             href: "https://linkedin.com/in/ArianMakiabadi",
           },
           {
-            icon: buyMeACoffeeIcon,
-            label: "Buy Me a Coffee",
+            icon: contactMeIcon,
+            label: "Contact me",
             href: "#",
           },
         ],
