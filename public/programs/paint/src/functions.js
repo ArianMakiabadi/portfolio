@@ -844,62 +844,6 @@ async function load_image_from_uri(uri) {
 
 /**
  * @param {ImageInfo} info
- * @param {() => void} [callback]
- * @param {() => void} [canceled]
- * @param {boolean} [into_existing_session]
- * @param {boolean} [from_session_load]
- */
-function open_from_image_info(info, callback, canceled, into_existing_session, from_session_load) {
-	are_you_sure(({ canvas_modified_while_loading } = {}) => {
-		deselect();
-		cancel();
-
-		if (!into_existing_session) {
-			$G.triggerHandler("session-update"); // autosave old session
-		}
-
-		reset_file();
-		reset_selected_colors();
-		reset_canvas_and_history(); // (with newly reset colors)
-		set_magnification(default_magnification);
-
-		main_ctx.copy(info.image || info.image_data);
-		apply_file_format_and_palette_info(info);
-		transparency = has_any_transparency(main_ctx);
-		$canvas_area.trigger("resize");
-
-		current_history_node.name = "Open";
-		current_history_node.image_data = main_ctx.getImageData(0, 0, main_canvas.width, main_canvas.height);
-		current_history_node.icon = get_help_folder_icon("p_open.png");
-
-		if (canvas_modified_while_loading || !from_session_load) {
-			// normally we don't want to autosave if we're loading a session,
-			// as this is redundant, but if the user has modified the canvas while loading a session,
-			// right now how it works is the session would be overwritten, so if you reloaded, it'd be lost,
-			// so we'd better save it.
-			// (and we want to save if this is a new session being initialized with an image)
-			$G.triggerHandler("session-update"); // autosave
-		}
-		$G.triggerHandler("history-update"); // update history view
-
-		if (info.source_blob instanceof File) {
-			file_name = info.source_blob.name;
-			// file.path is available in Electron (see https://www.electronjs.org/docs/api/file-object#file-object)
-			// @ts-ignore
-			system_file_handle = info.source_blob.path;
-		}
-		if (info.source_file_handle) {
-			system_file_handle = info.source_file_handle;
-		}
-		saved = true;
-		update_title();
-
-		callback?.();
-	}, canceled, from_session_load);
-}
-
-/**
- * @param {ImageInfo} info
  */
 function apply_file_format_and_palette_info(info) {
 	file_format = info.file_format;
@@ -1198,44 +1142,6 @@ function show_file_format_errors({ as_image_error, as_palette_error }) {
 	showMessageBox({
 		messageHTML: html,
 	});
-}
-
-function exit_fullscreen_if_ios() {
-	if ($("body").hasClass("ios")) {
-		try {
-			if (document.exitFullscreen) {
-				document.exitFullscreen();
-			} else if (document.webkitExitFullscreen) {
-				document.webkitExitFullscreen();
-			} else if (document.mozCancelFullScreen) {
-				document.mozCancelFullScreen();
-			} else if (document.msExitFullscreen) {
-				document.msExitFullscreen();
-			}
-		} catch (_error) {
-			// not important, just trying to prevent broken fullscreen after refresh
-			// (:fullscreen and document.fullscreenElement stops working because it's not "requested by the page" anymore)
-			// (the fullscreen styling is not generally obtrusive, but it is obtrusive when it DOESN'T work)
-			//
-			// alternatives:
-			// - detect reload-while-fullscreen by storing a timestamp on unload when fullscreen,
-			//   and apply the fullscreen class if timestamp is within a few seconds during load.
-			//   - This doesn't have an answer for detecting leaving fullscreen,
-			//     and if it keeps thinking it's fullscreen, it'll keep storing the timestamp, and get stuck.
-			//     Unless it only stores the timestamp if it knows it's fullscreen? (i.e. page-requested fullscreen)
-			//     Then it would only work for one reload.
-			//     So ideally it would have the below anyway, in which case this would be unnecessary.
-			// - detect fullscreen state without fullscreen API, using viewport size
-			//   - If this is possible, why don't browsers just expose this information in the fullscreen API? :(
-			//   - iPad resets the zoom level when going fullscreen, and then when reloading,
-			//     the zoom level is reset to the user-set zoom level.
-			//     Safari doesn't update devicePixelRatio based on the zoom level,
-			//     and doesn't support ResizeObserver for device pixels.
-			//     It does support https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API
-			//     though, so maybe something can be done with that.
-			// - prompt to add to homescreen
-		}
-	}
 }
 
 // @TODO: DRY between these functions and open_from_* functions further?
@@ -1869,42 +1775,6 @@ function make_monochrome_palette(rgba1 = [0, 0, 0, 255], rgba2 = [255, 255, 255,
 	return palette;
 }
 
-/**
- * @param {boolean} reverse
- * @param {string[]} colors
- * @param {number=} stripe_size
- * @returns {CanvasPattern}
- */
-function make_stripe_pattern(reverse, colors, stripe_size = 4) {
-	const rgba_colors = colors.map(get_rgba_from_color);
-
-	const pattern_canvas = document.createElement("canvas");
-	const pattern_ctx = pattern_canvas.getContext("2d");
-
-	pattern_canvas.width = colors.length * stripe_size;
-	pattern_canvas.height = colors.length * stripe_size;
-
-	const pattern_image_data = main_ctx.createImageData(pattern_canvas.width, pattern_canvas.height);
-
-	for (let x = 0; x < pattern_canvas.width; x += 1) {
-		for (let y = 0; y < pattern_canvas.height; y += 1) {
-			const pixel_index = ((y * pattern_image_data.width) + x) * 4;
-			// +1000 to avoid remainder on negative numbers
-			const pos = reverse ? (x - y) : (x + y);
-			const color_index = Math.floor((pos + 1000) / stripe_size) % colors.length;
-			const rgba = rgba_colors[color_index];
-			pattern_image_data.data[pixel_index + 0] = rgba[0];
-			pattern_image_data.data[pixel_index + 1] = rgba[1];
-			pattern_image_data.data[pixel_index + 2] = rgba[2];
-			pattern_image_data.data[pixel_index + 3] = rgba[3];
-		}
-	}
-
-	pattern_ctx.putImageData(pattern_image_data, 0, 0);
-
-	return main_ctx.createPattern(pattern_canvas, "repeat");
-}
-
 function switch_to_polychrome_palette() {
 
 }
@@ -2306,9 +2176,8 @@ function sanity_check_blob(blob, okay_callback, magic_number_bytes, magic_wanted
 
 export {
 	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, clear, deselect, detect_monochrome,
-	exit_fullscreen_if_ios,
-	get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
-	meld_textbox_into_canvas, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_tool, select_tools, set_all_url_params, set_magnification, show_custom_zoom_window, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette,
+	get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, meld_selection_into_canvas,
+	meld_textbox_into_canvas, paste, paste_image_from_file, please_enter_a_number, read_image_file, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_tool, select_tools, set_all_url_params, set_magnification, show_custom_zoom_window, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette,
 	undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
 	update_helper_layer_immediately, update_magnified_canvas_size, update_title
 };
@@ -2316,6 +2185,5 @@ export {
 window.make_history_node = make_history_node; // used by app-state.js
 window.are_you_sure = are_you_sure; // used by app-localization.js, electron-injected.js
 window.show_error_message = show_error_message; // used by app-localization.js, electron-injected.js
-window.exit_fullscreen_if_ios = exit_fullscreen_if_ios; // used by app-localization.js
 window.get_tool_by_id = get_tool_by_id; // used by app-state.js
 window.make_monochrome_palette = make_monochrome_palette; // used by app-state.js
