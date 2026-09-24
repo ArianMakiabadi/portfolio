@@ -1831,42 +1831,6 @@ function make_monochrome_palette(rgba1 = [0, 0, 0, 255], rgba2 = [255, 255, 255,
 	return palette;
 }
 
-/**
- * @param {boolean} reverse
- * @param {string[]} colors
- * @param {number=} stripe_size
- * @returns {CanvasPattern}
- */
-function make_stripe_pattern(reverse, colors, stripe_size = 4) {
-	const rgba_colors = colors.map(get_rgba_from_color);
-
-	const pattern_canvas = document.createElement("canvas");
-	const pattern_ctx = pattern_canvas.getContext("2d");
-
-	pattern_canvas.width = colors.length * stripe_size;
-	pattern_canvas.height = colors.length * stripe_size;
-
-	const pattern_image_data = main_ctx.createImageData(pattern_canvas.width, pattern_canvas.height);
-
-	for (let x = 0; x < pattern_canvas.width; x += 1) {
-		for (let y = 0; y < pattern_canvas.height; y += 1) {
-			const pixel_index = ((y * pattern_image_data.width) + x) * 4;
-			// +1000 to avoid remainder on negative numbers
-			const pos = reverse ? (x - y) : (x + y);
-			const color_index = Math.floor((pos + 1000) / stripe_size) % colors.length;
-			const rgba = rgba_colors[color_index];
-			pattern_image_data.data[pixel_index + 0] = rgba[0];
-			pattern_image_data.data[pixel_index + 1] = rgba[1];
-			pattern_image_data.data[pixel_index + 2] = rgba[2];
-			pattern_image_data.data[pixel_index + 3] = rgba[3];
-		}
-	}
-
-	pattern_ctx.putImageData(pattern_image_data, 0, 0);
-
-	return main_ctx.createPattern(pattern_canvas, "repeat");
-}
-
 function switch_to_polychrome_palette() {
 
 }
@@ -2268,7 +2232,7 @@ function sanity_check_blob(blob, okay_callback, magic_number_bytes, magic_wanted
 
 export {
 	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, clear, deselect, detect_monochrome,
-	get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
+	get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, meld_selection_into_canvas,
 	meld_textbox_into_canvas, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_tool, select_tools, set_all_url_params, set_magnification, show_custom_zoom_window, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette,
 	undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
 	update_helper_layer_immediately, update_magnified_canvas_size, update_title
