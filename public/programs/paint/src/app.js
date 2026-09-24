@@ -1,14 +1,14 @@
 // @ts-check
 // eslint-disable-next-line no-unused-vars
 /* global airbrush_size:writable, brush_shape:writable, brush_size:writable, button:writable, ctrl:writable, eraser_size:writable, fill_color:writable, pick_color_slot:writable, history_node_to_cancel_to:writable, my_canvas_height:writable, my_canvas_width:writable, palette:writable, pencil_size:writable, pointer:writable, pointer_active:writable, pointer_buttons:writable, pointer_over_canvas:writable, pointer_previous:writable, pointer_start:writable, pointer_type:writable, pointers:writable, reverse:writable, shift:writable, stroke_color:writable, stroke_size:writable, update_helper_layer_on_pointermove_active:writable */
-/* global current_history_node, default_airbrush_size, default_brush_shape, default_brush_size, default_canvas_height, default_canvas_width, default_eraser_size, default_magnification, default_pencil_size, default_stroke_size, enable_fs_access_api, file_name, get_direction, localize, magnification, main_canvas, main_ctx, return_to_tools, selected_colors, selected_tool, selected_tools, selection, systemHooks, textbox, transparency */
+/* global current_history_node, default_airbrush_size, default_brush_shape, default_brush_size, default_canvas_height, default_canvas_width, default_eraser_size, default_magnification, default_pencil_size, default_stroke_size, file_name, get_direction, localize, magnification, main_canvas, main_ctx, return_to_tools, selected_colors, selected_tool, selected_tools, selection, systemHooks, textbox, transparency */
 
 import { $ColorBox } from "./$ColorBox.js";
 import { $ToolBox } from "./$ToolBox.js";
 import { Handles } from "./Handles.js";
 // import { get_direction, localize } from "./app-localization.js";
 import { default_palette, get_winter_palette } from "./color-data.js";
-import { cancel, change_url_param, clear, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_new, get_tool_by_id, get_uris, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, make_or_update_undoable, open_from_file, paste, paste_image_from_file, redo, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, select_all, select_tool, select_tools, set_magnification, show_document_history, show_error_message, show_resource_load_error_message, toggle_grid, undo, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size, view_bitmap } from "./functions.js";
+import { cancel, change_url_param, clear, deselect, get_tool_by_id, get_uris, load_image_from_uri, make_or_update_undoable, open_from_file, paste, paste_image_from_file, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, select_tool, select_tools, set_magnification, show_error_message, show_resource_load_error_message, undo, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size } from "./functions.js";
 import { $G, E, TAU, get_file_extension, get_help_folder_icon, to_canvas_coords } from "./helpers.js";
 import { init_webgl_stuff, rotate } from "./image-manipulation.js";
 import { showMessageBox } from "./msgbox.js";
@@ -37,17 +37,6 @@ window.average_points = average_points;
 
 // #region System Hooks and default implementations
 
-/**
- * @param {string} extension
- * @returns {`.${string}`}
- */
-const prependDot = (extension) => `.${extension}`;
-/**
- * @param {FileFormat} format
- * @returns {string}
- */
-const getMimeType = (format) => "mimeType" in format ? format.mimeType : `application/x-${format.formatID}`;
-
 // Note: JSDoc type annotations don't seem to actually work on window.*
 /**
  * @type {SystemHooks}
@@ -59,40 +48,6 @@ const getMimeType = (format) => "mimeType" in format ? format.mimeType : `applic
 window.systemHooks = window.systemHooks || {};
 /** @type {SystemHooks} */
 window.systemHookDefaults = {
-	showOpenFileDialog: async ({ formats }) => {
-		if (window.untrusted_gesture) {
-			// We can't show a file picker RELIABLY.
-			show_error_message("Sorry, a file picker cannot be shown when using Speech Recognition or Eye Gaze Mode. You must click File > Open directly with the mouse, or press Ctrl+O on the keyboard.");
-			throw new Error("can't show file picker reliably");
-		}
-		if (window.showOpenFilePicker && enable_fs_access_api) {
-			const [fileHandle] = await window.showOpenFilePicker({
-				types: formats.map((format) => {
-					return {
-						description: format.name,
-						accept: {
-							[getMimeType(format)]: format.extensions.map(prependDot),
-						},
-					};
-				}),
-			});
-			const file = await fileHandle.getFile();
-			return { file, fileHandle };
-		} else {
-			// @TODO: specify mime types?
-			return new Promise((resolve) => {
-				const $input = /** @type {JQuery<HTMLInputElement>} */($("<input type='file'>")
-					.on("change", () => {
-						resolve({ file: $input[0].files[0] });
-						$input.remove();
-					})
-					.appendTo($app)
-					.hide()
-					.trigger("click")
-				);
-			});
-		}
-	},
 	readBlobFromHandle: async (file_handle) => {
 		if (file_handle && file_handle.getFile) {
 			const file = await file_handle.getFile();

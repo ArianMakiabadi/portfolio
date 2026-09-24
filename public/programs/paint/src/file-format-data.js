@@ -111,11 +111,6 @@ const image_format_categories = (image_formats) => {
 };
 */
 
-// Palette file import/export (AnyPalette.js) was removed along with external
-// file import in general, so there are no palette formats to list here anymore.
-/** @type {PaletteFileFormat[]} */
-const palette_formats = [];
-
-export { formats_unique_per_file_extension, image_formats, palette_formats };
+export { formats_unique_per_file_extension, image_formats };
 // Temporary globals until all dependent code is converted to ES Modules
 window.formats_unique_per_file_extension = formats_unique_per_file_extension; // used by electron-injected.js
