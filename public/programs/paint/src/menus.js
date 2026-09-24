@@ -4,9 +4,8 @@
 // import { available_languages, get_iso_language_name, get_language, get_language_emoji, get_language_endonym, localize, set_language } from "./app-localization.js";
 import { show_edit_colors_window } from "./edit-colors.js";
 import { palette_formats } from "./file-format-data.js";
-import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_load_from_url, file_new, file_open, file_print, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, show_multi_user_setup_dialog, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
+import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_load_from_url, file_new, file_open, file_print, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
 import { $G, is_discord_embed } from "./helpers.js";
-import { manage_storage } from "./manage-storage.js";
 import { showMessageBox } from "./msgbox.js";
 import { speech_recognition_active, speech_recognition_available } from "./speech-recognition.js";
 import { get_theme, set_theme } from "./theme.js";
@@ -76,17 +75,6 @@ const menus = {
 			],
 			action: () => { file_load_from_url(); },
 			description: localize("Opens an image from the web."),
-		},
-		MENU_DIVIDER,
-		{
-			label: localize("Manage Storage"),
-			speech_recognition: [
-				"manage storage", "show storage", "open storage window", "manage sessions", "show sessions", "show local sessions", "local sessions", "storage manager", "show storage manager", "open storage manager",
-				"show autosaves", "show saves", "show saved documents", "show saved files", "show saved pictures", "show saved images", "show local storage",
-				"autosaves", "autosave", "saved documents", "saved files", "saved pictures", "saved images", "local storage",
-			],
-			action: () => { manage_storage(); },
-			description: localize("Manages storage of previously created or opened pictures."),
 		},
 		MENU_DIVIDER,
 		{
@@ -654,98 +642,6 @@ const menus = {
 		// 	description: localize("Configures JS Paint."),
 		// }
 		{
-			emoji_icon: "👥",
-			label: localize("&Multi-User"),
-			submenu: [
-				{
-					label: localize("&New Session From Document"),
-					speech_recognition: [
-						"new session from document",
-						"session from document",
-						"online session",
-						"enable multi-user",
-						"enable multiplayer",
-						"start multi-user",
-						"start multiplayer",
-						"start collaboration",
-						"start collaborating",
-						"multi-user mode",
-						"multiplayer mode",
-						"collaboration mode",
-						"collaborative mode",
-						"collaborating mode",
-						"online mode",
-						"go online",
-						"share canvas",
-						"play with friends",
-						"draw with friends",
-						"draw together with friends",
-						"draw together",
-						"multiplayer",
-						"multi-user",
-						"collaborate",
-						"collaboration",
-						"collaborative",
-						"collaborating",
-					],
-					action: () => {
-						show_multi_user_setup_dialog(true);
-					},
-					description: localize("Starts a new multi-user session from the current document."),
-				},
-				{
-					label: localize("New &Blank Session"),
-					speech_recognition: [
-						"new blank session",
-						"new empty session",
-						"new fresh session",
-						"new blank multi-user session",
-						"new empty multi-user session",
-						"new fresh multi-user session",
-						"new blank multiplayer session",
-						"new empty multiplayer session",
-						"new fresh multiplayer session",
-						"new multi-user session",
-						"new multiplayer session",
-						"new collaboration session",
-						"new collaborative session",
-						"start multi-user session",
-						"start multiplayer session",
-						"start collaboration session",
-						"start collaborative session",
-						"start multi-user with a new",
-						"start multiplayer with a new",
-						"start collaboration with a new",
-						"start collaborating with a new",
-						"start multi-user with a blank",
-						"start multiplayer with a blank",
-						"start collaboration with a blank",
-						"start collaborating with a blank",
-						"start multi-user with an empty",
-						"start multiplayer with an empty",
-						"start collaboration with an empty",
-						"start collaborating with an empty",
-						"start multi-user with new",
-						"start multiplayer with new",
-						"start collaboration with new",
-						"start collaborating with new",
-						"start multi-user with blank",
-						"start multiplayer with blank",
-						"start collaboration with blank",
-						"start collaborating with blank",
-						"start multi-user with empty",
-						"start multiplayer with empty",
-						"start collaboration with empty",
-						"start collaborating with empty",
-					],
-					action: () => {
-						show_multi_user_setup_dialog(false);
-					},
-					description: localize("Starts a new multi-user session from an empty document."),
-				},
-			],
-		},
-		{
 			emoji_icon: "💄",
 			label: localize("&Themes"),
 			submenu: [
@@ -1089,15 +985,6 @@ const menus = {
 			description: localize("Arranges the color box vertically."),
 		},
 		MENU_DIVIDER,
-		{
-			emoji_icon: "🗃️",
-			label: localize("Manage Storage"),
-			speech_recognition: [
-				// This is a duplicate menu item (for easy access), so it doesn't need speech recognition data here.
-			],
-			action: () => { manage_storage(); },
-			description: localize("Manages storage of previously created or opened pictures."),
-		},
 		{
 			emoji_icon: "👾", // "👋",
 			label: localize("Discord"),

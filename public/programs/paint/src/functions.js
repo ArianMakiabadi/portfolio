@@ -1,7 +1,7 @@
 // @ts-check
 // eslint-disable-next-line no-unused-vars
 /* global $thumbnail_window:writable, canvas_bounding_client_rect:writable, current_history_node:writable, file_format:writable, file_name:writable, helper_layer:writable, history_node_to_cancel_to:writable, magnification:writable, monochrome:writable, palette:writable, pointer:writable, return_to_magnification:writable, return_to_tools:writable, root_history_node:writable, saved:writable, selected_colors:writable, selected_tool:writable, selected_tools:writable, selection:writable, show_grid:writable, show_thumbnail:writable, system_file_handle:writable, textbox:writable, thumbnail_canvas:writable, tool_transparent_mode:writable, transparency:writable, undos:writable */
-/* global $canvas, $canvas_area, $colorbox, $status_text, $toolbox, $Window, AccessKeys, applyCSSProperties, decodeBMP, default_canvas_height, default_canvas_width, default_magnification, default_tool, enable_palette_loading_from_indexed_images, encodeBMP, localize, main_canvas, main_ctx, monochrome_palette, my_canvas_height, my_canvas_width, new_local_session, parseThemeFileString, pointer_active, pointers, polychrome_palette, redos, systemHooks, text_tool_font, update_fill_and_stroke_colors_and_lineWidth, UPNG, UTIF */
+/* global $canvas, $canvas_area, $colorbox, $status_text, $toolbox, $Window, AccessKeys, applyCSSProperties, decodeBMP, default_canvas_height, default_canvas_width, default_magnification, default_tool, enable_palette_loading_from_indexed_images, encodeBMP, localize, main_canvas, main_ctx, monochrome_palette, my_canvas_height, my_canvas_width, parseThemeFileString, pointer_active, pointers, polychrome_palette, redos, systemHooks, text_tool_font, update_fill_and_stroke_colors_and_lineWidth, UPNG, UTIF */
 
 import { $DialogWindow } from "./$ToolWindow.js";
 import { OnCanvasHelperLayer } from "./OnCanvasHelperLayer.js";
@@ -15,12 +15,6 @@ import { apply_image_transformation, draw_grid, draw_selection_box, flip_horizon
 import { showMessageBox } from "./msgbox.js";
 import { localStore } from "./storage.js";
 import { TOOL_CURVE, TOOL_FREE_FORM_SELECT, TOOL_POLYGON, TOOL_SELECT, TOOL_TEXT, tools } from "./tools.js";
-// `sessions.js` must be loaded after `app.js`
-// This would cause it to be loaded earlier, and error trying to access `undos`
-// I'm surprised I haven't been bitten by this sort of bug, and I've
-// mostly converted the whole app to ES Modules!
-// TODO: make sessions.js export function to initialize it
-// import { new_local_session } from "./sessions.js";
 
 // expresses order in the URL as well as type
 const param_types = {
@@ -28,15 +22,10 @@ const param_types = {
 	"eye-gaze-mode": "bool",
 	"vertical-color-box-mode": "bool",
 	"speech-recognition-mode": "bool",
-	// sessions
-	"local": "string",
-	"session": "string",
 	"load": "string",
 };
 
 const exclusive_params = [
-	"local",
-	"session",
 	"load",
 ];
 
@@ -952,7 +941,6 @@ function open_from_image_info(info, callback, canceled, into_existing_session, f
 
 		if (!into_existing_session) {
 			$G.triggerHandler("session-update"); // autosave old session
-			new_local_session();
 		}
 
 		reset_file();
@@ -1081,7 +1069,6 @@ function file_new() {
 		cancel();
 
 		$G.triggerHandler("session-update"); // autosave old session
-		new_local_session();
 
 		reset_file();
 		reset_selected_colors();
@@ -3482,64 +3469,11 @@ function sanity_check_blob(blob, okay_callback, magic_number_bytes, magic_wanted
 	}
 }
 
-/**
- * @param {boolean} from_current_document
- */
-function show_multi_user_setup_dialog(from_current_document) {
-	const $w = $DialogWindow();
-	$w.title("Multi-User Setup").addClass("horizontal-buttons");
-	$w.$main.html(`
-		${from_current_document ? "<p>This will make the current document public.</p>" : ""}
-		<p>
-			<!-- Choose a name for the multi-user session, included in the URL for sharing: -->
-			Enter the session name that will be used in the URL for sharing:
-		</p>
-		<p>
-			<label>
-				<span class="partial-url-label">jspaint.app/#session:</span>
-				<input
-					type="text"
-					id="session-name"
-					aria-label="session name"
-					pattern="[-0-9A-Za-z\\u00c0-\\u00d6\\u00d8-\\u00f6\\u00f8-\\u02af\\u1d00-\\u1d25\\u1d62-\\u1d65\\u1d6b-\\u1d77\\u1d79-\\u1d9a\\u1e00-\\u1eff\\u2090-\\u2094\\u2184-\\u2184\\u2488-\\u2490\\u271d-\\u271d\\u2c60-\\u2c7c\\u2c7e-\\u2c7f\\ua722-\\ua76f\\ua771-\\ua787\\ua78b-\\ua78c\\ua7fb-\\ua7ff\\ufb00-\\ufb06]+"
-					title="Numbers, letters, and hyphens are allowed."
-					class="inset-deep"
-				>
-			</label>
-		</p>
-	`);
-	const $session_name = $w.$main.find("#session-name");
-	$w.$main.css({ maxWidth: "500px" });
-	$w.$Button("Start", () => {
-		let name = String($session_name.val()).trim();
-
-		if (name == "") {
-			show_error_message("The session name cannot be empty.");
-		} else if ($session_name.is(":invalid")) {
-			show_error_message("The session name must be made from only numbers, letters, and hyphens.");
-		} else {
-			if (from_current_document) {
-				change_url_param("session", name);
-			} else {
-				// @TODO: load new empty session in the same browser tab
-				// (or at least... keep settings like vertical-color-box-mode?)
-				window.open(`${location.origin}${location.pathname}#session:${name}`);
-			}
-			$w.close();
-		}
-	}, { type: "submit" });
-	$w.$Button(localize("Cancel"), () => {
-		$w.close();
-	});
-	$w.center();
-	$session_name.focus();
-}
-
 export {
 	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, choose_file_to_paste, cleanup_bitmap_view, clear, delete_selection, deselect, detect_monochrome,
 	edit_copy, edit_cut, edit_paste, exit_fullscreen_if_ios, file_load_from_url, file_new, file_open, file_print,
 	getSelectionText, get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
-	meld_textbox_into_canvas, open_from_file, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, redo, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_all, select_tool, select_tools, set_all_url_params, set_magnification, show_convert_to_black_and_white, show_custom_zoom_window, show_document_history, show_error_message, show_file_format_errors, show_multi_user_setup_dialog, show_resource_load_error_message, switch_to_polychrome_palette, toggle_grid,
+	meld_textbox_into_canvas, open_from_file, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, redo, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_all, select_tool, select_tools, set_all_url_params, set_magnification, show_convert_to_black_and_white, show_custom_zoom_window, show_document_history, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette, toggle_grid,
 	toggle_thumbnail, try_exec_command, undo, undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
 	update_helper_layer_immediately, update_magnified_canvas_size, update_title, view_bitmap
 };
