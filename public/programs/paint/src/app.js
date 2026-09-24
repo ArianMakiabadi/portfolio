@@ -9,7 +9,7 @@ import { Handles } from "./Handles.js";
 import { default_palette } from "./color-data.js";
 import { cancel, change_url_param, clear, deselect, get_tool_by_id, get_uris, load_image_from_uri, make_or_update_undoable, paste, paste_image_from_file, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, select_tool, select_tools, set_magnification, show_error_message, show_resource_load_error_message, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size } from "./functions.js";
 import { $G, E, TAU, get_file_extension, get_help_folder_icon, to_canvas_coords } from "./helpers.js";
-import { init_webgl_stuff, rotate } from "./image-manipulation.js";
+import { init_webgl_stuff } from "./image-manipulation.js";
 import { showMessageBox } from "./msgbox.js";
 import { localStore } from "./storage.js";
 import { set_theme } from "./theme.js";
