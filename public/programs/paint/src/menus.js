@@ -20,12 +20,6 @@ const menus = {
 		},
 		MENU_DIVIDER,
 		{
-			label: localize("Recent File"),
-			enabled: false, // @TODO for desktop app
-			description: localize(""),
-		},
-		MENU_DIVIDER,
-		{
 			label: localize("E&xit"),
 			action: () => {
 				are_you_sure(() => {
