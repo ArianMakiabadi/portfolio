@@ -35,8 +35,6 @@ document.head.appendChild(theme_link);
 
 update_not_for_modern_theme();
 
-const get_theme = () => current_theme;
-
 const set_theme = (theme) => {
 	current_theme = theme;
 
@@ -64,5 +62,5 @@ function update_not_for_modern_theme() {
 	}
 }
 
-export { get_theme, set_theme };
+export { set_theme };
 
