@@ -899,45 +899,6 @@ function open_from_image_info(info, callback, canceled, into_existing_session, f
 	}, canceled, from_session_load);
 }
 
-// Note: This function is part of the API.
-/**
- * @param {Blob} file
- * @param {UserFileHandle} source_file_handle
- */
-function open_from_file(file, source_file_handle) {
-	// The browser isn't very smart about MIME types.
-	// It seems to look at the file extension, but not the actual file contents.
-	// This is particularly problematic for files with no extension, where file.type gives an empty string.
-	// And the File Access API currently doesn't let us automatically append a file extension,
-	// so the user is likely to end up with files with no extension.
-	// It's better to look at the file content to determine file type.
-	// We do this for image files in read_image_file, and palette files in AnyPalette.js.
-
-	if (file instanceof File && file.name.match(/\.theme(pack)?$/i)) {
-		file.text().then(load_theme_from_text, (error) => {
-			show_error_message(localize("Paint cannot open this file."), error);
-		});
-		return;
-	}
-	// Try loading as an image file first, then as a palette file, but show a combined error message if both fail.
-	read_image_file(file, (as_image_error, image_info) => {
-		if (as_image_error) {
-			AnyPalette.loadPalette(file, (as_palette_error, new_palette) => {
-				if (as_palette_error) {
-					show_file_format_errors({ as_image_error, as_palette_error });
-					return;
-				}
-				palette = new_palette.map((color) => color.toString());
-				$colorbox.rebuild_palette();
-				window.console?.log(`Loaded palette: ${palette.map(() => "%c█").join("")}`, ...palette.map((color) => `color: ${color};`));
-			});
-			return;
-		}
-		image_info.source_file_handle = source_file_handle;
-		open_from_image_info(image_info);
-	});
-}
-
 /**
  * @param {ImageInfo} info
  */
@@ -2345,10 +2306,7 @@ function sanity_check_blob(blob, okay_callback, magic_number_bytes, magic_wanted
 						// 	<p>${localize("Unexpected file format.")}</p>
 						// 	<p>${localize("An unsupported operation was attempted.")}</p>
 						// `,
-						message:
-							window.is_electron_app ?
-								"Writing images in this file format is not supported." :
-								"Your browser does not support writing images in this file format.",
+						message: "Your browser does not support writing images in this file format.",
 						iconID: "error",
 					});
 				}
@@ -2367,16 +2325,14 @@ export {
 	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, clear, deselect, detect_monochrome,
 	exit_fullscreen_if_ios,
 	get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
-	meld_textbox_into_canvas, open_from_file, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_tool, select_tools, set_all_url_params, set_magnification, show_custom_zoom_window, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette,
+	meld_textbox_into_canvas, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_tool, select_tools, set_all_url_params, set_magnification, show_custom_zoom_window, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette,
 	undo, undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
 	update_helper_layer_immediately, update_magnified_canvas_size, update_title
 };
 // Temporary globals until all dependent code is converted to ES Modules
 window.make_history_node = make_history_node; // used by app-state.js
-window.open_from_file = open_from_file; // used by electron-injected.js
 window.are_you_sure = are_you_sure; // used by app-localization.js, electron-injected.js
 window.show_error_message = show_error_message; // used by app-localization.js, electron-injected.js
 window.exit_fullscreen_if_ios = exit_fullscreen_if_ios; // used by app-localization.js
 window.get_tool_by_id = get_tool_by_id; // used by app-state.js
 window.make_monochrome_palette = make_monochrome_palette; // used by app-state.js
-window.sanity_check_blob = sanity_check_blob; // used by electron-injected.js
