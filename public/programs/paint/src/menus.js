@@ -5,8 +5,6 @@
 import { show_edit_colors_window } from "./edit-colors.js";
 import { palette_formats } from "./file-format-data.js";
 import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_new, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
-import { $G, is_discord_embed } from "./helpers.js";
-import { showMessageBox } from "./msgbox.js";
 
 const looksLikeChrome = !!(window.chrome && (window.chrome.loadTimes || window.chrome.csi));
 // NOTE: Microsoft Edge includes window.chrome.app
@@ -31,14 +29,6 @@ const menus = {
 			label: localize("E&xit"),
 			action: () => {
 				are_you_sure(() => {
-					if (is_discord_embed) {
-						// For the Discord Activity, there doesn't seem to be an API to exit the activity.
-						showMessageBox({
-							message: "Click the Leave Activity button in Discord to exit.",
-						});
-						return;
-					}
-
 					// Note: For a Chrome PWA, window.close() is allowed only if there is only one history entry.
 					// I could make it try to close the window and then navigate to the official web desktop if it fails,
 					// but that would be inconsistent, as it wouldn't close the window after using File > New or File > Open.
