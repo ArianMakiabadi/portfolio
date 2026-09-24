@@ -785,10 +785,8 @@ const tools = [{
 		if (this.points.length < 1) {
 			this.preview_canvas = make_canvas(main_canvas.width, main_canvas.height);
 			this.points.push({ x, y });
-			if (!$("body").hasClass("eye-gaze-mode")) {
-				// second point so first action draws a line
-				this.points.push({ x, y });
-			}
+			// second point so first action draws a line
+			this.points.push({ x, y });
 		} else {
 			this.points.push({ x, y });
 		}
@@ -926,16 +924,8 @@ const tools = [{
 		const dx = this.points[i].x - this.points[0].x;
 		const dy = this.points[i].y - this.points[0].y;
 		const d = Math.sqrt(dx * dx + dy * dy);
-		if ($("body").hasClass("eye-gaze-mode")) {
-			if (this.points.length >= 3) {
-				if (d < stroke_size * 10 + 20) {
-					this.complete(ctx);
-				}
-			}
-		} else {
-			if (d < stroke_size * 5.1010101) { // arbitrary number (@TODO: find correct value (or formula))
-				this.complete(ctx);
-			}
+		if (d < stroke_size * 5.1010101) { // arbitrary number (@TODO: find correct value (or formula))
+			this.complete(ctx);
 		}
 
 		this.last_click_pointerup = { x, y, time: +(new Date()) };
@@ -949,10 +939,8 @@ const tools = [{
 			// Add the first point of the polygon
 			this.points.push({ x, y });
 
-			if (!$("body").hasClass("eye-gaze-mode")) {
-				// Add a second point so first action draws a line
-				this.points.push({ x, y });
-			}
+			// Add a second point so first action draws a line
+			this.points.push({ x, y });
 		} else {
 			const lx = this.last_click_pointerdown.x;
 			const ly = this.last_click_pointerdown.y;

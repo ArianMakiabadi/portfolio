@@ -19,7 +19,6 @@ import { TOOL_CURVE, TOOL_FREE_FORM_SELECT, TOOL_POLYGON, TOOL_SELECT, TOOL_TEXT
 // expresses order in the URL as well as type
 const param_types = {
 	// settings
-	"eye-gaze-mode": "bool",
 	"vertical-color-box-mode": "bool",
 	"load": "string",
 };

@@ -541,50 +541,19 @@ const menus = {
 			)),
 		},
 		{
-			emoji_icon: "👁️",
-			label: localize("&Eye Gaze Mode"),
-			checkbox: {
-				toggle: () => {
-					if (/eye-gaze-mode/i.test(location.hash)) {
-						// @TODO: confirmation dialog that you could cancel with dwell clicking!
-						// if (confirm("This will disable eye gaze mode.")) {
-						change_url_param("eye-gaze-mode", false);
-						// }
-					} else {
-						change_url_param("eye-gaze-mode", true);
-					}
-				},
-				check: () => {
-					return /eye-gaze-mode/i.test(location.hash);
-				},
-			},
-			description: localize("Enlarges buttons and provides dwell clicking."),
-		},
-		{
 			emoji_icon: "↕️",
 			label: localize("&Vertical Color Box"),
 			checkbox: {
 				toggle: () => {
-					if (/eye-gaze-mode/i.test(location.hash)) {
-						// @TODO: confirmation dialog that you could cancel with dwell clicking!
-						// if (confirm("This will disable eye gaze mode.")) {
-						// change_some_url_params({
-						// 	"eye-gaze-mode": false,
-						// 	"vertical-color-box-mode": false,
-						// });
-						// }
-					} else if (/vertical-color-box-mode/i.test(location.hash)) {
+					if (/vertical-color-box-mode/i.test(location.hash)) {
 						change_url_param("vertical-color-box-mode", false);
 					} else {
 						change_url_param("vertical-color-box-mode", true);
 					}
 				},
 				check: () => {
-					return /vertical-color-box-mode|eye-gaze-mode/i.test(location.hash);
+					return /vertical-color-box-mode/i.test(location.hash);
 				},
-			},
-			enabled: () => {
-				return !/eye-gaze-mode/i.test(location.hash);
 			},
 			description: localize("Arranges the color box vertically."),
 		},
