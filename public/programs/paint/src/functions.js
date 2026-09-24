@@ -1528,22 +1528,6 @@ function make_or_update_undoable(undoable_meta, undoable_action) {
 		undoable(undoable_meta, undoable_action);
 	}
 }
-function undo() {
-	if (undos.length < 1) { return false; }
-
-	redos.push(current_history_node);
-	let target_history_node = undos.pop();
-
-	while (target_history_node.soft && undos.length) {
-		redos.push(target_history_node);
-		target_history_node = undos.pop();
-	}
-
-	go_to_history_node(target_history_node);
-
-	return true;
-}
-
 /**
  * @param {HistoryNode} node
  * @returns {HistoryNode[]} ancestors
@@ -2325,7 +2309,7 @@ export {
 	exit_fullscreen_if_ios,
 	get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
 	meld_textbox_into_canvas, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_tool, select_tools, set_all_url_params, set_magnification, show_custom_zoom_window, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette,
-	undo, undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
+	undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
 	update_helper_layer_immediately, update_magnified_canvas_size, update_title
 };
 // Temporary globals until all dependent code is converted to ES Modules
