@@ -4,9 +4,8 @@
 // import { available_languages, get_iso_language_name, get_language, get_language_emoji, get_language_endonym, localize, set_language } from "./app-localization.js";
 import { show_edit_colors_window } from "./edit-colors.js";
 import { palette_formats } from "./file-format-data.js";
-import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_load_from_url, file_new, file_open, file_print, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, sanity_check_blob, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, show_multi_user_setup_dialog, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
+import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_load_from_url, file_new, file_open, file_print, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, show_multi_user_setup_dialog, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
 import { $G, is_discord_embed } from "./helpers.js";
-import { show_imgur_uploader } from "./imgur.js";
 import { manage_storage } from "./manage-storage.js";
 import { showMessageBox } from "./msgbox.js";
 import { speech_recognition_active, speech_recognition_available } from "./speech-recognition.js";
@@ -77,23 +76,6 @@ const menus = {
 			],
 			action: () => { file_load_from_url(); },
 			description: localize("Opens an image from the web."),
-		},
-		{
-			label: localize("&Upload To Imgur"),
-			speech_recognition: [
-				"upload to imgur", "upload image to imgur", "upload picture to imgur",
-			],
-			action: () => {
-				// include the selection in the saved image
-				deselect();
-
-				main_canvas.toBlob((blob) => {
-					sanity_check_blob(blob, () => {
-						show_imgur_uploader(blob);
-					});
-				});
-			},
-			description: localize("Uploads the active document to Imgur"),
 		},
 		MENU_DIVIDER,
 		{

@@ -12,7 +12,6 @@ import { default_palette } from "./color-data.js";
 import { image_formats } from "./file-format-data.js";
 import { $G, E, TAU, debounce, from_canvas_coords, get_help_folder_icon, get_icon_for_tool, get_rgba_from_color, is_discord_embed, is_pride_month, make_canvas, render_access_key, to_canvas_coords } from "./helpers.js";
 import { apply_image_transformation, draw_grid, draw_selection_box, flip_horizontal, flip_vertical, invert_monochrome, invert_rgb, rotate, stretch_and_skew, threshold_black_and_white } from "./image-manipulation.js";
-import { show_imgur_uploader } from "./imgur.js";
 import { showMessageBox } from "./msgbox.js";
 import { localStore } from "./storage.js";
 import { TOOL_CURVE, TOOL_FREE_FORM_SELECT, TOOL_POLYGON, TOOL_SELECT, TOOL_TEXT, tools } from "./tools.js";
