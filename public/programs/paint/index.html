@@ -78,10 +78,6 @@
 	<script src="lib/os-gui/$Window.js"></script>
 	<script src="lib/os-gui/MenuBar.js"></script>
 
-	<!-- must not be async/deferred, as it uses document.write(); and must come before other app code which uses localization functions -->
-	<!-- (also depends on msgbox.js and thus os-gui.js, but not initially) -->
-	<script src="src/app-localization.js"></script>
-
 	<!-- Scripts that are not yet transitioned to ES Modules are marked as "defer"
 	so that the ES Modules (which are implicitly deferred) can still export globals to be consumed by the non-module scripts,
 	which helps with progressively converting the codebase to ES Modules. -->

@@ -3,7 +3,6 @@
 import { $Component } from "./$Component.js";
 import { select_tool, select_tools } from "./functions.js";
 import { $G, E, make_css_cursor } from "./helpers.js";
-import { get_theme } from "./theme.js";
 
 
 let theme_dev_blob_url;
@@ -34,13 +33,8 @@ function $ToolBox(tools, is_extras) {
 		$icon.appendTo($b);
 		const update_css = () => {
 			const use_svg = !theme_dev_blob_url && (
-				(
-					get_theme() === "modern.css" || get_theme() === "modern-dark.css" ?
-						// only use raster when screen pixels line up with image pixels exactly
-						(window.devicePixelRatio !== 1) :
-						// with nearest neighbor scaling, favor raster at larger integer sizes as well, for retro look
-						(window.devicePixelRatio >= 3 || (window.devicePixelRatio % 1) !== 0)
-				) ||
+				// with nearest neighbor scaling, favor raster at larger integer sizes as well, for retro look
+				(window.devicePixelRatio >= 3 || (window.devicePixelRatio % 1) !== 0) ||
 				$("body").hasClass("eye-gaze-mode")
 			);
 			$icon.css({
