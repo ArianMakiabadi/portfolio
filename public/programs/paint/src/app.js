@@ -12,7 +12,6 @@ import { $G, E, TAU, get_file_extension, get_help_folder_icon, to_canvas_coords 
 import { init_webgl_stuff } from "./image-manipulation.js";
 import { showMessageBox } from "./msgbox.js";
 import { localStore } from "./storage.js";
-import { set_theme } from "./theme.js";
 import { TOOL_AIRBRUSH, TOOL_BRUSH, TOOL_CURVE, TOOL_ELLIPSE, TOOL_ERASER, TOOL_LINE, TOOL_PENCIL, TOOL_POLYGON, TOOL_RECTANGLE, TOOL_ROUNDED_RECTANGLE, TOOL_SELECT, tools } from "./tools.js";
 
 // #region Exports
@@ -745,26 +744,6 @@ $G.on("fullscreenchange webkitfullscreenchange", () => {
 	// $status_text.text(`fullscreen: ${fullscreen}`);
 	$("html").toggleClass("fullscreen", fullscreen);
 });
-// #endregion
-
-// #region Testing Helpers
-// Note: this is defined here so the app is loaded when this is defined.
-window.api_for_cypress_tests = {
-	reset_for_next_test() {
-		selected_colors.foreground = "#000";
-		selected_colors.background = "#fff";
-		brush_shape = default_brush_shape;
-		brush_size = default_brush_size;
-		eraser_size = default_eraser_size;
-		airbrush_size = default_airbrush_size;
-		pencil_size = default_pencil_size;
-		stroke_size = default_stroke_size;
-		clear();
-	},
-	selected_colors,
-	set_theme,
-	$,
-};
 // #endregion
 
 init_webgl_stuff();
