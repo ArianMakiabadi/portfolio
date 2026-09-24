@@ -21,7 +21,6 @@ const param_types = {
 	// settings
 	"eye-gaze-mode": "bool",
 	"vertical-color-box-mode": "bool",
-	"speech-recognition-mode": "bool",
 	"load": "string",
 };
 

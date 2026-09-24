@@ -13,7 +13,6 @@ import { $G, E, TAU, get_file_extension, get_help_folder_icon, is_discord_embed,
 import { init_webgl_stuff, rotate } from "./image-manipulation.js";
 import { menus } from "./menus.js";
 import { showMessageBox } from "./msgbox.js";
-import { disable_speech_recognition, enable_speech_recognition, trace_and_sketch_stop } from "./speech-recognition.js";
 import { localStore } from "./storage.js";
 import { get_theme, set_theme } from "./theme.js";
 import { TOOL_AIRBRUSH, TOOL_BRUSH, TOOL_CURVE, TOOL_ELLIPSE, TOOL_ERASER, TOOL_LINE, TOOL_PENCIL, TOOL_POLYGON, TOOL_RECTANGLE, TOOL_ROUNDED_RECTANGLE, TOOL_SELECT, tools } from "./tools.js";
@@ -140,12 +139,6 @@ const update_from_url_params = () => {
 			$G.triggerHandler("vertical-color-box-mode-toggled");
 			$G.triggerHandler("theme-load"); // signal layout change
 		}
-	}
-
-	if (location.hash.match(/speech-recognition-mode/i)) {
-		enable_speech_recognition();
-	} else {
-		disable_speech_recognition();
 	}
 
 	$("body").toggleClass("compare-reference", !!location.hash.match(/compare-reference/i));
