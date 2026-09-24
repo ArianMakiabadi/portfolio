@@ -3,7 +3,6 @@
 import { set_magnification } from "./functions.js";
 import { $G, E, make_canvas } from "./helpers.js";
 import { render_brush, replace_colors_with_swatch, stamp_brush_canvas } from "./image-manipulation.js";
-import { get_theme } from "./theme.js";
 
 const ChooserCanvas = (
 	url,
@@ -72,19 +71,10 @@ const ChooserDiv = (
 
 	// @TODO: single listener for all divs
 	const on_zoom_etc = () => {
-		const modern = get_theme() === "modern.css" || get_theme() === "modern-dark.css" || get_theme() === "bubblegum.css";
-		const use_svg = modern ?
-			// only use raster when screen pixels line up with image pixels exactly
-			(window.devicePixelRatio !== 1) :
-			// with nearest neighbor scaling, favor raster at larger integer sizes as well, for retro look
-			(window.devicePixelRatio >= 3 || (window.devicePixelRatio % 1) !== 0);
+		// with nearest neighbor scaling, favor raster at larger integer sizes as well, for retro look
+		const use_svg = window.devicePixelRatio >= 3 || (window.devicePixelRatio % 1) !== 0;
 		div.classList.toggle("use-svg", use_svg);
-		// The classic theme's transparency tool options spritesheet uses an
-		// overlapped border, shared by the top and bottom options, as it is
-		// simply a row of black for both, whereas the modern theme's spritesheet
-		// uses a gradient in the border, and so does not use an overlap trick.
-		// This might be clearer if I made the option "shift_y_by_1px_in_classic_themes" with the baseline being the modern theme's metrics.
-		div.style.backgroundPosition = `${-sourceX}px ${-sourceY - (modern && shift_y_by_1px_in_modern_theme_only ? 1 : 0)}px`;
+		div.style.backgroundPosition = `${-sourceX}px ${-sourceY}px`;
 	};
 	if (div._on_zoom_etc) { // condition is needed, otherwise it will remove all listeners! (leading to only the last graphic being updated when zooming)
 		$G.off("theme-load resize", div._on_zoom_etc);
