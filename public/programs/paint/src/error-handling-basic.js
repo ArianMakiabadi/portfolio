@@ -4,7 +4,7 @@
 // Use only ES5 syntax for this script!
 // (I would enforce this but I wasn't able to get it working with ESLint.)
 
-// Set up basic global error handling, which we can override later in error-handling-enhanced.js
+// Set up basic global error handling.
 
 var isIE = /MSIE \d|Trident.*rv:/.test(navigator.userAgent);
 

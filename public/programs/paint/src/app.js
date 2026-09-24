@@ -13,7 +13,6 @@ import { $G, E, TAU, get_file_extension, get_help_folder_icon, is_discord_embed,
 import { init_webgl_stuff, rotate } from "./image-manipulation.js";
 import { menus } from "./menus.js";
 import { showMessageBox } from "./msgbox.js";
-import { disable_speech_recognition, enable_speech_recognition, trace_and_sketch_stop } from "./speech-recognition.js";
 import { localStore } from "./storage.js";
 import { get_theme, set_theme } from "./theme.js";
 import { TOOL_AIRBRUSH, TOOL_BRUSH, TOOL_CURVE, TOOL_ELLIPSE, TOOL_ERASER, TOOL_LINE, TOOL_PENCIL, TOOL_POLYGON, TOOL_RECTANGLE, TOOL_ROUNDED_RECTANGLE, TOOL_SELECT, tools } from "./tools.js";
@@ -114,21 +113,7 @@ for (const [key, defaultValue] of Object.entries(window.systemHookDefaults)) {
 
 // #region URL Params
 const update_from_url_params = () => {
-	if (location.hash.match(/eye-gaze-mode/i)) {
-		if (!$("body").hasClass("eye-gaze-mode")) {
-			$("body").addClass("eye-gaze-mode");
-			$G.triggerHandler("eye-gaze-mode-toggled");
-			$G.triggerHandler("theme-load"); // signal layout change
-		}
-	} else {
-		if ($("body").hasClass("eye-gaze-mode")) {
-			$("body").removeClass("eye-gaze-mode");
-			$G.triggerHandler("eye-gaze-mode-toggled");
-			$G.triggerHandler("theme-load"); // signal layout change
-		}
-	}
-
-	if (location.hash.match(/vertical-color-box-mode|eye-gaze-mode/i)) {
+	if (location.hash.match(/vertical-color-box-mode/i)) {
 		if (!$("body").hasClass("vertical-color-box-mode")) {
 			$("body").addClass("vertical-color-box-mode");
 			$G.triggerHandler("vertical-color-box-mode-toggled");
@@ -140,12 +125,6 @@ const update_from_url_params = () => {
 			$G.triggerHandler("vertical-color-box-mode-toggled");
 			$G.triggerHandler("theme-load"); // signal layout change
 		}
-	}
-
-	if (location.hash.match(/speech-recognition-mode/i)) {
-		enable_speech_recognition();
-	} else {
-		disable_speech_recognition();
 	}
 
 	$("body").toggleClass("compare-reference", !!location.hash.match(/compare-reference/i));
@@ -187,10 +166,6 @@ update_from_url_params();
 $G.on("hashchange popstate change-url-params", update_from_url_params);
 
 // handle backwards compatibility URLs
-if (location.search.match(/eye-gaze-mode/)) {
-	change_url_param("eye-gaze-mode", true, { replace_history_state: true });
-	update_from_url_params();
-}
 if (location.search.match(/vertical-colors?-box/)) {
 	change_url_param("vertical-color-box", true, { replace_history_state: true });
 	update_from_url_params();
@@ -391,23 +366,6 @@ $G.on("vertical-color-box-mode-toggled", () => {
 	window.$colorbox = $colorbox;
 	prevent_selection($colorbox);
 });
-$G.on("eye-gaze-mode-toggled", () => {
-	$colorbox.destroy();
-	$colorbox = $ColorBox($("body").hasClass("vertical-color-box-mode"));
-	window.$colorbox = $colorbox;
-	prevent_selection($colorbox);
-
-	$toolbox.destroy();
-	$toolbox = $ToolBox(tools);
-	window.$toolbox = $toolbox;
-	prevent_selection($toolbox);
-
-	// $toolbox2.destroy();
-	// $toolbox2 = $ToolBox(extra_tools, true);
-	// prevent_selection($toolbox2);
-});
-
-
 $G.on("resize", () => { // for browser zoom, and in-app zoom of the canvas
 	update_canvas_rect();
 	update_disable_aa();
