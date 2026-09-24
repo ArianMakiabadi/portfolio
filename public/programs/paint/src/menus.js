@@ -1,7 +1,7 @@
 // @ts-check
 /* global tool_transparent_mode:writable, palette:writable */
-/* global $canvas_area, $colorbox, $status_area, $toolbox, available_languages, get_iso_language_name, get_language, get_language_emoji, get_language_endonym, localize, magnification, main_canvas, menu_bar, MENU_DIVIDER, redos, selection, set_language, show_grid, show_thumbnail, systemHooks, undos */
-// import { available_languages, get_iso_language_name, get_language, get_language_emoji, get_language_endonym, localize, set_language } from "./app-localization.js";
+/* global $canvas_area, $colorbox, $status_area, $toolbox, localize, magnification, main_canvas, menu_bar, MENU_DIVIDER, redos, selection, show_grid, show_thumbnail, systemHooks, undos */
+// import { localize } from "./app-localization.js";
 import { show_edit_colors_window } from "./edit-colors.js";
 import { palette_formats } from "./file-format-data.js";
 import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_load_from_url, file_new, file_open, file_print, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
@@ -419,21 +419,6 @@ const menus = {
 		// 	},
 		// 	description: localize("Configures JS Paint."),
 		// }
-		{
-			emoji_icon: "🌍",
-			label: localize("&Language"),
-			submenu: available_languages.map((available_language) => (
-				{
-					emoji_icon: get_language_emoji(available_language),
-					label: get_language_endonym(available_language),
-					action: () => {
-						set_language(available_language);
-					},
-					enabled: () => get_language() != available_language,
-					description: localize("Changes the language to %1.", get_iso_language_name(available_language)),
-				}
-			)),
-		},
 		{
 			emoji_icon: "↕️",
 			label: localize("&Vertical Color Box"),
