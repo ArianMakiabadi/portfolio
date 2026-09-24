@@ -722,7 +722,7 @@ $G.on("blur", () => {
 
 // #region Fullscreen Handling for iOS
 // For Safari on iPad, Fullscreen mode overlays the system bar, completely obscuring our menu bar.
-// See CSS .fullscreen handling (and exit_fullscreen_if_ios) for more info.
+// See CSS .fullscreen handling for more info.
 function iOS() {
 	return (
 		[
