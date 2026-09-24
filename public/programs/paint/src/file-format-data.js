@@ -1,7 +1,4 @@
 // @ts-check
-/* global get_direction, localize */
-
-// import { get_direction, localize } from "./app-localization.js";
 
 /** @type {ImageFileFormat[]} */
 let image_formats = [];
@@ -18,16 +15,11 @@ const add_image_format = (mime_type, name_and_exts, target_array = image_formats
 	const format = {
 		formatID: mime_type,
 		mimeType: mime_type,
-		name: localize(name_and_exts).replace(/\s+\([^(]+$/, ""),
-		nameWithExtensions: localize(name_and_exts),
+		name: name_and_exts.replace(/\s+\([^(]+$/, ""),
+		nameWithExtensions: name_and_exts,
 		extensions: [],
 	};
 	const ext_regexp = /\*\.([^);,]+)/g;
-	if (get_direction() === "rtl") {
-		const rlm = "\u200F";
-		const lrm = "\u200E";
-		format.nameWithExtensions = format.nameWithExtensions.replace(ext_regexp, `${rlm}*.${lrm}$1${rlm}`);
-	}
 	let match;
 	// eslint-disable-next-line no-cond-assign
 	while (match = ext_regexp.exec(name_and_exts)) {
@@ -42,7 +34,6 @@ const add_image_format = (mime_type, name_and_exts, target_array = image_formats
 	target_array.push(format);
 };
 // First file extension in a parenthetical defines default for the format.
-// Strings are localized in add_image_format, don't need localize() here.
 add_image_format("image/png", "PNG (*.png)");
 add_image_format("image/webp", "WebP (*.webp)");
 add_image_format("image/gif", "GIF (*.gif)");
@@ -88,7 +79,7 @@ const image_format_categories = (image_formats) => {
 	image_formats = image_formats.filter((format) =>
 		!format.extensions.includes("bmp")
 	);
-	add_image_format("image/bmp", localize("Bitmap Files (*.bmp)").replace("(*.bmp)", "(*.bmp;*.dib)"), image_formats);
+	add_image_format("image/bmp", "Bitmap Files (*.bmp)".replace("(*.bmp)", "(*.bmp;*.dib)"), image_formats);
 	// add_image_format("", "Icon Files (*.ico;*.cur;*.ani;*.icns)", image_formats);
 	// add_image_format("", "All Picture Files", image_formats);
 	// add_image_format("", "All Files", image_formats);
@@ -96,15 +87,15 @@ const image_format_categories = (image_formats) => {
 		// TODO: we don't treat formatID and mimeType interchangeably, do we?
 		formatID: "IMAGE_FILES",
 		mimeType: "image/*", // but also application/pdf, not included here, but hopefully the mime type isn't what we go off of (I don't remember)
-		name: localize("All Picture Files"),
-		nameWithExtensions: localize("All Picture Files"),
+		name: "All Picture Files",
+		nameWithExtensions: "All Picture Files",
 		extensions: image_formats.map((format) => format.extensions).flat(),
 	});
 	image_formats.push({
 		formatID: "ALL_FILES",
 		mimeType: "*" + "/*",
-		name: localize("All Files"),
-		nameWithExtensions: localize("All Files"),
+		name: "All Files",
+		nameWithExtensions: "All Files",
 		extensions: ["*"], // Note: no other wildcard is allowed in the extension list
 	});
 	return image_formats;

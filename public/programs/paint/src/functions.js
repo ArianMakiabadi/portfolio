@@ -1,13 +1,12 @@
 // @ts-check
 // eslint-disable-next-line no-unused-vars
 /* global $thumbnail_window:writable, canvas_bounding_client_rect:writable, current_history_node:writable, file_format:writable, file_name:writable, helper_layer:writable, history_node_to_cancel_to:writable, magnification:writable, monochrome:writable, palette:writable, pointer:writable, return_to_magnification:writable, return_to_tools:writable, root_history_node:writable, saved:writable, selected_colors:writable, selected_tool:writable, selected_tools:writable, selection:writable, show_grid:writable, show_thumbnail:writable, system_file_handle:writable, textbox:writable, thumbnail_canvas:writable, tool_transparent_mode:writable, transparency:writable, undos:writable */
-/* global $canvas, $canvas_area, $colorbox, $status_text, $toolbox, $Window, AccessKeys, applyCSSProperties, decodeBMP, default_canvas_height, default_canvas_width, default_magnification, default_tool, enable_palette_loading_from_indexed_images, encodeBMP, localize, main_canvas, main_ctx, monochrome_palette, my_canvas_height, my_canvas_width, parseThemeFileString, pointer_active, pointers, polychrome_palette, redos, systemHooks, text_tool_font, update_fill_and_stroke_colors_and_lineWidth, UPNG, UTIF */
+/* global $canvas, $canvas_area, $colorbox, $status_text, $toolbox, $Window, AccessKeys, applyCSSProperties, decodeBMP, default_canvas_height, default_canvas_width, default_magnification, default_tool, enable_palette_loading_from_indexed_images, encodeBMP, main_canvas, main_ctx, monochrome_palette, my_canvas_height, my_canvas_width, parseThemeFileString, pointer_active, pointers, polychrome_palette, redos, systemHooks, text_tool_font, update_fill_and_stroke_colors_and_lineWidth, UPNG, UTIF */
 
 import { $DialogWindow } from "./$ToolWindow.js";
 import { OnCanvasHelperLayer } from "./OnCanvasHelperLayer.js";
 import { OnCanvasSelection } from "./OnCanvasSelection.js";
 import { OnCanvasTextBox } from "./OnCanvasTextBox.js";
-// import { localize } from "./app-localization.js";
 import { default_palette } from "./color-data.js";
 import { image_formats } from "./file-format-data.js";
 import { $G, E, TAU, debounce, from_canvas_coords, get_help_folder_icon, get_icon_for_tool, get_rgba_from_color, is_pride_month, make_canvas, render_access_key, to_canvas_coords } from "./helpers.js";
@@ -418,11 +417,11 @@ function show_custom_zoom_window() {
 	if ($custom_zoom_window) {
 		$custom_zoom_window.close();
 	}
-	const $w = $DialogWindow(localize("Custom Zoom"));
+	const $w = $DialogWindow("Custom Zoom");
 	$custom_zoom_window = $w;
 	$w.addClass("custom-zoom-window");
 
-	$w.$main.append(`<div class='current-zoom'>${localize("Current zoom:")} <bdi>${magnification * 100}%</bdi></div>`);
+	$w.$main.append(`<div class='current-zoom'>${"Current zoom:"} <bdi>${magnification * 100}%</bdi></div>`);
 	// update when zoom changes
 	$G.on("magnification-changed", () => {
 		$w.$main.find(".current-zoom bdi").text(`${magnification * 100}%`);
@@ -430,7 +429,7 @@ function show_custom_zoom_window() {
 
 	const $fieldset = $(E("fieldset")).appendTo($w.$main);
 	$fieldset.append(`
-		<legend>${localize("Zoom to")}</legend>
+		<legend>${"Zoom to"}</legend>
 		<div class="fieldset-body">
 			<div class="radio-field"><input type="radio" name="custom-zoom-radio" id="zoom-option-1" aria-keyshortcuts="Alt+1 1" value="1"/><label for="zoom-option-1">${render_access_key("&100%")}</label></div>
 			<div class="radio-field"><input type="radio" name="custom-zoom-radio" id="zoom-option-2" aria-keyshortcuts="Alt+2 2" value="2"/><label for="zoom-option-2">${render_access_key("&200%")}</label></div>
@@ -497,7 +496,7 @@ function show_custom_zoom_window() {
 
 	$fieldset.find("label").css({ display: "block" });
 
-	$w.$Button(localize("OK"), () => {
+	$w.$Button("OK", () => {
 		let option_val = String($fieldset.find("input[name='custom-zoom-radio']:checked").val());
 		let mag;
 		if (option_val === "really-custom") {
@@ -519,7 +518,7 @@ function show_custom_zoom_window() {
 
 		$w.close();
 	}, { type: "submit" });
-	$w.$Button(localize("Cancel"), () => {
+	$w.$Button("Cancel", () => {
 		$w.close();
 	});
 
@@ -540,7 +539,7 @@ function reset_selected_colors() {
 
 function reset_file() {
 	system_file_handle = null;
-	file_name = localize("untitled");
+	file_name = "untitled";
 	file_format = "image/png";
 	saved = true;
 	update_title();
@@ -550,7 +549,7 @@ function reset_canvas_and_history() {
 	undos.length = 0;
 	redos.length = 0;
 	current_history_node = root_history_node = make_history_node({
-		name: localize("New"),
+		name: "New",
 		icon: get_help_folder_icon("p_blank.png"),
 	});
 	history_node_to_cancel_to = null;
@@ -588,7 +587,7 @@ function reset_canvas_and_history() {
  * @param {string | CanvasPattern=} options.foreground_color - selected foreground color (left click)
  * @param {string | CanvasPattern=} options.background_color - selected background color (right click)
  * @param {string | CanvasPattern=} options.ternary_color - selected ternary color (ctrl+click)
- * @param {string=} options.name - the name of the operation, shown in the history window, e.g. localize("Resize Canvas")
+ * @param {string=} options.name - the name of the operation, shown in the history window, e.g. "Resize Canvas"
  * @param {HTMLImageElement |HTMLCanvasElement | null=} options.icon - a visual representation of the operation type, shown in the history window, e.g. get_help_folder_icon("p_blank.png")
  * @returns {HistoryNode}
  */
@@ -611,7 +610,7 @@ function make_history_node({
 	foreground_color, // selected foreground color (left click)
 	background_color, // selected background color (right click)
 	ternary_color, // selected ternary color (ctrl+click)
-	name, // the name of the operation, shown in the history window, e.g. localize("Resize Canvas")
+	name, // the name of the operation, shown in the history window, e.g. "Resize Canvas"
 	icon = null, // an Image representation of the operation type, shown in the history window, e.g. get_help_folder_icon("p_blank.png")
 }) {
 	return {
@@ -639,7 +638,7 @@ function make_history_node({
 }
 
 function update_title() {
-	document.title = `${file_name} - ${is_pride_month ? "June Solidarity " : ""}${localize("Paint")}`;
+	document.title = `${file_name} - ${is_pride_month ? "June Solidarity " : ""}${"Paint"}`;
 
 	if (is_pride_month) {
 		$("link[rel~='icon']").attr("href", "./images/icons/gay-es-paint-16x16-light-outline.png");
@@ -869,7 +868,7 @@ function open_from_image_info(info, callback, canceled, into_existing_session, f
 		transparency = has_any_transparency(main_ctx);
 		$canvas_area.trigger("resize");
 
-		current_history_node.name = localize("Open");
+		current_history_node.name = "Open";
 		current_history_node.image_data = main_ctx.getImageData(0, 0, main_canvas.width, main_canvas.height);
 		current_history_node.icon = get_help_folder_icon("p_open.png");
 
@@ -930,7 +929,7 @@ function apply_file_format_and_palette_info(info) {
 function load_theme_from_text(fileText) {
 	var cssProperties = parseThemeFileString(fileText);
 	if (!cssProperties) {
-		show_error_message(localize("Paint cannot open this file."));
+		show_error_message("Paint cannot open this file.");
 		return;
 	}
 	applyCSSProperties(cssProperties, { recurseIntoIframes: true });
@@ -958,11 +957,11 @@ function are_you_sure(action, canceled, from_session_load) {
 		//   http://127.0.0.1:1999/#load:https://i.imgur.com/M5zcPuk.jpeg
 		// - click an Open link in the Manage Storage dialog in the Electron app
 		showMessageBox({
-			message: localize("You've modified the document while an existing document was loading.\nSave the new document?", file_name),
+			message: "You've modified the document while an existing document was loading.\nSave the new document?",
 			buttons: [
 				{
 					// label: "Discard",
-					label: localize("No"),
+					label: "No",
 					value: "discard",
 					default: true,
 				},
@@ -982,16 +981,16 @@ function are_you_sure(action, canceled, from_session_load) {
 		});
 	} else {
 		showMessageBox({
-			message: localize("Save changes to %1?", file_name),
+			message: `Save changes to ${file_name}?`,
 			buttons: [
 				{
 					// label: "Discard",
-					label: localize("No"),
+					label: "No",
 					value: "discard",
 					default: true,
 				},
 				{
-					label: localize("Cancel"),
+					label: "Cancel",
 					value: "cancel",
 				},
 			],
@@ -1008,7 +1007,7 @@ function are_you_sure(action, canceled, from_session_load) {
 function please_enter_a_number() {
 	showMessageBox({
 		// title: "Invalid Value",
-		message: localize("Please enter a number."),
+		message: "Please enter a number.",
 	});
 }
 
@@ -1147,14 +1146,14 @@ function show_resource_load_error_message(error) {
  */
 function show_file_format_errors({ as_image_error, as_palette_error }) {
 	let html = `
-		<p>${localize("Paint cannot open this file.")}</p>
+		<p>${"Paint cannot open this file."}</p>
 	`;
 	if (as_image_error) {
 		// TODO: handle weird errors, only show invalid format error if that's what happened
 		html += `
 			<details>
-				<summary>${localize("Bitmap Image")}</summary>
-				<p>${localize("This is not a valid bitmap file, or its format is not currently supported.")}</p>
+				<summary>${"Bitmap Image"}</summary>
+				<p>${"This is not a valid bitmap file, or its format is not currently supported."}</p>
 			</details>
 		`;
 	}
@@ -1190,8 +1189,8 @@ function show_file_format_errors({ as_image_error, as_palette_error }) {
 		}
 		html += `
 			<details>
-				<summary>${only_palette_error ? "Details" : localize("Palette|*.pal|").split("|")[0]}</summary>
-				<p>${localize("Unexpected file format.")}</p>
+				<summary>${only_palette_error ? "Details" : "Palette|*.pal|".split("|")[0]}</summary>
+				<p>${"Unexpected file format."}</p>
 				${details}
 			</details>
 		`;
@@ -1260,8 +1259,8 @@ function paste_image_from_file(blob) {
 function paste(img_or_canvas) {
 
 	if (img_or_canvas.width > main_canvas.width || img_or_canvas.height > main_canvas.height) {
-		const message = localize("The image in the clipboard is larger than the bitmap.") + "\n" +
-			localize("Would you like the bitmap enlarged?");
+		const message = "The image in the clipboard is larger than the bitmap." + "\n" +
+			"Would you like the bitmap enlarged?";
 		showMessageBox({
 			message,
 			iconID: "question",
@@ -1274,17 +1273,17 @@ function paste(img_or_canvas) {
 			buttons: [
 				{
 					// label: "Enlarge",
-					label: localize("Yes"),
+					label: "Yes",
 					value: "enlarge",
 					default: true,
 				},
 				{
 					// label: "Crop",
-					label: localize("No"),
+					label: "No",
 					value: "crop",
 				},
 				{
-					label: localize("Cancel"),
+					label: "Cancel",
 					value: "cancel",
 				},
 			],
@@ -1326,7 +1325,7 @@ function paste(img_or_canvas) {
 		// }
 
 		undoable({
-			name: localize("Paste"),
+			name: "Paste",
 			icon: get_help_folder_icon("p_paste.png"),
 			soft: true,
 		}, () => {
@@ -1374,7 +1373,7 @@ function go_to_history_node(target_history_node, canceling) {
 		// @TODO maybe: could store whether a selection is from Free-Form Select
 		// so it selects Free-Form Select when you jump to e.g. Move Selection
 		// (or could traverse history to figure it out)
-		if (target_history_node.name === localize("Free-Form Select")) {
+		if (target_history_node.name === "Free-Form Select") {
 			select_tool(get_tool_by_id(TOOL_FREE_FORM_SELECT));
 		} else {
 			select_tool(get_tool_by_id(TOOL_SELECT));
@@ -1633,7 +1632,7 @@ function meld_textbox_into_canvas(going_to_history_node) {
 	const text = textbox.$editor.val();
 	if (text && !going_to_history_node) {
 		undoable({
-			name: localize("Text"),
+			name: "Text",
 			icon: get_icon_for_tool(get_tool_by_id(TOOL_TEXT)),
 			soft: true,
 		}, () => { });
@@ -1669,7 +1668,7 @@ function clear() {
 	deselect();
 	cancel();
 	undoable({
-		name: localize("Clear Image"),
+		name: "Clear Image",
 		icon: get_help_folder_icon("p_blank.png"),
 	}, () => {
 		saved = false;
@@ -1975,10 +1974,10 @@ function resize_canvas_without_saving_dimensions(unclamped_width, unclamped_heig
 				main_ctx.drawImage(temp_canvas, 0, 0);
 			} catch (exception) {
 				if (exception.name === "NS_ERROR_FAILURE") {
-					// or localize("There is not enough memory or resources to complete operation.")
-					show_error_message(localize("Insufficient memory to perform operation."), exception);
+					// or "There is not enough memory or resources to complete operation."
+					show_error_message("Insufficient memory to perform operation.", exception);
 				} else {
-					show_error_message(localize("An unknown error has occurred."), exception);
+					show_error_message("An unknown error has occurred.", exception);
 				}
 				// @TODO: undo and clean up undoable
 				// maybe even keep Attributes dialog open if that's what's triggering the resize
@@ -2303,21 +2302,21 @@ function sanity_check_blob(blob, okay_callback, magic_number_bytes, magic_wanted
 						// hackily combining messages that are already localized, in ways they were not meant to be used.
 						// you may have to do some deduction to understand this message.
 						// messageHTML: `
-						// 	<p>${localize("Unexpected file format.")}</p>
-						// 	<p>${localize("An unsupported operation was attempted.")}</p>
+						// 	<p>${"Unexpected file format."}</p>
+						// 	<p>${"An unsupported operation was attempted."}</p>
 						// `,
 						message: "Your browser does not support writing images in this file format.",
 						iconID: "error",
 					});
 				}
 			}, (error) => {
-				show_error_message(localize("An unknown error has occurred."), error);
+				show_error_message("An unknown error has occurred.", error);
 			});
 		} else {
 			okay_callback();
 		}
 	} else {
-		show_error_message(localize("Failed to save document."));
+		show_error_message("Failed to save document.");
 	}
 }
 

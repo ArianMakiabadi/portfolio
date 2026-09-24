@@ -1,12 +1,11 @@
 // @ts-check
 // eslint-disable-next-line no-unused-vars
 /* global airbrush_size:writable, brush_shape:writable, brush_size:writable, button:writable, ctrl:writable, eraser_size:writable, fill_color:writable, pick_color_slot:writable, history_node_to_cancel_to:writable, my_canvas_height:writable, my_canvas_width:writable, palette:writable, pencil_size:writable, pointer:writable, pointer_active:writable, pointer_buttons:writable, pointer_over_canvas:writable, pointer_previous:writable, pointer_start:writable, pointer_type:writable, pointers:writable, reverse:writable, shift:writable, stroke_color:writable, stroke_size:writable, update_helper_layer_on_pointermove_active:writable */
-/* global current_history_node, default_airbrush_size, default_brush_shape, default_brush_size, default_canvas_height, default_canvas_width, default_eraser_size, default_magnification, default_pencil_size, default_stroke_size, file_name, get_direction, localize, magnification, main_canvas, main_ctx, return_to_tools, selected_colors, selected_tool, selected_tools, selection, systemHooks, textbox, transparency */
+/* global current_history_node, default_airbrush_size, default_brush_shape, default_brush_size, default_canvas_height, default_canvas_width, default_eraser_size, default_magnification, default_pencil_size, default_stroke_size, file_name, magnification, main_canvas, main_ctx, return_to_tools, selected_colors, selected_tool, selected_tools, selection, systemHooks, textbox, transparency */
 
 import { $ColorBox } from "./$ColorBox.js";
 import { $ToolBox } from "./$ToolBox.js";
 import { Handles } from "./Handles.js";
-// import { get_direction, localize } from "./app-localization.js";
 import { default_palette, get_winter_palette } from "./color-data.js";
 import { cancel, change_url_param, clear, deselect, get_tool_by_id, get_uris, load_image_from_uri, make_or_update_undoable, paste, paste_image_from_file, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, select_tool, select_tools, set_magnification, show_error_message, show_resource_load_error_message, undo, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size } from "./functions.js";
 import { $G, E, TAU, get_file_extension, get_help_folder_icon, to_canvas_coords } from "./helpers.js";
@@ -54,7 +53,7 @@ window.systemHookDefaults = {
 			return file;
 		} else {
 			throw new Error(`Unknown file handle (${file_handle})`);
-			// show_error_message(`${localize("Failed to open document.")}\n${localize("An unsupported operation was attempted.")}`, error);
+			// show_error_message(`${"Failed to open document."}\n${"An unsupported operation was attempted."}`, error);
 		}
 	},
 };
@@ -161,12 +160,6 @@ const $right = $(E("div")).addClass("component-area right").appendTo($H);
 window.$right = $right;
 
 
-// there's also probably a CSS solution alternative to this
-if (get_direction() === "rtl") {
-	$left.appendTo($H);
-	$right.prependTo($H);
-}
-
 // #endregion
 // (arguably still App UI stuff below, but it becomes a fuzzy line later on)
 
@@ -181,7 +174,7 @@ const $status_size = $(E("div")).addClass("status-coordinates status-field inset
 window.$status_size = $status_size;
 
 $status_text.default = () => {
-	$status_text.text(localize("For Help, click Help Topics on the Help Menu."));
+	$status_text.text("For Help, click Help Topics on the Help Menu.");
 };
 $status_text.default();
 
@@ -314,7 +307,7 @@ localStore.get({
 	my_canvas_height = Number(stored_values.height);
 
 	make_or_update_undoable({
-		match: (history_node) => history_node.name === localize("New"),
+		match: (history_node) => history_node.name === "New",
 		name: "Resize Canvas For New Document",
 		icon: get_help_folder_icon("p_stretch_both.png"),
 	}, () => {
