@@ -1,13 +1,10 @@
 // @ts-check
 /* global tool_transparent_mode:writable, palette:writable */
-/* global $canvas_area, $colorbox, $status_area, $toolbox, available_languages, get_iso_language_name, get_language, get_language_emoji, get_language_endonym, localize, magnification, main_canvas, menu_bar, MENU_DIVIDER, redos, selection, set_language, show_grid, show_thumbnail, systemHooks, undos */
-// import { available_languages, get_iso_language_name, get_language, get_language_emoji, get_language_endonym, localize, set_language } from "./app-localization.js";
+/* global $canvas_area, $colorbox, $status_area, $toolbox, localize, magnification, main_canvas, menu_bar, MENU_DIVIDER, redos, selection, show_grid, show_thumbnail, systemHooks, undos */
+// import { localize } from "./app-localization.js";
 import { show_edit_colors_window } from "./edit-colors.js";
 import { palette_formats } from "./file-format-data.js";
-import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_load_from_url, file_new, file_open, file_print, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
-import { $G, is_discord_embed } from "./helpers.js";
-import { showMessageBox } from "./msgbox.js";
-import { get_theme, set_theme } from "./theme.js";
+import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_new, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
 
 const looksLikeChrome = !!(window.chrome && (window.chrome.loadTimes || window.chrome.csi));
 // NOTE: Microsoft Edge includes window.chrome.app
@@ -21,60 +18,11 @@ const menus = {
 			action: () => { file_new(); },
 			description: localize("Creates a new document."),
 		},
-		{
-			label: localize("&Open"),
-			action: () => { file_open(); },
-			description: localize("Opens an existing document."),
-		},
-		{
-			label: localize("&Load From URL"),
-			// shortcut: "", // no shortcut: Ctrl+L is taken, and you can paste a URL with Ctrl+V, so it's not really needed
-			action: () => { file_load_from_url(); },
-			description: localize("Opens an image from the web."),
-		},
-		MENU_DIVIDER,
-		{
-			label: localize("Print Pre&view"),
-			action: () => {
-				file_print();
-			},
-			description: localize("Prints the active document and sets printing options."),
-			//description: localize("Displays full pages."),
-		},
-		{
-			label: localize("Page Se&tup"),
-			action: () => {
-				file_print();
-			},
-			description: localize("Prints the active document and sets printing options."),
-			//description: localize("Changes the page layout."),
-		},
-		{
-			label: localize("&Print"),
-			action: () => {
-				file_print();
-			},
-			description: localize("Prints the active document and sets printing options."),
-		},
-		MENU_DIVIDER,
-		{
-			label: localize("Recent File"),
-			enabled: false, // @TODO for desktop app
-			description: localize(""),
-		},
 		MENU_DIVIDER,
 		{
 			label: localize("E&xit"),
 			action: () => {
 				are_you_sure(() => {
-					if (is_discord_embed) {
-						// For the Discord Activity, there doesn't seem to be an API to exit the activity.
-						showMessageBox({
-							message: "Click the Leave Activity button in Discord to exit.",
-						});
-						return;
-					}
-
 					// Note: For a Chrome PWA, window.close() is allowed only if there is only one history entry.
 					// I could make it try to close the window and then navigate to the official web desktop if it fails,
 					// but that would be inconsistent, as it wouldn't close the window after using File > New or File > Open.
@@ -420,126 +368,6 @@ const menus = {
 		// 	},
 		// 	description: localize("Configures JS Paint."),
 		// }
-		{
-			emoji_icon: "💄",
-			label: localize("&Themes"),
-			submenu: [
-				{
-					emoji_icon: "⬜",
-					label: localize("&Classic Light"),
-					action: () => {
-						set_theme("classic.css");
-					},
-					enabled: () => get_theme() != "classic.css",
-					description: localize("Makes JS Paint look like MS Paint from Windows 98."),
-				},
-				{
-					emoji_icon: "⬛",
-					label: localize("Classic &Dark"),
-					action: () => {
-						set_theme("dark.css");
-					},
-					enabled: () => get_theme() != "dark.css",
-					description: localize("Makes JS Paint look like MS Paint from Windows 98, with a dark color scheme."),
-				},
-				{
-					emoji_icon: "⚪",
-					label: localize("&Modern Light"),
-					action: () => {
-						set_theme("modern.css");
-					},
-					enabled: () => get_theme() != "modern.css",
-					description: localize("Gives JS Paint a more modern look, with light colors."),
-				},
-				{
-					emoji_icon: "⚫",
-					label: localize("Mod&ern Dark"),
-					action: () => {
-						set_theme("modern-dark.css");
-					},
-					enabled: () => get_theme() != "modern-dark.css",
-					description: localize("Gives JS Paint a more modern look, with dark colors."),
-				},
-				{
-					emoji_icon: "❄️",
-					label: localize("&Winter"),
-					action: () => {
-						set_theme("winter.css");
-					},
-					enabled: () => get_theme() != "winter.css",
-					description: localize("Makes JS Paint look festive for the holidays."),
-				},
-				{
-					emoji_icon: "🤘",
-					label: localize("&Occult"),
-					action: () => {
-						set_theme("occult.css");
-					},
-					enabled: () => get_theme() != "occult.css",
-					description: localize("Starts the ritual."),
-				},
-				{
-					emoji_icon: "🫧",
-					label: localize("&Bubblegum"),
-					action: () => {
-						set_theme("bubblegum.css");
-					},
-					enabled: () => get_theme() != "bubblegum.css",
-					description: localize("Makes JS Paint look like pearlescent bubblegum."),
-				},
-				// {
-				// 	emoji_icon: "🪐",
-				// 	label: localize("&Retro Futurist"),
-				// 	speech_recognition: [
-				// 		"retrofuturist theme", "switch to retrofuturist theme", "use retrofuturist theme", "set theme to retrofuturist", "set theme retrofuturist", "switch to retrofuturist theme", "switch theme to retrofuturist", "switch theme retrofuturist",
-				// 		"retro futurist theme", "switch to retro futurist theme", "use retro futurist theme", "set theme to retro futurist", "set theme retro futurist", "switch to retro futurist theme", "switch theme to retro futurist", "switch theme retro futurist",
-				// 		"retrofuturistic theme", "switch to retrofuturistic theme", "use retrofuturistic theme", "set theme to retrofuturistic", "set theme retrofuturistic", "switch to retrofuturistic theme", "switch theme to retrofuturistic", "switch theme retrofuturistic",
-				// 		"retro futuristic theme", "switch to retro futuristic theme", "use retro futuristic theme", "set theme to retro futuristic", "set theme retro futuristic", "switch to retro futuristic theme", "switch theme to retro futuristic", "switch theme retro futuristic",
-				// 		// spell-checker: disable
-				// 		"scifi theme", "switch to scifi theme", "use scifi theme", "set theme to scifi", "set theme scifi", "switch to scifi theme", "switch theme to scifi", "switch theme scifi",
-				// 		// spell-checker: enable
-				// 		"sci-fi theme", "switch to sci-fi theme", "use sci-fi theme", "set theme to sci-fi", "set theme sci-fi", "switch to sci-fi theme", "switch theme to sci-fi", "switch theme sci-fi",
-				// 	],
-				// 	action: () => {
-				// 		set_theme("retrofuturist.css");
-				// 	},
-				// 	enabled: false,
-				// 	// enabled: () => get_theme() != "retrofuturist.css",
-				// 	description: localize("Makes JS Paint look like the future as imagined in the past."),
-				// },
-				// {
-				// 	emoji_icon: "🧺",
-				// 	label: localize("&Picnic"),
-				// 	speech_recognition: [
-				// 		"picnic theme", "switch to picnic theme", "use picnic theme", "set theme to picnic", "set theme picnic", "switch to picnic theme", "switch theme to picnic", "switch theme picnic",
-				// 		"pic-nic theme", "switch to pic-nic theme", "use pic-nic theme", "set theme to pic-nic", "set theme pic-nic", "switch to pic-nic theme", "switch theme to pic-nic", "switch theme pic-nic",
-				// 		"sandbox theme", "switch to sandbox theme", "use sandbox theme", "set theme to sandbox", "set theme sandbox", "switch to sandbox theme", "switch theme to sandbox", "switch theme sandbox",
-				// 		"wooden theme", "switch to wooden theme", "use wooden theme", "set theme to wooden", "set theme wooden", "switch to wooden theme", "switch theme to wooden", "switch theme wooden",
-				// 	],
-				// 	action: () => {
-				// 		set_theme("picnic.css");
-				// 	},
-				// 	enabled: false,
-				// 	// enabled: () => get_theme() != "picnic.css",
-				// 	description: localize("Makes JS Paint look like a picnic in the park."),
-				// },
-			],
-		},
-		{
-			emoji_icon: "🌍",
-			label: localize("&Language"),
-			submenu: available_languages.map((available_language) => (
-				{
-					emoji_icon: get_language_emoji(available_language),
-					label: get_language_endonym(available_language),
-					action: () => {
-						set_language(available_language);
-					},
-					enabled: () => get_language() != available_language,
-					description: localize("Changes the language to %1.", get_iso_language_name(available_language)),
-				}
-			)),
-		},
 		{
 			emoji_icon: "↕️",
 			label: localize("&Vertical Color Box"),

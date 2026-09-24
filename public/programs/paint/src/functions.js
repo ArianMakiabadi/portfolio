@@ -10,7 +10,7 @@ import { OnCanvasTextBox } from "./OnCanvasTextBox.js";
 // import { localize } from "./app-localization.js";
 import { default_palette } from "./color-data.js";
 import { image_formats } from "./file-format-data.js";
-import { $G, E, TAU, debounce, from_canvas_coords, get_help_folder_icon, get_icon_for_tool, get_rgba_from_color, is_discord_embed, is_pride_month, make_canvas, render_access_key, to_canvas_coords } from "./helpers.js";
+import { $G, E, TAU, debounce, from_canvas_coords, get_help_folder_icon, get_icon_for_tool, get_rgba_from_color, is_pride_month, make_canvas, render_access_key, to_canvas_coords } from "./helpers.js";
 import { apply_image_transformation, draw_grid, draw_selection_box, flip_horizontal, flip_vertical, invert_monochrome, invert_rgb, rotate, stretch_and_skew, threshold_black_and_white } from "./image-manipulation.js";
 import { showMessageBox } from "./msgbox.js";
 import { localStore } from "./storage.js";
@@ -20,12 +20,9 @@ import { TOOL_CURVE, TOOL_FREE_FORM_SELECT, TOOL_POLYGON, TOOL_SELECT, TOOL_TEXT
 const param_types = {
 	// settings
 	"vertical-color-box-mode": "bool",
-	"load": "string",
 };
 
-const exclusive_params = [
-	"load",
-];
+const exclusive_params = [];
 
 function get_all_url_params() {
 	/** @type {Record<string, string | boolean>} */
@@ -1075,58 +1072,6 @@ function file_new() {
 
 		$G.triggerHandler("session-update"); // autosave
 	});
-}
-
-async function file_open() {
-	const { file, fileHandle } = await systemHooks.showOpenFileDialog({ formats: image_formats });
-	open_from_file(file, fileHandle);
-}
-
-/** @type {OSGUI$Window} */
-let $file_load_from_url_window;
-function file_load_from_url() {
-	if ($file_load_from_url_window) {
-		$file_load_from_url_window.close();
-	}
-	const $w = $DialogWindow().addClass("horizontal-buttons");
-	$file_load_from_url_window = $w;
-	$w.title("Load from URL");
-	// @TODO: URL validation (input has to be in a form (and we don't want the form to submit))
-	$w.$main.html(`
-		<div style="padding: 10px;">
-			<label style="display: block; margin-bottom: 5px;" for="url-input">Paste or type the web address of an image:</label>
-			<input type="url" required value="" id="url-input" class="inset-deep" style="width: 300px;"/></label>
-		</div>
-	`);
-	const $input = $w.$main.find("#url-input");
-	// $w.$Button("Load", () => {
-	$w.$Button(localize("Open"), () => {
-		const uris = get_uris(String($input.val()));
-		if (uris.length > 0) {
-			// @TODO: retry loading if same URL entered
-			// actually, make it change the hash only after loading successfully
-			// (but still load from the hash when necessary)
-			// make sure it doesn't overwrite the old session before switching
-			$w.close();
-			change_url_param("load", uris[0]);
-		} else {
-			show_error_message("Invalid URL. It must include a protocol (https:// or http://)");
-		}
-	}, { type: "submit" });
-	$w.$Button(localize("Cancel"), () => {
-		$w.close();
-	});
-	$w.center();
-	$input[0].focus();
-}
-
-function file_print() {
-	if (is_discord_embed) {
-		// closest localized string: "Could not start print job."
-		show_error_message(localize("Printing is not supported in the Discord Activity."));
-		return;
-	}
-	print();
 }
 
 /**
@@ -3469,7 +3414,7 @@ function sanity_check_blob(blob, okay_callback, magic_number_bytes, magic_wanted
 
 export {
 	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, choose_file_to_paste, cleanup_bitmap_view, clear, delete_selection, deselect, detect_monochrome,
-	edit_copy, edit_cut, edit_paste, exit_fullscreen_if_ios, file_load_from_url, file_new, file_open, file_print,
+	edit_copy, edit_cut, edit_paste, exit_fullscreen_if_ios, file_new,
 	getSelectionText, get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
 	meld_textbox_into_canvas, open_from_file, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, redo, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_all, select_tool, select_tools, set_all_url_params, set_magnification, show_convert_to_black_and_white, show_custom_zoom_window, show_document_history, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette, toggle_grid,
 	toggle_thumbnail, try_exec_command, undo, undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
