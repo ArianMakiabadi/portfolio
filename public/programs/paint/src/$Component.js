@@ -1,8 +1,7 @@
 // @ts-check
-/* global $bottom, $canvas, $left, $right, $top, get_direction */
+/* global $bottom, $canvas, $left, $right, $top */
 
 import { $ToolWindow } from "./$ToolWindow.js";
-// import { get_direction } from "./app-localization.js";
 import { $G, E } from "./helpers.js";
 
 // Segments here represent UI components as far as a layout algorithm is concerned,
@@ -104,7 +103,7 @@ function $Component(title, className, orientation, $el) {
 	// Nudge the Colors component over a tiny bit
 	if (className === "colors-component" && orientation === "wide") {
 		$c.css("position", "relative");
-		$c.css(`margin-${get_direction() === "rtl" ? "right" : "left"}`, "3px");
+		$c.css("margin-left", "3px");
 	}
 
 	let iid;
@@ -131,13 +130,7 @@ function $Component(title, className, orientation, $el) {
 	let $dock_to;
 	let $ghost;
 
-	if (orientation === "tall") {
-		pos_axis = "top";
-	} else if (get_direction() === "rtl") {
-		pos_axis = "right";
-	} else {
-		pos_axis = "left";
-	}
+	pos_axis = orientation === "tall" ? "top" : "left";
 
 	/**
 	 * @param {JQuery<HTMLElement>} $dock_to
@@ -340,7 +333,7 @@ function $Component(title, className, orientation, $el) {
 				$dock_to = $right;
 			}
 		} else {
-			pos_axis = get_direction() === "rtl" ? "right" : "left";
+			pos_axis = "left";
 			if (dock_ghost_top - q < $top[0].getBoundingClientRect().bottom) {
 				$dock_to = $top;
 			}

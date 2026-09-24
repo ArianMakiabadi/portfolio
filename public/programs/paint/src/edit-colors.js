@@ -1,9 +1,8 @@
 // @ts-check
 /* global palette:writable */
-/* global $colorbox, localize, main_ctx, monochrome, selected_colors, selection */
+/* global $colorbox, main_ctx, monochrome, selected_colors, selection */
 import { $Swatch, update_$swatch } from "./$ColorBox.js";
 import { $DialogWindow } from "./$ToolWindow.js";
-// import { localize } from "./app-localization.js";
 import { basic_colors, custom_colors } from "./color-data.js";
 import { detect_monochrome, make_monochrome_palette, show_error_message, undoable } from "./functions.js";
 import { $G, get_help_folder_icon, get_rgba_from_color, make_canvas, render_access_key, rgb_to_hsl } from "./helpers.js";
@@ -165,7 +164,7 @@ function choose_color(initial_color, callback) {
 	if ($edit_colors_window) {
 		$edit_colors_window.close();
 	}
-	const $w = $DialogWindow(localize("Edit Colors"));
+	const $w = $DialogWindow("Edit Colors");
 	$w.addClass("edit-colors-window");
 	$edit_colors_window = $w;
 
@@ -629,11 +628,11 @@ function choose_color(initial_color, callback) {
 			$w.removeClass("defining-custom-colors"); // for mobile layout
 		});
 
-	$w.$Button(localize("OK"), () => {
+	$w.$Button("OK", () => {
 		callback(get_current_color());
 		$w.close();
 	}, { type: "submit" });
-	$w.$Button(localize("Cancel"), () => {
+	$w.$Button("Cancel", () => {
 		$w.close();
 	});
 

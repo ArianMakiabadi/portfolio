@@ -1,9 +1,8 @@
 // @ts-check
 /* global selection:writable, stroke_size:writable, textbox:writable */
-/* global $canvas, $canvas_area, $status_size, airbrush_size, brush_shape, brush_size, button, canvas_handles, ctrl, eraser_size, fill_color, pick_color_slot, get_language, localize, magnification, main_canvas, main_ctx, pencil_size, pointer, pointer_active, pointer_over_canvas, pointer_previous, pointer_start, return_to_magnification, selected_colors, shift, stroke_color, transparency */
+/* global $canvas, $canvas_area, $status_size, airbrush_size, brush_shape, brush_size, button, canvas_handles, ctrl, eraser_size, fill_color, pick_color_slot, magnification, main_canvas, main_ctx, pencil_size, pointer, pointer_active, pointer_over_canvas, pointer_previous, pointer_start, return_to_magnification, selected_colors, shift, stroke_color, transparency */
 import { OnCanvasSelection } from "./OnCanvasSelection.js";
 import { OnCanvasTextBox } from "./OnCanvasTextBox.js";
-// import { get_language, localize } from "./app-localization.js";
 import { deselect, get_tool_by_id, meld_selection_into_canvas, meld_textbox_into_canvas, set_magnification, show_error_message, undoable, update_helper_layer } from "./functions.js";
 import { $G, E, get_icon_for_tool, get_icon_for_tools, get_rgba_from_color, make_canvas, make_css_cursor } from "./helpers.js";
 import { bresenham_dense_line, bresenham_line, copy_contents_within_polygon, draw_bezier_curve, draw_ellipse, draw_fill, draw_line, draw_line_strip, draw_noncontiguous_fill, draw_polygon, draw_quadratic_curve, draw_rounded_rectangle, draw_selection_box, get_circumference_points_for_brush, replace_colors_with_swatch, stamp_brush_canvas, update_brush_for_drawing_lines } from "./image-manipulation.js";
@@ -137,9 +136,9 @@ const TOOL_ROUNDED_RECTANGLE = "TOOL_ROUNDED_RECTANGLE";
 /** @type {Tool[]} */
 const tools = [{
 	id: TOOL_FREE_FORM_SELECT,
-	name: localize("Free-Form Select"),
+	name: "Free-Form Select",
 	help_icon: "p_free.gif",
-	description: localize("Selects a free-form part of the picture to move, copy, or edit."),
+	description: "Selects a free-form part of the picture to move, copy, or edit.",
 	cursor: ["precise", [16, 16], "crosshair"],
 
 	// A canvas for rendering a preview of the shape
@@ -236,7 +235,7 @@ const tools = [{
 		}
 
 		undoable({
-			name: localize("Free-Form Select"),
+			name: "Free-Form Select",
 			icon: get_icon_for_tool(get_tool_by_id(TOOL_FREE_FORM_SELECT)),
 			soft: true,
 		}, () => {
@@ -267,9 +266,9 @@ const tools = [{
 	$options: $choose_transparent_mode,
 }, {
 	id: TOOL_SELECT,
-	name: localize("Select"),
+	name: "Select",
 	help_icon: "p_sel.gif",
-	description: localize("Selects a rectangular part of the picture to move, copy, or edit."),
+	description: "Selects a rectangular part of the picture to move, copy, or edit.",
 	cursor: ["precise", [16, 16], "crosshair"],
 	selectBox(rect_x, rect_y, rect_width, rect_height) {
 		if (rect_width > 1 && rect_height > 1) {
@@ -326,7 +325,7 @@ const tools = [{
 				contents_canvas.ctx.drawImage(rect_canvas, 0, 0);
 
 				undoable({
-					name: `${localize("Free-Form Select")}⊕${localize("Select")}`,
+					name: `${"Free-Form Select"}⊕${"Select"}`,
 					icon: get_icon_for_tools([
 						get_tool_by_id(TOOL_FREE_FORM_SELECT),
 						get_tool_by_id(TOOL_SELECT),
@@ -344,7 +343,7 @@ const tools = [{
 				});
 			} else {
 				undoable({
-					name: localize("Select"),
+					name: "Select",
 					icon: get_icon_for_tool(get_tool_by_id(TOOL_SELECT)),
 					soft: true,
 				}, () => {
@@ -356,9 +355,9 @@ const tools = [{
 	$options: $choose_transparent_mode,
 }, {
 	id: TOOL_ERASER,
-	name: localize("Eraser/Color Eraser"),
+	name: "Eraser/Color Eraser",
 	help_icon: "p_erase.gif",
-	description: localize("Erases a portion of the picture, using the selected eraser shape."),
+	description: "Erases a portion of the picture, using the selected eraser shape.",
 	cursor: ["precise", [16, 16], "crosshair"],
 
 	// binary mask of the drawn area, either opaque white or transparent
@@ -452,7 +451,7 @@ const tools = [{
 			return; // not sure why this would happen per se
 		}
 		undoable({
-			name: get_language().match(/^en\b/) ? (this.color_eraser_mode ? "Color Eraser" : "Eraser") : localize("Eraser/Color Eraser"),
+			name: this.color_eraser_mode ? "Color Eraser" : "Eraser",
 			icon: get_icon_for_tool(this),
 		}, () => {
 			this.render_from_mask(main_ctx);
@@ -509,7 +508,7 @@ const tools = [{
 	$options: $choose_eraser_size,
 }, {
 	id: TOOL_FILL,
-	name: localize("Fill With Color"),
+	name: "Fill With Color",
 	help_icon: "p_paint.gif",
 	description: "Fills an area with the selected drawing color.",
 	cursor: ["fill-bucket", [8, 22], "crosshair"],
@@ -524,7 +523,7 @@ const tools = [{
 			});
 		} else {
 			undoable({
-				name: localize("Fill With Color"),
+				name: "Fill With Color",
 				icon: get_icon_for_tool(this),
 			}, () => {
 				// Perform a normal fill operation
@@ -534,9 +533,9 @@ const tools = [{
 	},
 }, {
 	id: TOOL_PICK_COLOR,
-	name: localize("Pick Color"),
+	name: "Pick Color",
 	help_icon: "p_eye.gif",
-	description: localize("Picks up a color from the picture for drawing."),
+	description: "Picks up a color from the picture for drawing.",
 	cursor: ["eye-dropper", [9, 22], "crosshair"],
 	deselect: true,
 
@@ -570,9 +569,9 @@ const tools = [{
 	$options: $(E("div")),
 }, {
 	id: TOOL_MAGNIFIER,
-	name: localize("Magnifier"),
+	name: "Magnifier",
 	help_icon: "p_zoom.gif",
-	description: localize("Changes the magnification."),
+	description: "Changes the magnification.",
 	cursor: ["magnifier", [16, 16], "zoom-in"], // overridden below
 	deselect: true,
 
@@ -694,9 +693,9 @@ const tools = [{
 	$options: $choose_magnification,
 }, {
 	id: TOOL_PENCIL,
-	name: localize("Pencil"),
+	name: "Pencil",
 	help_icon: "p_pencil.gif",
-	description: localize("Draws a free-form line one pixel wide."),
+	description: "Draws a free-form line one pixel wide.",
 	cursor: ["pencil", [13, 23], "crosshair"],
 	stroke_only: true,
 	get_brush() {
@@ -704,9 +703,9 @@ const tools = [{
 	},
 }, {
 	id: TOOL_BRUSH,
-	name: localize("Brush"),
+	name: "Brush",
 	help_icon: "p_brush.gif",
-	description: localize("Draws using a brush with the selected shape and size."),
+	description: "Draws using a brush with the selected shape and size.",
 	cursor: ["precise-dotted", [16, 16], "crosshair"],
 	dynamic_preview_cursor: true,
 	get_brush() {
@@ -715,9 +714,9 @@ const tools = [{
 	$options: $choose_brush,
 }, {
 	id: TOOL_AIRBRUSH,
-	name: localize("Airbrush"),
+	name: "Airbrush",
 	help_icon: "p_airb.gif",
-	description: localize("Draws using an airbrush of the selected size."),
+	description: "Draws using an airbrush of the selected size.",
 	cursor: ["airbrush", [7, 22], "crosshair"],
 	paint_on_time_interval: 5,
 	paint_mask(ctx, x, y) {
@@ -735,9 +734,9 @@ const tools = [{
 	$options: $choose_airbrush_size,
 }, {
 	id: TOOL_TEXT,
-	name: localize("Text"),
+	name: "Text",
 	help_icon: "p_txt.gif",
-	description: localize("Inserts text into the picture."),
+	description: "Inserts text into the picture.",
 	cursor: ["precise", [16, 16], "crosshair"],
 	preload() {
 		setTimeout(FontDetective.preload, 10);
@@ -750,9 +749,9 @@ const tools = [{
 	$options: $choose_transparent_mode,
 }, {
 	id: TOOL_LINE,
-	name: localize("Line"),
+	name: "Line",
 	help_icon: "p_line.gif",
-	description: localize("Draws a straight line with the selected line width."),
+	description: "Draws a straight line with the selected line width.",
 	cursor: ["precise", [16, 16], "crosshair"],
 	stroke_only: true,
 	shape(ctx, x, y, w, h) {
@@ -762,9 +761,9 @@ const tools = [{
 	$options: $choose_stroke_size,
 }, {
 	id: TOOL_CURVE,
-	name: localize("Curve"),
+	name: "Curve",
 	help_icon: "p_curve.gif",
-	description: localize("Draws a curved line with the selected line width."),
+	description: "Draws a curved line with the selected line width.",
 	cursor: ["precise", [16, 16], "crosshair"],
 	stroke_only: true,
 	points: [],
@@ -772,7 +771,7 @@ const tools = [{
 	pointerup(ctx, _x, _y) {
 		if (this.points.length >= 4) {
 			undoable({
-				name: localize("Curve"),
+				name: "Curve",
 				icon: get_icon_for_tool(this),
 			}, () => {
 				ctx.drawImage(this.preview_canvas, 0, 0);
@@ -867,9 +866,9 @@ const tools = [{
 	$options: $choose_stroke_size,
 }, {
 	id: TOOL_RECTANGLE,
-	name: localize("Rectangle"),
+	name: "Rectangle",
 	help_icon: "p_rect.gif",
-	description: localize("Draws a rectangle with the selected fill style."),
+	description: "Draws a rectangle with the selected fill style.",
 	cursor: ["precise", [16, 16], "crosshair"],
 	shape(ctx, x, y, w, h) {
 		if (w < 0) { x += w; w = -w; }
@@ -898,9 +897,9 @@ const tools = [{
 	$options: $ChooseShapeStyle(),
 }, {
 	id: TOOL_POLYGON,
-	name: localize("Polygon"),
+	name: "Polygon",
 	help_icon: "p_poly.gif",
-	description: localize("Draws a polygon with the selected fill style."),
+	description: "Draws a polygon with the selected fill style.",
 	cursor: ["precise", [16, 16], "crosshair"],
 
 	// Record the last click for double-clicking
@@ -1006,7 +1005,7 @@ const tools = [{
 	complete(ctx) {
 		if (this.points.length >= 3) {
 			undoable({
-				name: localize("Polygon"),
+				name: "Polygon",
 				icon: get_icon_for_tool(this),
 			}, () => {
 				ctx.fillStyle = fill_color;
@@ -1067,9 +1066,9 @@ const tools = [{
 	$options: $ChooseShapeStyle(),
 }, {
 	id: TOOL_ELLIPSE,
-	name: localize("Ellipse"),
+	name: "Ellipse",
 	help_icon: "p_oval.gif",
-	description: localize("Draws an ellipse with the selected fill style."),
+	description: "Draws an ellipse with the selected fill style.",
 	cursor: ["precise", [16, 16], "crosshair"],
 	shape(ctx, x, y, w, h) {
 		if (w < 0) { x += w; w = -w; }
@@ -1093,9 +1092,9 @@ const tools = [{
 	$options: $ChooseShapeStyle(),
 }, {
 	id: TOOL_ROUNDED_RECTANGLE,
-	name: localize("Rounded Rectangle"),
+	name: "Rounded Rectangle",
 	help_icon: "p_rrect.gif",
-	description: localize("Draws a rounded rectangle with the selected fill style."),
+	description: "Draws a rounded rectangle with the selected fill style.",
 	cursor: ["precise", [16, 16], "crosshair"],
 	shape(ctx, x, y, w, h) {
 		if (w < 0) { x += w; w = -w; }

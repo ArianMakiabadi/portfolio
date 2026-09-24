@@ -1,13 +1,12 @@
 // @ts-check
 // eslint-disable-next-line no-unused-vars
 /* global $thumbnail_window:writable, canvas_bounding_client_rect:writable, current_history_node:writable, file_format:writable, file_name:writable, helper_layer:writable, history_node_to_cancel_to:writable, magnification:writable, monochrome:writable, palette:writable, pointer:writable, return_to_magnification:writable, return_to_tools:writable, root_history_node:writable, saved:writable, selected_colors:writable, selected_tool:writable, selected_tools:writable, selection:writable, show_grid:writable, show_thumbnail:writable, system_file_handle:writable, textbox:writable, thumbnail_canvas:writable, tool_transparent_mode:writable, transparency:writable, undos:writable */
-/* global $canvas, $canvas_area, $colorbox, $status_text, $toolbox, $Window, AccessKeys, applyCSSProperties, decodeBMP, default_canvas_height, default_canvas_width, default_magnification, default_tool, enable_palette_loading_from_indexed_images, encodeBMP, localize, main_canvas, main_ctx, monochrome_palette, my_canvas_height, my_canvas_width, parseThemeFileString, pointer_active, pointers, polychrome_palette, redos, systemHooks, text_tool_font, update_fill_and_stroke_colors_and_lineWidth, UPNG, UTIF */
+/* global $canvas, $canvas_area, $colorbox, $status_text, $toolbox, $Window, AccessKeys, applyCSSProperties, decodeBMP, default_canvas_height, default_canvas_width, default_magnification, default_tool, enable_palette_loading_from_indexed_images, encodeBMP, main_canvas, main_ctx, monochrome_palette, my_canvas_height, my_canvas_width, parseThemeFileString, pointer_active, pointers, polychrome_palette, redos, systemHooks, text_tool_font, update_fill_and_stroke_colors_and_lineWidth, UPNG, UTIF */
 
 import { $DialogWindow } from "./$ToolWindow.js";
 import { OnCanvasHelperLayer } from "./OnCanvasHelperLayer.js";
 import { OnCanvasSelection } from "./OnCanvasSelection.js";
 import { OnCanvasTextBox } from "./OnCanvasTextBox.js";
-// import { localize } from "./app-localization.js";
 import { default_palette } from "./color-data.js";
 import { image_formats } from "./file-format-data.js";
 import { $G, E, TAU, debounce, from_canvas_coords, get_help_folder_icon, get_icon_for_tool, get_rgba_from_color, is_pride_month, make_canvas, render_access_key, to_canvas_coords } from "./helpers.js";
@@ -418,11 +417,11 @@ function show_custom_zoom_window() {
 	if ($custom_zoom_window) {
 		$custom_zoom_window.close();
 	}
-	const $w = $DialogWindow(localize("Custom Zoom"));
+	const $w = $DialogWindow("Custom Zoom");
 	$custom_zoom_window = $w;
 	$w.addClass("custom-zoom-window");
 
-	$w.$main.append(`<div class='current-zoom'>${localize("Current zoom:")} <bdi>${magnification * 100}%</bdi></div>`);
+	$w.$main.append(`<div class='current-zoom'>${"Current zoom:"} <bdi>${magnification * 100}%</bdi></div>`);
 	// update when zoom changes
 	$G.on("magnification-changed", () => {
 		$w.$main.find(".current-zoom bdi").text(`${magnification * 100}%`);
@@ -430,7 +429,7 @@ function show_custom_zoom_window() {
 
 	const $fieldset = $(E("fieldset")).appendTo($w.$main);
 	$fieldset.append(`
-		<legend>${localize("Zoom to")}</legend>
+		<legend>${"Zoom to"}</legend>
 		<div class="fieldset-body">
 			<div class="radio-field"><input type="radio" name="custom-zoom-radio" id="zoom-option-1" aria-keyshortcuts="Alt+1 1" value="1"/><label for="zoom-option-1">${render_access_key("&100%")}</label></div>
 			<div class="radio-field"><input type="radio" name="custom-zoom-radio" id="zoom-option-2" aria-keyshortcuts="Alt+2 2" value="2"/><label for="zoom-option-2">${render_access_key("&200%")}</label></div>
@@ -497,7 +496,7 @@ function show_custom_zoom_window() {
 
 	$fieldset.find("label").css({ display: "block" });
 
-	$w.$Button(localize("OK"), () => {
+	$w.$Button("OK", () => {
 		let option_val = String($fieldset.find("input[name='custom-zoom-radio']:checked").val());
 		let mag;
 		if (option_val === "really-custom") {
@@ -519,7 +518,7 @@ function show_custom_zoom_window() {
 
 		$w.close();
 	}, { type: "submit" });
-	$w.$Button(localize("Cancel"), () => {
+	$w.$Button("Cancel", () => {
 		$w.close();
 	});
 
@@ -528,85 +527,6 @@ function show_custom_zoom_window() {
 	handle_keyshortcuts($w);
 }
 
-
-function toggle_grid() {
-	show_grid = !show_grid;
-	// $G.trigger("option-changed");
-	update_helper_layer();
-}
-
-function toggle_thumbnail() {
-	show_thumbnail = !show_thumbnail;
-	if (!show_thumbnail) {
-		$thumbnail_window.hide();
-	} else {
-		if (!thumbnail_canvas) {
-			thumbnail_canvas = make_canvas(108, 92);
-			thumbnail_canvas.style.width = "100%";
-			thumbnail_canvas.style.height = "100%";
-		}
-		if (!$thumbnail_window) {
-			$thumbnail_window = $Window({
-				title: localize("Thumbnail"),
-				toolWindow: true,
-				resizable: true,
-				innerWidth: thumbnail_canvas.width + 4, // @TODO: should the border of $content be included in the definition of innerWidth/Height?
-				innerHeight: thumbnail_canvas.height + 4,
-				minInnerWidth: 52 + 4,
-				minInnerHeight: 36 + 4,
-				minOuterWidth: 0, // @FIXME: this shouldn't be needed
-				minOuterHeight: 0, // @FIXME: this shouldn't be needed
-			});
-			$thumbnail_window.addClass("thumbnail-window");
-			$thumbnail_window.$content.append(thumbnail_canvas);
-			$thumbnail_window.$content.addClass("inset-deep");
-			$thumbnail_window.$content.css({ marginTop: "1px" }); // @TODO: should this (or equivalent on titlebar) be for all windows?
-			$thumbnail_window.maximize = () => { }; // @TODO: disable maximize with an option
-			// NOTE: I'm not sure some of these fallbacks are relevant anymore,
-			// or if they even work since changing `box` from an array to a string.
-			// Presumably the spec changed, but I don't feel like trying to dig up the history.
-			new ResizeObserver((entries) => {
-				const entry = entries[0];
-				let width, height;
-				if ("devicePixelContentBoxSize" in entry) {
-					// console.log("devicePixelContentBoxSize", entry.devicePixelContentBoxSize);
-					// Firefox seems to support this, although I can't find any documentation that says it should
-					// I can't find an implementation bug or anything.
-					// So I had to disable this case to test the fallback case (in Firefox 94.0)
-					width = entry.devicePixelContentBoxSize[0].inlineSize;
-					height = entry.devicePixelContentBoxSize[0].blockSize;
-				} else if ("contentBoxSize" in entry) {
-					// console.log("contentBoxSize", entry.contentBoxSize);
-					// round() seems to line up with what Firefox does for device pixel alignment, which is great.
-					// In Chrome it's blurry at some zoom levels with round(), ceil(), or floor(), but it (documentedly) supports devicePixelContentBoxSize.
-					// @ts-ignore
-					width = Math.round(entry.contentBoxSize[0].inlineSize * devicePixelRatio);
-					// @ts-ignore
-					height = Math.round(entry.contentBoxSize[0].blockSize * devicePixelRatio);
-				} else {
-					// Safari on iPad doesn't support either of the above as of iOS 15.0.2
-					// @ts-ignore
-					width = Math.round(entry.contentRect.width * devicePixelRatio);
-					// @ts-ignore
-					height = Math.round(entry.contentRect.height * devicePixelRatio);
-				}
-				if (width && height) { // If it's hidden, and then shown, it gets a width and height of 0 briefly on iOS. (This would give IndexSizeError in drawImage.)
-					thumbnail_canvas.width = width;
-					thumbnail_canvas.height = height;
-				}
-				update_helper_layer_immediately(); // updates thumbnail (but also unnecessarily the helper layer)
-			}).observe(thumbnail_canvas, { box: "device-pixel-content-box" });
-		}
-		$thumbnail_window.show();
-		$thumbnail_window.on("close", (e) => {
-			e.preventDefault();
-			$thumbnail_window.hide();
-			show_thumbnail = false;
-		});
-	}
-	// Currently the thumbnail updates with the helper layer. But it's not part of the helper layer, so this is a bit of a misnomer for now.
-	update_helper_layer();
-}
 
 function reset_selected_colors() {
 	selected_colors = {
@@ -619,7 +539,7 @@ function reset_selected_colors() {
 
 function reset_file() {
 	system_file_handle = null;
-	file_name = localize("untitled");
+	file_name = "untitled";
 	file_format = "image/png";
 	saved = true;
 	update_title();
@@ -629,7 +549,7 @@ function reset_canvas_and_history() {
 	undos.length = 0;
 	redos.length = 0;
 	current_history_node = root_history_node = make_history_node({
-		name: localize("New"),
+		name: "New",
 		icon: get_help_folder_icon("p_blank.png"),
 	});
 	history_node_to_cancel_to = null;
@@ -667,7 +587,7 @@ function reset_canvas_and_history() {
  * @param {string | CanvasPattern=} options.foreground_color - selected foreground color (left click)
  * @param {string | CanvasPattern=} options.background_color - selected background color (right click)
  * @param {string | CanvasPattern=} options.ternary_color - selected ternary color (ctrl+click)
- * @param {string=} options.name - the name of the operation, shown in the history window, e.g. localize("Resize Canvas")
+ * @param {string=} options.name - the name of the operation, shown in the history window, e.g. "Resize Canvas"
  * @param {HTMLImageElement |HTMLCanvasElement | null=} options.icon - a visual representation of the operation type, shown in the history window, e.g. get_help_folder_icon("p_blank.png")
  * @returns {HistoryNode}
  */
@@ -690,7 +610,7 @@ function make_history_node({
 	foreground_color, // selected foreground color (left click)
 	background_color, // selected background color (right click)
 	ternary_color, // selected ternary color (ctrl+click)
-	name, // the name of the operation, shown in the history window, e.g. localize("Resize Canvas")
+	name, // the name of the operation, shown in the history window, e.g. "Resize Canvas"
 	icon = null, // an Image representation of the operation type, shown in the history window, e.g. get_help_folder_icon("p_blank.png")
 }) {
 	return {
@@ -718,7 +638,7 @@ function make_history_node({
 }
 
 function update_title() {
-	document.title = `${file_name} - ${is_pride_month ? "June Solidarity " : ""}${localize("Paint")}`;
+	document.title = `${file_name} - ${is_pride_month ? "June Solidarity " : ""}${"Paint"}`;
 
 	if (is_pride_month) {
 		$("link[rel~='icon']").attr("href", "./images/icons/gay-es-paint-16x16-light-outline.png");
@@ -948,7 +868,7 @@ function open_from_image_info(info, callback, canceled, into_existing_session, f
 		transparency = has_any_transparency(main_ctx);
 		$canvas_area.trigger("resize");
 
-		current_history_node.name = localize("Open");
+		current_history_node.name = "Open";
 		current_history_node.image_data = main_ctx.getImageData(0, 0, main_canvas.width, main_canvas.height);
 		current_history_node.icon = get_help_folder_icon("p_open.png");
 
@@ -976,45 +896,6 @@ function open_from_image_info(info, callback, canceled, into_existing_session, f
 
 		callback?.();
 	}, canceled, from_session_load);
-}
-
-// Note: This function is part of the API.
-/**
- * @param {Blob} file
- * @param {UserFileHandle} source_file_handle
- */
-function open_from_file(file, source_file_handle) {
-	// The browser isn't very smart about MIME types.
-	// It seems to look at the file extension, but not the actual file contents.
-	// This is particularly problematic for files with no extension, where file.type gives an empty string.
-	// And the File Access API currently doesn't let us automatically append a file extension,
-	// so the user is likely to end up with files with no extension.
-	// It's better to look at the file content to determine file type.
-	// We do this for image files in read_image_file, and palette files in AnyPalette.js.
-
-	if (file instanceof File && file.name.match(/\.theme(pack)?$/i)) {
-		file.text().then(load_theme_from_text, (error) => {
-			show_error_message(localize("Paint cannot open this file."), error);
-		});
-		return;
-	}
-	// Try loading as an image file first, then as a palette file, but show a combined error message if both fail.
-	read_image_file(file, (as_image_error, image_info) => {
-		if (as_image_error) {
-			AnyPalette.loadPalette(file, (as_palette_error, new_palette) => {
-				if (as_palette_error) {
-					show_file_format_errors({ as_image_error, as_palette_error });
-					return;
-				}
-				palette = new_palette.map((color) => color.toString());
-				$colorbox.rebuild_palette();
-				window.console?.log(`Loaded palette: ${palette.map(() => "%c█").join("")}`, ...palette.map((color) => `color: ${color};`));
-			});
-			return;
-		}
-		image_info.source_file_handle = source_file_handle;
-		open_from_image_info(image_info);
-	});
 }
 
 /**
@@ -1048,7 +929,7 @@ function apply_file_format_and_palette_info(info) {
 function load_theme_from_text(fileText) {
 	var cssProperties = parseThemeFileString(fileText);
 	if (!cssProperties) {
-		show_error_message(localize("Paint cannot open this file."));
+		show_error_message("Paint cannot open this file.");
 		return;
 	}
 	applyCSSProperties(cssProperties, { recurseIntoIframes: true });
@@ -1056,22 +937,6 @@ function load_theme_from_text(fileText) {
 	window.themeCSSProperties = cssProperties;
 
 	$G.triggerHandler("theme-load");
-}
-
-function file_new() {
-	are_you_sure(() => {
-		deselect();
-		cancel();
-
-		$G.triggerHandler("session-update"); // autosave old session
-
-		reset_file();
-		reset_selected_colors();
-		reset_canvas_and_history(); // (with newly reset colors)
-		set_magnification(default_magnification);
-
-		$G.triggerHandler("session-update"); // autosave
-	});
 }
 
 /**
@@ -1092,11 +957,11 @@ function are_you_sure(action, canceled, from_session_load) {
 		//   http://127.0.0.1:1999/#load:https://i.imgur.com/M5zcPuk.jpeg
 		// - click an Open link in the Manage Storage dialog in the Electron app
 		showMessageBox({
-			message: localize("You've modified the document while an existing document was loading.\nSave the new document?", file_name),
+			message: "You've modified the document while an existing document was loading.\nSave the new document?",
 			buttons: [
 				{
 					// label: "Discard",
-					label: localize("No"),
+					label: "No",
 					value: "discard",
 					default: true,
 				},
@@ -1116,16 +981,16 @@ function are_you_sure(action, canceled, from_session_load) {
 		});
 	} else {
 		showMessageBox({
-			message: localize("Save changes to %1?", file_name),
+			message: `Save changes to ${file_name}?`,
 			buttons: [
 				{
 					// label: "Discard",
-					label: localize("No"),
+					label: "No",
 					value: "discard",
 					default: true,
 				},
 				{
-					label: localize("Cancel"),
+					label: "Cancel",
 					value: "cancel",
 				},
 			],
@@ -1142,7 +1007,7 @@ function are_you_sure(action, canceled, from_session_load) {
 function please_enter_a_number() {
 	showMessageBox({
 		// title: "Invalid Value",
-		message: localize("Please enter a number."),
+		message: "Please enter a number.",
 	});
 }
 
@@ -1281,14 +1146,14 @@ function show_resource_load_error_message(error) {
  */
 function show_file_format_errors({ as_image_error, as_palette_error }) {
 	let html = `
-		<p>${localize("Paint cannot open this file.")}</p>
+		<p>${"Paint cannot open this file."}</p>
 	`;
 	if (as_image_error) {
 		// TODO: handle weird errors, only show invalid format error if that's what happened
 		html += `
 			<details>
-				<summary>${localize("Bitmap Image")}</summary>
-				<p>${localize("This is not a valid bitmap file, or its format is not currently supported.")}</p>
+				<summary>${"Bitmap Image"}</summary>
+				<p>${"This is not a valid bitmap file, or its format is not currently supported."}</p>
 			</details>
 		`;
 	}
@@ -1324,8 +1189,8 @@ function show_file_format_errors({ as_image_error, as_palette_error }) {
 		}
 		html += `
 			<details>
-				<summary>${only_palette_error ? "Details" : localize("Palette|*.pal|").split("|")[0]}</summary>
-				<p>${localize("Unexpected file format.")}</p>
+				<summary>${only_palette_error ? "Details" : "Palette|*.pal|".split("|")[0]}</summary>
+				<p>${"Unexpected file format."}</p>
 				${details}
 			</details>
 		`;
@@ -1388,24 +1253,14 @@ function paste_image_from_file(blob) {
 	});
 }
 
-// Edit > Paste From
-async function choose_file_to_paste() {
-	const { file } = await systemHooks.showOpenFileDialog({ formats: image_formats });
-	if (file.type.match(/^image|application\/pdf/)) {
-		paste_image_from_file(file);
-		return;
-	}
-	show_error_message(localize("This is not a valid bitmap file, or its format is not currently supported."));
-}
-
 /**
  * @param {HTMLImageElement | HTMLCanvasElement} img_or_canvas
  */
 function paste(img_or_canvas) {
 
 	if (img_or_canvas.width > main_canvas.width || img_or_canvas.height > main_canvas.height) {
-		const message = localize("The image in the clipboard is larger than the bitmap.") + "\n" +
-			localize("Would you like the bitmap enlarged?");
+		const message = "The image in the clipboard is larger than the bitmap." + "\n" +
+			"Would you like the bitmap enlarged?";
 		showMessageBox({
 			message,
 			iconID: "question",
@@ -1418,17 +1273,17 @@ function paste(img_or_canvas) {
 			buttons: [
 				{
 					// label: "Enlarge",
-					label: localize("Yes"),
+					label: "Yes",
 					value: "enlarge",
 					default: true,
 				},
 				{
 					// label: "Crop",
-					label: localize("No"),
+					label: "No",
 					value: "crop",
 				},
 				{
-					label: localize("Cancel"),
+					label: "Cancel",
 					value: "cancel",
 				},
 			],
@@ -1470,7 +1325,7 @@ function paste(img_or_canvas) {
 		// }
 
 		undoable({
-			name: localize("Paste"),
+			name: "Paste",
 			icon: get_help_folder_icon("p_paste.png"),
 			soft: true,
 		}, () => {
@@ -1518,7 +1373,7 @@ function go_to_history_node(target_history_node, canceling) {
 		// @TODO maybe: could store whether a selection is from Free-Form Select
 		// so it selects Free-Form Select when you jump to e.g. Move Selection
 		// (or could traverse history to figure it out)
-		if (target_history_node.name === localize("Free-Form Select")) {
+		if (target_history_node.name === "Free-Form Select") {
 			select_tool(get_tool_by_id(TOOL_FREE_FORM_SELECT));
 		} else {
 			select_tool(get_tool_by_id(TOOL_SELECT));
@@ -1689,37 +1544,6 @@ function undo() {
 	return true;
 }
 
-// @TODO: use Clippy.js instead for potentially annoying tips
-/** @type {OSGUI$Window} */
-let $document_history_prompt_window;
-function redo() {
-	if (redos.length < 1) {
-		if ($document_history_prompt_window) {
-			$document_history_prompt_window.close();
-		}
-		if (!$document_history_window || $document_history_window.closed) {
-			$document_history_prompt_window = showMessageBox({
-				title: "Redo",
-				messageHTML: "To view all branches of the history tree, click <b>Edit > History</b>.",
-				iconID: "info",
-			}).$window;
-		}
-		return false;
-	}
-
-	undos.push(current_history_node);
-	let target_history_node = redos.pop();
-
-	while (target_history_node.soft && redos.length) {
-		undos.push(target_history_node);
-		target_history_node = redos.pop();
-	}
-
-	go_to_history_node(target_history_node);
-
-	return true;
-}
-
 /**
  * @param {HistoryNode} node
  * @returns {HistoryNode[]} ancestors
@@ -1730,158 +1554,6 @@ function get_history_ancestors(node) {
 		ancestors.push(node);
 	}
 	return ancestors;
-}
-
-/** @type {OSGUI$Window} */
-let $document_history_window;
-// setTimeout(show_document_history, 100);
-function show_document_history() {
-	if ($document_history_prompt_window) {
-		$document_history_prompt_window.close();
-	}
-	if ($document_history_window) {
-		$document_history_window.close();
-	}
-	const $w = $document_history_window = $Window({
-		title: "Document History",
-		resizable: false,
-		maximizeButton: false,
-		minimizeButton: false,
-	});
-	// $w.prependTo("body").css({position: ""});
-	$w.addClass("history-window squish");
-	$w.$content.html(`
-		<label>
-			<select id="history-view-mode" class="inset-deep">
-				<option value="linear">Linear timeline</option>
-				<option value="tree">Tree</option>
-			</select>
-		</label>
-		<div class="history-view" tabIndex="0"></div>
-	`);
-
-	const $history_view = $w.$content.find(".history-view");
-	$history_view.focus();
-
-	let previous_scroll_position = 0;
-
-	let rendered_$entries = [];
-	let current_$entry;
-
-	let $mode_select = $w.$content.find("#history-view-mode");
-	$mode_select.css({
-		margin: "10px",
-	});
-	let mode = $mode_select.val();
-	$mode_select.on("change", () => {
-		mode = $mode_select.val();
-		render_tree();
-	});
-
-	/**
-	 * @param {HistoryNode} node
-	 */
-	function render_tree_from_node(node) {
-		const $entry = $(`
-			<div class="history-entry">
-				<div class="history-entry-icon-area"></div>
-				<div class="history-entry-name"></div>
-			</div>
-		`);
-		// $entry.find(".history-entry-name").text((node.name || "Unknown") + (node.soft ? " (soft)" : ""));
-		$entry.find(".history-entry-name").text((node.name || "Unknown") + (node === root_history_node ? " (Start of History)" : ""));
-		$entry.find(".history-entry-icon-area").append(node.icon);
-		if (mode === "tree") {
-			let dist_to_root = 0;
-			for (let ancestor = node.parent; ancestor; ancestor = ancestor.parent) {
-				dist_to_root++;
-			}
-			$entry.css({
-				marginInlineStart: `${dist_to_root * 8}px`,
-			});
-		}
-		if (node === current_history_node) {
-			$entry.addClass("current");
-			current_$entry = $entry;
-			requestAnimationFrame(() => {
-				// scrollIntoView causes <html> to scroll when the window is partially offscreen,
-				// despite overflow: hidden on html and body, so it's not an option.
-				$history_view[0].scrollTop =
-					Math.min(
-						$entry[0].offsetTop,
-						Math.max(
-							previous_scroll_position,
-							$entry[0].offsetTop - $history_view[0].clientHeight + $entry.outerHeight()
-						)
-					);
-			});
-		} else {
-			const history_ancestors = get_history_ancestors(current_history_node);
-			if (history_ancestors.indexOf(node) > -1) {
-				$entry.addClass("ancestor-of-current");
-			}
-		}
-		for (const sub_node of node.futures) {
-			render_tree_from_node(sub_node);
-		}
-		$entry.on("click", () => {
-			go_to_history_node(node);
-		});
-		// @ts-ignore  (TODO: maybe don't tack properties onto objects so much!)
-		$entry.history_node = node;
-		rendered_$entries.push($entry);
-	}
-	const render_tree = () => {
-		previous_scroll_position = $history_view.scrollTop();
-		$history_view.empty();
-		rendered_$entries = [];
-		render_tree_from_node(root_history_node);
-		if (mode === "linear") {
-			rendered_$entries.sort(($a, $b) => {
-				if ($a.history_node.timestamp < $b.history_node.timestamp) {
-					return -1;
-				}
-				if ($b.history_node.timestamp < $a.history_node.timestamp) {
-					return +1;
-				}
-				return 0;
-			});
-		} else {
-			rendered_$entries.reverse();
-		}
-		rendered_$entries.forEach(($entry) => {
-			$history_view.append($entry);
-		});
-	};
-	render_tree();
-
-	// This is different from Ctrl+Z/Ctrl+Shift+Z because it goes over all branches of the history tree, chronologically,
-	// not just one branch.
-	const go_by = (index_delta) => {
-		const from_index = rendered_$entries.indexOf(current_$entry);
-		const to_index = from_index + index_delta;
-		if (rendered_$entries[to_index]) {
-			rendered_$entries[to_index].click();
-		}
-	};
-	$history_view.on("keydown", (event) => {
-		if (!event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey) {
-			if (event.key === "ArrowDown" || event.key === "Down") {
-				go_by(1);
-				event.preventDefault();
-			} else if (event.key === "ArrowUp" || event.key === "Up") {
-				go_by(-1);
-				event.preventDefault();
-			}
-		}
-	});
-
-	$G.on("history-update", render_tree);
-	$w.on("close", () => {
-		$G.off("history-update", render_tree);
-	});
-
-	$w.center();
 }
 
 /**
@@ -1960,7 +1632,7 @@ function meld_textbox_into_canvas(going_to_history_node) {
 	const text = textbox.$editor.val();
 	if (text && !going_to_history_node) {
 		undoable({
-			name: localize("Text"),
+			name: "Text",
 			icon: get_icon_for_tool(get_tool_by_id(TOOL_TEXT)),
 			soft: true,
 		}, () => { });
@@ -1992,214 +1664,11 @@ function deselect(going_to_history_node) {
 	}
 }
 
-/**
- * @param {{name?: string, icon?: HTMLImageElement | HTMLCanvasElement}} [meta] - overrides certain properties of ActionMetadata
- */
-function delete_selection(meta = {}) {
-	if (selection) {
-		undoable({
-			name: meta.name || localize("Clear Selection"), //"Delete", (I feel like "Clear Selection" is unclear, could mean "Deselect")
-			icon: meta.icon || get_help_folder_icon("p_delete.png"),
-			// soft: @TODO: conditionally soft?,
-		}, () => {
-			selection.destroy();
-			selection = null;
-		});
-	}
-}
-function select_all() {
-	deselect();
-	select_tool(get_tool_by_id(TOOL_SELECT));
-
-	undoable({
-		name: localize("Select All"),
-		icon: get_icon_for_tool(get_tool_by_id(TOOL_SELECT)),
-		soft: true,
-	}, () => {
-		selection = new OnCanvasSelection(0, 0, main_canvas.width, main_canvas.height);
-	});
-}
-
-const ctrlOrCmd = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? "⌘" : "Ctrl";
-const recommendationForClipboardAccess = `Please use the keyboard: ${ctrlOrCmd}+C to copy, ${ctrlOrCmd}+X to cut, ${ctrlOrCmd}+V to paste. If keyboard is not an option, try using Chrome version 76 or higher.`;
-/**
- * @param {string} commandId
- */
-function try_exec_command(commandId) {
-	if (document.queryCommandEnabled(commandId)) { // not a reliable source for whether it'll work, if I recall
-		document.execCommand(commandId);
-		if (!navigator.userAgent.includes("Firefox") || commandId === "paste") {
-			return show_error_message(`That ${commandId} probably didn't work. ${recommendationForClipboardAccess}`);
-		}
-	} else {
-		return show_error_message(`Cannot perform ${commandId}. ${recommendationForClipboardAccess}`);
-	}
-}
-
-function getSelectionText() {
-	// instanceof might make this simpler, particularly with TypeScript JSDoc
-	const activeEl = document.activeElement;
-	const activeElTagName = activeEl ? activeEl.tagName.toLowerCase() : null;
-	if (
-		(activeElTagName == "textarea") || (
-			activeElTagName == "input" &&
-			/^(?:text|search|password|tel|url)$/i.test(/** @type {HTMLInputElement} */(activeEl).type)
-		)
-	) {
-		const textField = /** @type {HTMLInputElement | HTMLTextAreaElement} */(activeEl);
-		if (typeof textField.selectionStart == "number") {
-			return textField.value.slice(textField.selectionStart, textField.selectionEnd);
-		}
-	}
-	if (window.getSelection) {
-		return window.getSelection().toString();
-	}
-	return "";
-}
-
-/**
- * @param {boolean} [execCommandFallback]
- */
-function edit_copy(execCommandFallback) {
-	const text = getSelectionText();
-
-	if (text.length > 0) {
-		if (!navigator.clipboard || !navigator.clipboard.writeText) {
-			if (execCommandFallback) {
-				return try_exec_command("copy");
-			} else {
-				show_error_message(`${localize("Error getting the Clipboard Data!")} ${recommendationForClipboardAccess}`);
-				// show_error_message(`The Async Clipboard API is not supported by this browser. ${browserRecommendationForClipboardAccess}`);
-				return;
-			}
-		}
-		navigator.clipboard.writeText(text);
-	} else if (selection && selection.canvas) {
-		if (!navigator.clipboard || !navigator.clipboard.write) {
-			if (execCommandFallback) {
-				return try_exec_command("copy");
-			} else {
-				show_error_message(`${localize("Error getting the Clipboard Data!")} ${recommendationForClipboardAccess}`);
-				// show_error_message(`The Async Clipboard API is not supported by this browser. ${browserRecommendationForClipboardAccess}`);
-				return;
-			}
-		}
-		selection.canvas.toBlob((blob) => {
-			sanity_check_blob(blob, () => {
-				navigator.clipboard.write([
-					new ClipboardItem(Object.defineProperty({}, blob.type, {
-						value: blob,
-						enumerable: true,
-					})),
-				]).then(() => {
-					window.console?.log("Copied image to the clipboard.");
-				}, (error) => {
-					show_error_message("Failed to copy to the Clipboard.", error);
-				});
-			});
-		});
-	}
-}
-/**
- * @param {boolean} [execCommandFallback]
- */
-function edit_cut(execCommandFallback) {
-	if (!navigator.clipboard || !navigator.clipboard.write) {
-		if (execCommandFallback) {
-			return try_exec_command("cut");
-		} else {
-			show_error_message(`${localize("Error getting the Clipboard Data!")} ${recommendationForClipboardAccess}`);
-			// show_error_message(`The Async Clipboard API is not supported by this browser. ${browserRecommendationForClipboardAccess}`);
-			return;
-		}
-	}
-	edit_copy();
-	delete_selection({
-		name: localize("Cut"),
-		icon: get_help_folder_icon("p_cut.png"),
-	});
-}
-/**
- * @param {boolean} [execCommandFallback]
- */
-async function edit_paste(execCommandFallback) {
-	if (
-		document.activeElement instanceof HTMLInputElement ||
-		document.activeElement instanceof HTMLTextAreaElement
-	) {
-		if (!navigator.clipboard || !navigator.clipboard.readText) {
-			if (execCommandFallback) {
-				return try_exec_command("paste");
-			} else {
-				show_error_message(`${localize("Error getting the Clipboard Data!")} ${recommendationForClipboardAccess}`);
-				// show_error_message(`The Async Clipboard API is not supported by this browser. ${browserRecommendationForClipboardAccess}`);
-				return;
-			}
-		}
-		const clipboardText = await navigator.clipboard.readText();
-		document.execCommand("InsertText", false, clipboardText);
-		return;
-	}
-	if (!navigator.clipboard || !navigator.clipboard.read) {
-		if (execCommandFallback) {
-			return try_exec_command("paste");
-		} else {
-			show_error_message(`${localize("Error getting the Clipboard Data!")} ${recommendationForClipboardAccess}`);
-			// show_error_message(`The Async Clipboard API is not supported by this browser. ${browserRecommendationForClipboardAccess}`);
-			return;
-		}
-	}
-	try {
-		const clipboardItems = await navigator.clipboard.read();
-		const blob = await clipboardItems[0].getType("image/png");
-		paste_image_from_file(blob);
-	} catch (error) {
-		if (error.name === "NotFoundError") {
-			try {
-				const clipboardText = await navigator.clipboard.readText();
-				if (clipboardText) {
-					const uris = get_uris(clipboardText);
-					if (uris.length > 0) {
-						load_image_from_uri(uris[0]).then((info) => {
-							paste(info.image || make_canvas(info.image_data));
-						}, (error) => {
-							show_resource_load_error_message(error);
-						});
-					} else {
-						// @TODO: should I just make a textbox instead?
-						show_error_message("The information on the Clipboard can't be inserted into Paint.");
-					}
-				} else {
-					show_error_message("The information on the Clipboard can't be inserted into Paint.");
-				}
-			} catch (error) {
-				show_error_message(localize("Error getting the Clipboard Data!"), error);
-			}
-		} else {
-			show_error_message(localize("Error getting the Clipboard Data!"), error);
-		}
-	}
-}
-
-function image_invert_colors() {
-	apply_image_transformation({
-		name: localize("Invert Colors"),
-		icon: get_help_folder_icon("p_invert.png"),
-	}, (_original_canvas, original_ctx, _new_canvas, new_ctx) => {
-		const monochrome_info = monochrome && detect_monochrome(original_ctx);
-		if (monochrome && monochrome_info.isMonochrome) {
-			invert_monochrome(original_ctx, new_ctx, monochrome_info);
-		} else {
-			invert_rgb(original_ctx, new_ctx);
-		}
-	});
-}
-
 function clear() {
 	deselect();
 	cancel();
 	undoable({
-		name: localize("Clear Image"),
+		name: "Clear Image",
 		icon: get_help_folder_icon("p_blank.png"),
 	}, () => {
 		saved = false;
@@ -2214,121 +1683,6 @@ function clear() {
 	});
 }
 
-let cleanup_bitmap_view = () => { };
-function view_bitmap() {
-	cleanup_bitmap_view();
-
-	const bitmap_view_div = document.createElement("div");
-	bitmap_view_div.classList.add("bitmap-view", "inset-deep");
-	document.body.appendChild(bitmap_view_div);
-	$(bitmap_view_div).css({
-		display: "flex",
-		alignItems: "center",
-		justifyContent: "center",
-		position: "fixed",
-		top: "0",
-		left: "0",
-		width: "100%",
-		height: "100%",
-		zIndex: "9999",
-		background: "var(--Background)",
-	});
-	if (bitmap_view_div.requestFullscreen) {
-		bitmap_view_div.requestFullscreen();
-	} else if (bitmap_view_div.webkitRequestFullscreen) {
-		bitmap_view_div.webkitRequestFullscreen();
-	}
-
-	let blob_url;
-	let got_fullscreen = false;
-	let iid = setInterval(() => {
-		// In Chrome, if the page is already fullscreen, and you requestFullscreen,
-		// hitting Esc will change document.fullscreenElement without triggering the fullscreenchange event!
-		// It doesn't trigger a keydown either.
-		if (document.fullscreenElement === bitmap_view_div || document.webkitFullscreenElement === bitmap_view_div) {
-			got_fullscreen = true;
-		} else if (got_fullscreen) {
-			cleanup_bitmap_view();
-		}
-	}, 100);
-	cleanup_bitmap_view = () => {
-		document.removeEventListener("fullscreenchange", onFullscreenChange);
-		document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
-		document.removeEventListener("keydown", onKeyDown);
-		document.removeEventListener("mousedown", onMouseDown);
-		// If you have e.g. the Help window open,
-		// and right click to close the View Bitmap, with the mouse over the window,
-		// this needs a delay to cancel the context menu.
-		setTimeout(() => {
-			document.removeEventListener("contextmenu", onContextMenu);
-		}, 100);
-		URL.revokeObjectURL(blob_url);
-		clearInterval(iid);
-		if (document.fullscreenElement === bitmap_view_div || document.webkitFullscreenElement === bitmap_view_div) {
-			if (document.exitFullscreen) {
-				document.exitFullscreen(); // avoid warning in Firefox
-			} else if (document.msExitFullscreen) {
-				document.msExitFullscreen();
-			} else if (document.mozCancelFullScreen) {
-				document.mozCancelFullScreen();
-			} else if (document.webkitExitFullscreen) {
-				document.webkitExitFullscreen();
-			}
-		}
-		bitmap_view_div.remove();
-		cleanup_bitmap_view = () => { };
-	};
-	document.addEventListener("fullscreenchange", onFullscreenChange, { once: true });
-	document.addEventListener("webkitfullscreenchange", onFullscreenChange, { once: true });
-	document.addEventListener("keydown", onKeyDown);
-	document.addEventListener("mousedown", onMouseDown);
-	document.addEventListener("contextmenu", onContextMenu);
-
-	function onFullscreenChange() {
-		if (document.fullscreenElement !== bitmap_view_div && document.webkitFullscreenElement !== bitmap_view_div) {
-			cleanup_bitmap_view();
-		}
-	}
-	let repeating_f = false;
-	function onKeyDown(event) {
-		// console.log(event.key, event.repeat);
-		repeating_f = repeating_f || event.repeat && (event.key === "f" || event.key === "F");
-		if (event.repeat) { return; }
-		if (repeating_f && (event.key === "f" || event.key === "F")) {
-			repeating_f = false;
-			return; // Chrome sends an F keydown with repeat=false if you release Ctrl before F, while repeating.
-			// This is a slightly overkill, and slightly overzealous workaround (can ignore one normal F before handling F as exit)
-		}
-		// Prevent also toggling View Bitmap on while toggling off, with Ctrl+F+F.
-		// That is, if you hold Ctrl and press F twice, the second F should close View Bitmap and not reopen it immediately.
-		// This relies on the keydown handler handling event.defaultPrevented (or isDefaultPrevented() if it's using jQuery)
-		event.preventDefault();
-		// Note: in mspaint, Esc is the only key that DOESN'T close the bitmap view,
-		// but it also doesn't do anything else — other than changing the cursor. Stupid.
-		cleanup_bitmap_view();
-	}
-	function onMouseDown(_event) {
-		// Note: in mspaint, only left click exits View Bitmap mode.
-		// Right click can show a useless context menu.
-		cleanup_bitmap_view();
-	}
-	function onContextMenu(event) {
-		event.preventDefault();
-		cleanup_bitmap_view(); // not needed
-	}
-
-	// @TODO: include selection in the bitmap
-	// I believe mspaint uses a similar code path to the Thumbnail,
-	// considering that if you right click on the image in View Bitmap mode,
-	// it shows the silly "Thumbnail" context menu item.
-	// (It also shows the selection, in a meaningless place, similar to the Thumbnail's bugs)
-	main_canvas.toBlob((blob) => {
-		blob_url = URL.createObjectURL(blob);
-		const img = document.createElement("img");
-		img.src = blob_url;
-		bitmap_view_div.appendChild(img);
-	}, "image/png");
-}
 /**
  * @param {ToolID} id
  * @returns {Tool} tool object
@@ -2620,10 +1974,10 @@ function resize_canvas_without_saving_dimensions(unclamped_width, unclamped_heig
 				main_ctx.drawImage(temp_canvas, 0, 0);
 			} catch (exception) {
 				if (exception.name === "NS_ERROR_FAILURE") {
-					// or localize("There is not enough memory or resources to complete operation.")
-					show_error_message(localize("Insufficient memory to perform operation."), exception);
+					// or "There is not enough memory or resources to complete operation."
+					show_error_message("Insufficient memory to perform operation.", exception);
 				} else {
-					show_error_message(localize("An unknown error has occurred."), exception);
+					show_error_message("An unknown error has occurred.", exception);
 				}
 				// @TODO: undo and clean up undoable
 				// maybe even keep Attributes dialog open if that's what's triggering the resize
@@ -2650,449 +2004,6 @@ function resize_canvas_and_save_dimensions(unclamped_width, unclamped_height, un
 	}, (_error) => {
 		// oh well
 	});
-}
-
-function image_attributes() {
-	if (image_attributes.$window) {
-		image_attributes.$window.close();
-	}
-	const $w = image_attributes.$window = $DialogWindow(localize("Attributes"));
-	$w.addClass("attributes-window");
-
-	const $main = $w.$main;
-
-	// Information
-
-	const table = {
-		[localize("File last saved:")]: localize("Not Available"), // @TODO: make available?
-		[localize("Size on disk:")]: localize("Not Available"), // @TODO: make available?
-		[localize("Resolution:")]: "72 x 72 dots per inch", // if localizing this, remove "direction" setting below
-	};
-	const $table = $(E("table")).appendTo($main);
-	for (const k in table) {
-		const $tr = $(E("tr")).appendTo($table);
-		$(E("td")).appendTo($tr).text(k);
-		const $value = $(E("td")).appendTo($tr).text(table[k]);
-		if (table[k].indexOf("72") !== -1) {
-			$value.css("direction", "ltr");
-		}
-	}
-
-	// Dimensions
-
-	const unit_sizes_in_px = { px: 1, in: 72, cm: 28.3465 };
-	let current_unit = image_attributes.unit = image_attributes.unit || "px";
-	let width_in_px = main_canvas.width;
-	let height_in_px = main_canvas.height;
-
-	const $width_label = $(E("label")).appendTo($main).html(render_access_key(localize("&Width:")));
-	const $height_label = $(E("label")).appendTo($main).html(render_access_key(localize("&Height:")));
-	const $width = $(E("input")).attr({ type: "number", min: 1, "aria-keyshortcuts": "Alt+W W W" }).addClass("no-spinner inset-deep").appendTo($width_label);
-	const $height = $(E("input")).attr({ type: "number", min: 1, "aria-keyshortcuts": "Alt+H H H" }).addClass("no-spinner inset-deep").appendTo($height_label);
-
-	$main.find("input")
-		.css({ width: "40px" })
-		.on("change keyup keydown keypress pointerdown pointermove paste drop", () => {
-			width_in_px = Number($width.val()) * unit_sizes_in_px[current_unit];
-			height_in_px = Number($height.val()) * unit_sizes_in_px[current_unit];
-		});
-
-	// Fieldsets
-
-	const $units = $(E("fieldset")).appendTo($main).append(`
-		<legend>${localize("Units")}</legend>
-		<div class="fieldset-body">
-			<div class="radio-field"><input type="radio" name="units" id="unit-in" value="in" aria-keyshortcuts="Alt+I I"><label for="unit-in">${render_access_key(localize("&Inches"))}</label></div>
-			<div class="radio-field"><input type="radio" name="units" id="unit-cm" value="cm" aria-keyshortcuts="Alt+M M"><label for="unit-cm">${render_access_key(localize("C&m"))}</label></div>
-			<div class="radio-field"><input type="radio" name="units" id="unit-px" value="px" aria-keyshortcuts="Alt+P P"><label for="unit-px">${render_access_key(localize("&Pixels"))}</label></div>
-		</div>
-	`);
-	$units.find(`[value=${current_unit}]`).attr({ checked: true });
-	$units.on("change", () => {
-		const new_unit = String($units.find(":checked").val());
-		$width.val(width_in_px / unit_sizes_in_px[new_unit]);
-		$height.val(height_in_px / unit_sizes_in_px[new_unit]);
-		current_unit = new_unit;
-	}).triggerHandler("change");
-
-	const $colors = $(E("fieldset")).appendTo($main).append(`
-		<legend>${localize("Colors")}</legend>
-		<div class="fieldset-body">
-			<div class="radio-field"><input type="radio" name="colors" id="attribute-monochrome" value="monochrome" aria-keyshortcuts="Alt+B B"><label for="attribute-monochrome">${render_access_key(localize("&Black and white"))}</label></div>
-			<div class="radio-field"><input type="radio" name="colors" id="attribute-polychrome" value="polychrome" aria-keyshortcuts="Alt+L L"><label for="attribute-polychrome">${render_access_key(localize("Co&lors"))}</label></div>
-		</div>
-	`);
-	$colors.find(`[value=${monochrome ? "monochrome" : "polychrome"}]`).attr({ checked: true });
-
-	const $transparency = $(E("fieldset")).appendTo($main).append(`
-		<legend>${localize("Transparency")}</legend>
-		<div class="fieldset-body">
-			<div class="radio-field"><input type="radio" name="transparency" id="attribute-transparent" value="transparent"><label for="attribute-transparent">${localize("Transparent")}</label></div>
-			<div class="radio-field"><input type="radio" name="transparency" id="attribute-opaque" value="opaque"><label for="attribute-opaque">${localize("Opaque")}</label></div>
-		</div>
-	`);
-	$transparency.find(`[value=${transparency ? "transparent" : "opaque"}]`).attr({ checked: true });
-
-	// Buttons on the right
-
-	$w.$Button(localize("OK"), () => {
-		const transparency_option = $transparency.find(":checked").val();
-		const colors_option = $colors.find(":checked").val();
-		const unit = String($units.find(":checked").val());
-
-		const was_monochrome = monochrome;
-		let monochrome_info;
-
-		image_attributes.unit = unit;
-		transparency = (transparency_option == "transparent");
-		monochrome = (colors_option == "monochrome");
-
-		if (monochrome != was_monochrome) {
-			if (selection) {
-				// want to detect monochrome based on selection + canvas
-				// simplest way to do that is to meld them together
-				meld_selection_into_canvas();
-			}
-			monochrome_info = detect_monochrome(main_ctx);
-
-			if (monochrome) {
-				if (monochrome_info.isMonochrome && monochrome_info.presentNonTransparentRGBAs.length === 2) {
-					palette = make_monochrome_palette(...monochrome_info.presentNonTransparentRGBAs);
-				} else {
-					palette = monochrome_palette;
-				}
-			} else {
-				palette = polychrome_palette;
-			}
-			selected_colors.foreground = palette[0];
-			selected_colors.background = palette[14]; // first in second row
-			selected_colors.ternary = "";
-			$colorbox.rebuild_palette();
-			$G.trigger("option-changed");
-		}
-
-		const unit_to_px = unit_sizes_in_px[unit];
-		const width = Number($width.val()) * unit_to_px;
-		const height = Number($height.val()) * unit_to_px;
-		resize_canvas_and_save_dimensions(~~width, ~~height);
-
-		if (!transparency && has_any_transparency(main_ctx)) {
-			make_opaque();
-		}
-
-		// 1. Must be after canvas resize to avoid weird undoable interaction and such.
-		// 2. Check that monochrome option changed, same as above.
-		//   a) for monochrome_info variable to be available
-		//   b) Consider the case where color is introduced to the canvas while in monochrome mode.
-		//      We only want to show this dialog if it would also change the palette (above), never leave you on an outdated palette.
-		//   c) And it's nice to be able to change other options without worrying about it trying to convert the document to monochrome.
-		if (monochrome != was_monochrome) {
-			if (monochrome && !monochrome_info.isMonochrome) {
-				show_convert_to_black_and_white();
-			}
-		}
-
-		image_attributes.$window.close();
-	}, { type: "submit" });
-
-	$w.$Button(localize("Cancel"), () => {
-		image_attributes.$window.close();
-	});
-
-	// Parsing HTML with jQuery; $Button takes text (not HTML) or Node/DocumentFragment
-	$w.$Button($.parseHTML(render_access_key(localize("&Default")))[0], () => {
-		width_in_px = default_canvas_width;
-		height_in_px = default_canvas_height;
-		$width.val(width_in_px / unit_sizes_in_px[current_unit]);
-		$height.val(height_in_px / unit_sizes_in_px[current_unit]);
-	}).attr("aria-keyshortcuts", "Alt+D D");
-
-	handle_keyshortcuts($w);
-
-	// Default focus
-
-	$width.select();
-
-	// Reposition the window
-
-	image_attributes.$window.center();
-}
-
-// TODO: maybe don't tack properties onto functions so much!?
-/**
- * @memberof image_attributes
- * @type {OSGUI$Window}
- */
-image_attributes.$window = null;
-/**
- * @memberof image_attributes
- * @type {string}
- */
-image_attributes.unit = "px";
-
-function show_convert_to_black_and_white() {
-	const $w = $DialogWindow("Convert to Black and White");
-	$w.addClass("convert-to-black-and-white");
-	$w.$main.append("<fieldset><legend>Threshold:</legend><input type='range' min='0' max='1' step='0.01' value='0.5'></fieldset>");
-	const $slider = $w.$main.find("input[type='range']");
-	const original_canvas = make_canvas(main_canvas);
-	let threshold;
-	const update_threshold = () => {
-		make_or_update_undoable({
-			name: "Make Monochrome",
-			match: (history_node) => history_node.name === "Make Monochrome",
-			icon: get_help_folder_icon("p_monochrome.png"),
-		}, () => {
-			threshold = Number($slider.val());
-			main_ctx.copy(original_canvas);
-			threshold_black_and_white(main_ctx, threshold);
-		});
-	};
-	update_threshold();
-	const update_threshold_soon = debounce(update_threshold, 100);
-	$slider.on("input", update_threshold_soon);
-
-	$w.$Button(localize("OK"), () => {
-		$w.close();
-	}, { type: "submit" }).focus();
-	$w.$Button(localize("Cancel"), () => {
-		if (current_history_node.name === "Make Monochrome") {
-			undo();
-		} else {
-			undoable({
-				name: "Cancel Make Monochrome",
-				icon: get_help_folder_icon("p_color.png"),
-			}, () => {
-				main_ctx.copy(original_canvas);
-			});
-		}
-		$w.close();
-	});
-	$w.center();
-}
-
-function image_flip_and_rotate() {
-	const $w = $DialogWindow(localize("Flip and Rotate"));
-	$w.addClass("flip-and-rotate");
-
-	const $fieldset = $(E("fieldset")).appendTo($w.$main);
-	$fieldset.append(`
-		<legend>${localize("Flip or rotate")}</legend>
-		<div class="radio-wrapper">
-			<input
-				type="radio"
-				name="flip-or-rotate"
-				id="flip-horizontal"
-				value="flip-horizontal"
-				aria-keyshortcuts="Alt+F"
-				checked
-			/><label for="flip-horizontal">${render_access_key(localize("&Flip horizontal"))}</label>
-		</div>
-		<div class="radio-wrapper">
-			<input
-				type="radio"
-				name="flip-or-rotate"
-				id="flip-vertical"
-				value="flip-vertical"
-				aria-keyshortcuts="Alt+V"
-			/><label for="flip-vertical">${render_access_key(localize("Flip &vertical"))}</label>
-		</div>
-		<div class="radio-wrapper">
-			<input
-				type="radio"
-				name="flip-or-rotate"
-				id="rotate-by-angle"
-				value="rotate-by-angle"
-				aria-keyshortcuts="Alt+R"
-			/><label for="rotate-by-angle">${render_access_key(localize("&Rotate by angle"))}</label>
-		</div>
-	`);
-
-	const $rotate_by_angle = $(E("div")).appendTo($fieldset);
-	$rotate_by_angle.addClass("sub-options");
-	for (const label_with_hotkey of [
-		"&90°",
-		"&180°",
-		"&270°",
-	]) {
-		const degrees = parseInt(AccessKeys.toText(label_with_hotkey), 10);
-		$rotate_by_angle.append(`
-			<div class="radio-wrapper">
-				<input
-					type="radio"
-					name="rotate-by-angle"
-					value="${degrees}"
-					id="rotate-${degrees}"
-					aria-keyshortcuts="Alt+${AccessKeys.get(label_with_hotkey).toUpperCase()}"
-				/><label
-					for="rotate-${degrees}"
-				>${render_access_key(label_with_hotkey)}</label>
-			</div>
-		`);
-	}
-	$rotate_by_angle.append(`
-		<div class="radio-wrapper">
-			<input
-				type="radio"
-				name="rotate-by-angle"
-				value="arbitrary"
-			/><input
-				type="number"
-				min="-360"
-				max="360"
-				name="rotate-by-arbitrary-angle"
-				id="custom-degrees"
-				value=""
-				class="no-spinner inset-deep"
-				style="width: 50px"
-			/>
-			<label for="custom-degrees">${localize("Degrees")}</label>
-		</div>
-	`);
-	$rotate_by_angle.find("#rotate-90").attr({ checked: true });
-	// Disabling inputs makes them not even receive mouse events,
-	// and so pointer-events: none is needed to respond to events on the parent.
-	$rotate_by_angle.find("input").attr({ disabled: true });
-	$fieldset.find("input").on("change", () => {
-		const action = $fieldset.find("input[name='flip-or-rotate']:checked").val();
-		$rotate_by_angle.find("input").attr({
-			disabled: action !== "rotate-by-angle",
-		});
-	});
-	$rotate_by_angle.find(".radio-wrapper").on("click", (e) => {
-		// Select "Rotate by angle" and enable subfields
-		$fieldset.find("input[value='rotate-by-angle']").prop("checked", true);
-		$fieldset.find("input").triggerHandler("change");
-
-		const $wrapper = $(e.target).closest(".radio-wrapper");
-		// Focus the numerical input if this field has one
-		const num_input = $wrapper.find("input[type='number']")[0];
-		if (num_input) {
-			num_input.focus();
-		}
-		// Select the radio for this field
-		$wrapper.find("input[type='radio']").prop("checked", true);
-	});
-
-	$fieldset.find("input[name='rotate-by-arbitrary-angle']").on("input", () => {
-		$fieldset.find("input[value='rotate-by-angle']").prop("checked", true);
-		$fieldset.find("input[value='arbitrary']").prop("checked", true);
-	});
-
-	$w.$Button(localize("OK"), () => {
-		const action = $fieldset.find("input[name='flip-or-rotate']:checked").val();
-		switch (action) {
-			case "flip-horizontal":
-				flip_horizontal();
-				break;
-			case "flip-vertical":
-				flip_vertical();
-				break;
-			case "rotate-by-angle": {
-				let angle_val = $fieldset.find("input[name='rotate-by-angle']:checked").val();
-				if (angle_val === "arbitrary") {
-					angle_val = $fieldset.find("input[name='rotate-by-arbitrary-angle']").val();
-				}
-				const angle_deg = Number(angle_val);
-				const angle = angle_deg / 360 * TAU;
-
-				if (isNaN(angle)) {
-					please_enter_a_number();
-					return;
-				}
-				rotate(angle);
-				break;
-			}
-		}
-
-		$w.close();
-	}, { type: "submit" });
-	$w.$Button(localize("Cancel"), () => {
-		$w.close();
-	});
-
-	$fieldset.find("input[type='radio']").first().focus();
-
-	$w.center();
-
-	handle_keyshortcuts($w);
-}
-
-function image_stretch_and_skew() {
-	const $w = $DialogWindow(localize("Stretch and Skew"));
-	$w.addClass("stretch-and-skew");
-
-	const $fieldset_stretch = $(E("fieldset")).appendTo($w.$main);
-	$fieldset_stretch.append(`<legend>${localize("Stretch")}</legend><table></table>`);
-	const $fieldset_skew = $(E("fieldset")).appendTo($w.$main);
-	$fieldset_skew.append(`<legend>${localize("Skew")}</legend><table></table>`);
-
-	const $RowInput = ($table, img_src, label_with_hotkey, default_value, label_unit, min, max) => {
-		const $tr = $(E("tr")).appendTo($table);
-		const $img = $(E("img")).attr({
-			src: `images/transforms/${img_src}.png`,
-			width: 32,
-			height: 32,
-		}).css({
-			marginRight: "20px",
-		});
-		const input_id = ("input" + Math.random() + Math.random()).replace(/\./, "");
-		const $input = $(E("input")).attr({
-			type: "number",
-			min,
-			max,
-			value: default_value,
-			id: input_id,
-			"aria-keyshortcuts": `Alt+${AccessKeys.get(label_with_hotkey).toUpperCase()}`,
-		}).css({
-			width: "40px",
-		}).addClass("no-spinner inset-deep");
-		$(E("td")).appendTo($tr).append($img);
-		$(E("td")).appendTo($tr).append($(E("label")).html(render_access_key(label_with_hotkey)).attr("for", input_id));
-		$(E("td")).appendTo($tr).append($input);
-		$(E("td")).appendTo($tr).text(label_unit);
-
-		return $input;
-	};
-
-	const stretch_x = $RowInput($fieldset_stretch.find("table"), "stretch-x", localize("&Horizontal:"), 100, "%", 1, 5000);
-	const stretch_y = $RowInput($fieldset_stretch.find("table"), "stretch-y", localize("&Vertical:"), 100, "%", 1, 5000);
-	const skew_x = $RowInput($fieldset_skew.find("table"), "skew-x", localize("H&orizontal:"), 0, localize("Degrees"), -90, 90);
-	const skew_y = $RowInput($fieldset_skew.find("table"), "skew-y", localize("V&ertical:"), 0, localize("Degrees"), -90, 90);
-
-	$w.$Button(localize("OK"), () => {
-		const x_scale = parseFloat(stretch_x.val()) / 100;
-		const y_scale = parseFloat(stretch_y.val()) / 100;
-		const h_skew = parseFloat(skew_x.val()) / 360 * TAU;
-		const v_skew = parseFloat(skew_y.val()) / 360 * TAU;
-		if (isNaN(x_scale) || isNaN(y_scale) || isNaN(h_skew) || isNaN(v_skew)) {
-			please_enter_a_number();
-			return;
-		}
-		try {
-			stretch_and_skew(x_scale, y_scale, h_skew, v_skew);
-		} catch (exception) {
-			if (exception.name === "NS_ERROR_FAILURE") {
-				// or localize("There is not enough memory or resources to complete operation.")
-				show_error_message(localize("Insufficient memory to perform operation."), exception);
-			} else {
-				show_error_message(localize("An unknown error has occurred."), exception);
-			}
-			// @TODO: undo and clean up undoable
-			return;
-		}
-		$w.close();
-	}, { type: "submit" });
-
-	$w.$Button(localize("Cancel"), () => {
-		$w.close();
-	});
-
-	$w.$main.find("input").first().focus().select();
-
-	$w.center();
-
-	handle_keyshortcuts($w);
 }
 
 /**
@@ -3391,41 +2302,36 @@ function sanity_check_blob(blob, okay_callback, magic_number_bytes, magic_wanted
 						// hackily combining messages that are already localized, in ways they were not meant to be used.
 						// you may have to do some deduction to understand this message.
 						// messageHTML: `
-						// 	<p>${localize("Unexpected file format.")}</p>
-						// 	<p>${localize("An unsupported operation was attempted.")}</p>
+						// 	<p>${"Unexpected file format."}</p>
+						// 	<p>${"An unsupported operation was attempted."}</p>
 						// `,
-						message:
-							window.is_electron_app ?
-								"Writing images in this file format is not supported." :
-								"Your browser does not support writing images in this file format.",
+						message: "Your browser does not support writing images in this file format.",
 						iconID: "error",
 					});
 				}
 			}, (error) => {
-				show_error_message(localize("An unknown error has occurred."), error);
+				show_error_message("An unknown error has occurred.", error);
 			});
 		} else {
 			okay_callback();
 		}
 	} else {
-		show_error_message(localize("Failed to save document."));
+		show_error_message("Failed to save document.");
 	}
 }
 
 export {
-	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, choose_file_to_paste, cleanup_bitmap_view, clear, delete_selection, deselect, detect_monochrome,
-	edit_copy, edit_cut, edit_paste, exit_fullscreen_if_ios, file_new,
-	getSelectionText, get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
-	meld_textbox_into_canvas, open_from_file, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, redo, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_all, select_tool, select_tools, set_all_url_params, set_magnification, show_convert_to_black_and_white, show_custom_zoom_window, show_document_history, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette, toggle_grid,
-	toggle_thumbnail, try_exec_command, undo, undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
-	update_helper_layer_immediately, update_magnified_canvas_size, update_title, view_bitmap
+	apply_file_format_and_palette_info, are_you_sure, cancel, change_some_url_params, change_url_param, clear, deselect, detect_monochrome,
+	exit_fullscreen_if_ios,
+	get_all_url_params, get_history_ancestors, get_tool_by_id, get_uris, get_url_param, go_to_history_node, handle_keyshortcuts, has_any_transparency, load_image_from_uri, load_theme_from_text, make_history_node, make_monochrome_palette, make_monochrome_pattern, make_opaque, make_or_update_undoable, make_stripe_pattern, meld_selection_into_canvas,
+	meld_textbox_into_canvas, open_from_image_info, paste, paste_image_from_file, please_enter_a_number, read_image_file, render_canvas_view, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, sanity_check_blob, select_tool, select_tools, set_all_url_params, set_magnification, show_custom_zoom_window, show_error_message, show_file_format_errors, show_resource_load_error_message, switch_to_polychrome_palette,
+	undo, undoable, update_canvas_rect, update_disable_aa, update_helper_layer,
+	update_helper_layer_immediately, update_magnified_canvas_size, update_title
 };
 // Temporary globals until all dependent code is converted to ES Modules
 window.make_history_node = make_history_node; // used by app-state.js
-window.open_from_file = open_from_file; // used by electron-injected.js
 window.are_you_sure = are_you_sure; // used by app-localization.js, electron-injected.js
 window.show_error_message = show_error_message; // used by app-localization.js, electron-injected.js
 window.exit_fullscreen_if_ios = exit_fullscreen_if_ios; // used by app-localization.js
 window.get_tool_by_id = get_tool_by_id; // used by app-state.js
 window.make_monochrome_palette = make_monochrome_palette; // used by app-state.js
-window.sanity_check_blob = sanity_check_blob; // used by electron-injected.js

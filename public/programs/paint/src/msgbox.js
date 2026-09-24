@@ -1,5 +1,4 @@
 // @ts-check
-/* global localize */
 
 // Note that this API must be kept in sync with the version in 98.js.org,
 // as 98.js.org will write the global `showMessageBox` to provide integration with the web desktop environment,
@@ -9,7 +8,6 @@
 // or, couldn't we just provide the default in a wrapper function, similar to how 98.js.org does it?
 
 import { make_window_supporting_scale } from "./$ToolWindow.js";
-// import { localize } from "./app-localization.js";
 
 const exports = {};
 
@@ -153,7 +151,7 @@ exports.showMessageBox = window.showMessageBox || showMessageBox_implementation;
 // https://github.com/1j01/98/blob/361bd759a6d9b71d0fad9e479840598dc0128bb6/src/iframe-windows.js#L111
 // Any other default parameters need to be handled there (as it works now)
 
-window.defaultMessageBoxTitle = localize("Paint");
+window.defaultMessageBoxTitle = "Paint";
 
 // Don't override alert, because I only use it as a fallback for global error handling.
 // If make_window_supporting_scale is not defined, then alert is used instead,

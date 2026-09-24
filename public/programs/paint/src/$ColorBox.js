@@ -1,7 +1,6 @@
 // @ts-check
-/* global $bottom, $left, $right, button, get_direction, localize, palette, selected_colors */
+/* global $bottom, $right, button, palette, selected_colors */
 import { $Component } from "./$Component.js";
-// import { get_direction, localize } from "./app-localization.js";
 import { show_edit_colors_window } from "./edit-colors.js";
 import { $G, E, make_canvas } from "./helpers.js";
 
@@ -146,10 +145,10 @@ function $ColorBox(vertical) {
 
 	let $c;
 	if (vertical) {
-		$c = $Component(localize("Colors"), "colors-component", "tall", $cb);
-		$c.appendTo(get_direction() === "rtl" ? $left : $right); // opposite ToolBox by default
+		$c = $Component("Colors", "colors-component", "tall", $cb);
+		$c.appendTo($right); // opposite ToolBox by default
 	} else {
-		$c = $Component(localize("Colors"), "colors-component", "wide", $cb);
+		$c = $Component("Colors", "colors-component", "wide", $cb);
 		$c.appendTo($bottom);
 	}
 

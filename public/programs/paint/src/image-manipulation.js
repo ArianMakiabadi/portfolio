@@ -1,8 +1,7 @@
 // @ts-check
 // eslint-disable-next-line no-unused-vars
 /* global saved:writable, brush_size:writable, pencil_size:writable, stroke_size:writable */
-/* global $canvas_area, aliasing, localize, main_canvas, main_ctx, palette, selected_colors, selection, stroke_color, transparency */
-// import { localize } from "./app-localization.js";
+/* global $canvas_area, aliasing, main_canvas, main_ctx, palette, selected_colors, selection, stroke_color, transparency */
 import { cancel, deselect, detect_monochrome, show_error_message, undoable, update_title } from "./functions.js";
 import { $G, TAU, get_help_folder_icon, get_rgba_from_color, make_canvas, memoize_synchronous_function } from "./helpers.js";
 
@@ -775,7 +774,7 @@ function apply_image_transformation(meta, fn) {
 
 	if (selection) {
 		undoable({
-			name: `${meta.name} (${localize("Selection")})`,
+			name: `${meta.name} (${"Selection"})`,
 			icon: meta.icon,
 			soft: true,
 		}, () => {
@@ -801,7 +800,7 @@ function apply_image_transformation(meta, fn) {
 
 function flip_horizontal() {
 	apply_image_transformation({
-		name: localize("Flip horizontal"),
+		name: "Flip horizontal",
 		icon: get_help_folder_icon("p_fliph.png"),
 	}, (original_canvas, _original_ctx, new_canvas, new_ctx) => {
 		new_ctx.translate(new_canvas.width, 0);
@@ -812,7 +811,7 @@ function flip_horizontal() {
 
 function flip_vertical() {
 	apply_image_transformation({
-		name: localize("Flip vertical"),
+		name: "Flip vertical",
 		icon: get_help_folder_icon("p_flipv.png"),
 	}, (original_canvas, _original_ctx, new_canvas, new_ctx) => {
 		new_ctx.translate(0, new_canvas.height);
@@ -828,7 +827,7 @@ function flip_vertical() {
  */
 function rotate(angle) {
 	apply_image_transformation({
-		name: `${localize("Rotate by angle")} ${angle / TAU * 360} ${localize("Degrees")}`,
+		name: `${"Rotate by angle"} ${angle / TAU * 360} ${"Degrees"}`,
 		icon: get_help_folder_icon(`p_rotate_${angle >= 0 ? "cw" : "ccw"}.png`),
 	}, (original_canvas, _original_ctx, new_canvas, new_ctx) => {
 		new_ctx.save();
@@ -913,8 +912,8 @@ function stretch_and_skew(x_scale, y_scale, h_skew, v_skew) {
 	apply_image_transformation({
 		name:
 			(h_skew !== 0 || v_skew !== 0) ? (
-				(x_scale !== 1 || y_scale !== 1) ? localize("Stretch and Skew") : localize("Skew")
-			) : localize("Stretch"),
+				(x_scale !== 1 || y_scale !== 1) ? "Stretch and Skew" : "Skew"
+			) : "Stretch",
 		icon: get_help_folder_icon(
 			(h_skew !== 0) ? "p_skew_h.png" :
 				(v_skew !== 0) ? "p_skew_v.png" :

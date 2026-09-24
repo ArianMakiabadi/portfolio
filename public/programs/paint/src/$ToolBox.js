@@ -1,7 +1,6 @@
 // @ts-check
-/* global $canvas, $left, $right, $status_text, get_direction, localize, main_canvas, return_to_tools, selected_tool, selected_tools */
+/* global $canvas, $left, $status_text, main_canvas, return_to_tools, selected_tool, selected_tools */
 import { $Component } from "./$Component.js";
-// import { get_direction, localize } from "./app-localization.js";
 import { select_tool, select_tools } from "./functions.js";
 import { $G, E, make_css_cursor } from "./helpers.js";
 import { get_theme } from "./theme.js";
@@ -95,12 +94,12 @@ function $ToolBox(tools, is_extras) {
 	 */
 
 	const $c = /** @type {JQuery<HTMLDivElement> & I$Component & I$ToolBox} **/ ($Component(
-		is_extras ? "Extra Tools" : localize("Tools"),
+		is_extras ? "Extra Tools" : "Tools",
 		is_extras ? "tools-component extra-tools-component" : "tools-component",
 		"tall",
 		$tools.add($tool_options)
 	));
-	$c.appendTo(get_direction() === "rtl" ? $right : $left); // opposite ColorBox by default
+	$c.appendTo($left); // opposite ColorBox by default
 	$c.update_selected_tool = () => {
 		$buttons.removeClass("selected");
 		selected_tools.forEach((selected_tool) => {

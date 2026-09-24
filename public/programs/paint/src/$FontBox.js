@@ -1,7 +1,6 @@
 // @ts-check
-/* global localize, text_tool_font */
+/* global text_tool_font */
 import { $ToolWindow } from "./$ToolWindow.js";
-// import { localize } from "./app-localization.js";
 import { $G, E } from "./helpers.js";
 
 const eachFont = async (callback, afterAllCallback) => {
@@ -57,7 +56,7 @@ function $FontBox() {
 	const $family = /** @type {JQuery<HTMLSelectElement & { type: "select-one" }>} */(
 		$(E("select")).addClass("inset-deep").attr({
 			"aria-label": "Font Family",
-			"aria-description": localize("Selects the font used by the text."),
+			"aria-description": "Selects the font used by the text.",
 		})
 	);
 	const $size = $(E("input")).addClass("inset-deep").attr({
@@ -66,16 +65,16 @@ function $FontBox() {
 		max: 72,
 		value: text_tool_font.size,
 		"aria-label": "Font Size",
-		"aria-description": localize("Selects the point size of the text."),
+		"aria-description": "Selects the point size of the text.",
 	}).css({
 		maxWidth: 50,
 	});
 	const $button_group = $(E("span")).addClass("text-toolbar-button-group");
 	// @TODO: localized labels
-	const $bold = $Toggle(0, "bold", "Bold", localize("Sets or clears the text bold attribute."));
-	const $italic = $Toggle(1, "italic", "Italic", localize("Sets or clears the text italic attribute."));
-	const $underline = $Toggle(2, "underline", "Underline", localize("Sets or clears the text underline attribute."));
-	const $vertical = $Toggle(3, "vertical", "Vertical Writing Mode", localize("Only a Far East font can be used for vertical editing."));
+	const $bold = $Toggle(0, "bold", "Bold", "Sets or clears the text bold attribute.");
+	const $italic = $Toggle(1, "italic", "Italic", "Sets or clears the text italic attribute.");
+	const $underline = $Toggle(2, "underline", "Underline", "Sets or clears the text underline attribute.");
+	const $vertical = $Toggle(3, "vertical", "Vertical Writing Mode", "Only a Far East font can be used for vertical editing.");
 	$vertical.prop("disabled", true);
 
 	$button_group.append($bold, $italic, $underline, $vertical);
@@ -131,7 +130,7 @@ function $FontBox() {
 	$size.on("change", update_font);
 
 	const $w = $ToolWindow();
-	$w.title(localize("Fonts"));
+	$w.title("Fonts");
 	$w.$content.append($fb);
 	$w.center();
 	return $w;
