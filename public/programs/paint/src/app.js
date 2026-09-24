@@ -345,59 +345,6 @@ addEventListener("wheel", (e) => {
 }, { passive: false });
 // #endregion
 
-// #region Clipboard Handling
-$G.on("cut copy paste", (e) => {
-	if (e.isDefaultPrevented()) {
-		return;
-	}
-	if (
-		document.activeElement instanceof HTMLInputElement ||
-		document.activeElement instanceof HTMLTextAreaElement ||
-		!window.getSelection().isCollapsed
-	) {
-		// Don't prevent cutting/copying/pasting within inputs or textareas, or if there's a selection
-		return;
-	}
-
-	e.preventDefault();
-	// @ts-ignore
-	const cd = e.originalEvent.clipboardData || window.clipboardData;
-	if (!cd) { return; }
-
-	if (e.type === "copy" || e.type === "cut") {
-		if (selection && selection.canvas) {
-			const do_sync_clipboard_copy_or_cut = () => {
-				// works only for pasting within a jspaint instance
-				const data_url = selection.canvas.toDataURL();
-				cd.setData("text/x-data-uri; type=image/png", data_url);
-				cd.setData("text/uri-list", data_url);
-				cd.setData("URL", data_url);
-				if (e.type === "cut") {
-					delete_selection({
-						name: localize("Cut"),
-						icon: get_help_folder_icon("p_cut.png"),
-					});
-				}
-			};
-			if (!navigator.clipboard || !navigator.clipboard.write) {
-				return do_sync_clipboard_copy_or_cut();
-			}
-			try {
-				if (e.type === "cut") {
-					edit_cut();
-				} else {
-					edit_copy();
-				}
-			} catch (_error) {
-				do_sync_clipboard_copy_or_cut();
-			}
-		}
-	}
-	// Pasting an image (file or copied image URL/data-URI) is intentionally
-	// disabled — the canvas should only ever contain what's drawn in it.
-});
-// #endregion
-
 // #region Initialization
 // This sort of thing should really be at the END of the file.
 
