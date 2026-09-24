@@ -4,7 +4,7 @@
 // import { localize } from "./app-localization.js";
 import { show_edit_colors_window } from "./edit-colors.js";
 import { palette_formats } from "./file-format-data.js";
-import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_new, file_print, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
+import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_selection, edit_copy, edit_cut, edit_paste, file_new, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, redo, select_all, set_magnification, show_custom_zoom_window, show_document_history, show_file_format_errors, toggle_grid, toggle_thumbnail, undo, view_bitmap } from "./functions.js";
 import { $G, is_discord_embed } from "./helpers.js";
 import { showMessageBox } from "./msgbox.js";
 
@@ -19,30 +19,6 @@ const menus = {
 			label: localize("&New"),
 			action: () => { file_new(); },
 			description: localize("Creates a new document."),
-		},
-		MENU_DIVIDER,
-		{
-			label: localize("Print Pre&view"),
-			action: () => {
-				file_print();
-			},
-			description: localize("Prints the active document and sets printing options."),
-			//description: localize("Displays full pages."),
-		},
-		{
-			label: localize("Page Se&tup"),
-			action: () => {
-				file_print();
-			},
-			description: localize("Prints the active document and sets printing options."),
-			//description: localize("Changes the page layout."),
-		},
-		{
-			label: localize("&Print"),
-			action: () => {
-				file_print();
-			},
-			description: localize("Prints the active document and sets printing options."),
 		},
 		MENU_DIVIDER,
 		{
