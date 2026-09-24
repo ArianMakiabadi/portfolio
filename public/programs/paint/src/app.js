@@ -1,7 +1,7 @@
 // @ts-check
 // eslint-disable-next-line no-unused-vars
-/* global airbrush_size:writable, brush_shape:writable, brush_size:writable, button:writable, ctrl:writable, eraser_size:writable, fill_color:writable, pick_color_slot:writable, history_node_to_cancel_to:writable, MenuBar:writable, my_canvas_height:writable, my_canvas_width:writable, palette:writable, pencil_size:writable, pointer:writable, pointer_active:writable, pointer_buttons:writable, pointer_over_canvas:writable, pointer_previous:writable, pointer_start:writable, pointer_type:writable, pointers:writable, reverse:writable, shift:writable, stroke_color:writable, stroke_size:writable, update_helper_layer_on_pointermove_active:writable */
-/* global AccessKeys, current_history_node, default_airbrush_size, default_brush_shape, default_brush_size, default_canvas_height, default_canvas_width, default_eraser_size, default_magnification, default_pencil_size, default_stroke_size, enable_fs_access_api, file_name, get_direction, localize, magnification, main_canvas, main_ctx, return_to_tools, selected_colors, selected_tool, selected_tools, selection, systemHooks, textbox, transparency */
+/* global airbrush_size:writable, brush_shape:writable, brush_size:writable, button:writable, ctrl:writable, eraser_size:writable, fill_color:writable, pick_color_slot:writable, history_node_to_cancel_to:writable, my_canvas_height:writable, my_canvas_width:writable, palette:writable, pencil_size:writable, pointer:writable, pointer_active:writable, pointer_buttons:writable, pointer_over_canvas:writable, pointer_previous:writable, pointer_start:writable, pointer_type:writable, pointers:writable, reverse:writable, shift:writable, stroke_color:writable, stroke_size:writable, update_helper_layer_on_pointermove_active:writable */
+/* global current_history_node, default_airbrush_size, default_brush_shape, default_brush_size, default_canvas_height, default_canvas_width, default_eraser_size, default_magnification, default_pencil_size, default_stroke_size, enable_fs_access_api, file_name, get_direction, localize, magnification, main_canvas, main_ctx, return_to_tools, selected_colors, selected_tool, selected_tools, selection, systemHooks, textbox, transparency */
 
 import { $ColorBox } from "./$ColorBox.js";
 import { $ToolBox } from "./$ToolBox.js";
@@ -11,7 +11,6 @@ import { default_palette, get_winter_palette } from "./color-data.js";
 import { cancel, change_url_param, clear, delete_selection, deselect, edit_copy, edit_cut, edit_paste, file_new, get_tool_by_id, get_uris, image_attributes, image_flip_and_rotate, image_invert_colors, image_stretch_and_skew, load_image_from_uri, make_or_update_undoable, open_from_file, paste, paste_image_from_file, redo, reset_canvas_and_history, reset_file, reset_selected_colors, resize_canvas_and_save_dimensions, resize_canvas_without_saving_dimensions, select_all, select_tool, select_tools, set_magnification, show_document_history, show_error_message, show_resource_load_error_message, toggle_grid, undo, update_canvas_rect, update_disable_aa, update_helper_layer, update_magnified_canvas_size, view_bitmap } from "./functions.js";
 import { $G, E, TAU, get_file_extension, get_help_folder_icon, to_canvas_coords } from "./helpers.js";
 import { init_webgl_stuff, rotate } from "./image-manipulation.js";
-import { menus } from "./menus.js";
 import { showMessageBox } from "./msgbox.js";
 import { localStore } from "./storage.js";
 import { get_theme, set_theme } from "./theme.js";
@@ -235,118 +234,6 @@ $status_text.default = () => {
 	$status_text.text(localize("For Help, click Help Topics on the Help Menu."));
 };
 $status_text.default();
-
-// #endregion
-
-// #region Menu Bar
-let menu_bar_outside_frame = false;
-if (frameElement) {
-	try {
-		if (parent.MenuBar) {
-			// @ts-ignore
-			MenuBar = parent.MenuBar;
-			menu_bar_outside_frame = true;
-		}
-	} catch (_error) { /* ignore */ }
-}
-const menu_bar = MenuBar(menus);
-window.menu_bar = menu_bar;
-if (menu_bar_outside_frame) {
-	$(menu_bar.element).insertBefore(frameElement);
-} else {
-	$(menu_bar.element).prependTo($V);
-}
-
-$(menu_bar.element).on("info", (event) => {
-	// @ts-ignore
-	$status_text.text(event.detail?.description ?? "");
-});
-$(menu_bar.element).on("default-info", () => {
-	$status_text.default();
-});
-
-// Extras menu emoji icons
-// (OS-GUI.js doesn't support icons yet but I wanted to spruce it up a bit.)
-// Originally I defined the emoji as part of the label, which worked well for a while.
-// Now I'm rendering the emoji as pseudo elements.
-// - It allows for matching on the menu item text exactly, without including emoji in my tests,
-//   which will hopefully be replaced with custom icons in the future.
-// - It makes it easier to replace the emoji with custom icons in the future.
-// - It hides the emoji from `aria-label`, for screen reader users.
-// - It makes the menu data cleaner.
-// - It allows aligning the emoji nicely, even when some don't show as emoji, depending on the platform.
-
-/**
- * @param {OSGUIMenuFragment[]} menu_items
- * @param {HTMLElement} menu_element
- * @yields {[OSGUIMenuItem, HTMLElement]}
- * @returns {Generator<[OSGUIMenuItem, HTMLElement], void, void>}
- */
-function* traverse_menu(menu_items, menu_element) {
-	// Traverse menu data and elements in tandem, yielding pairs of menu item specifications and elements.
-	// This approach handles identically named menu items in separate menus,
-	// as is the case with "File > Manage Storage" and "Edit > History", both present in the Extras menu,
-	// but also in the other menus for discoverability.
-	// However, it doesn't handle identically named menu items in the same menu,
-	// as it still matches up items within the menu using aria-label.
-
-	// Menu structure:
-	// - Menu popups are not descendants of the menu bar or other menu popups; they are always direct children of the body.
-	// - Menu items that open submenus have "aria-controls" pointing to the ID of the submenu.
-	// - (Menu popups also have "data-semantic-parent" pointing to the ID of the menu item that opens them.)
-	// - `submenu` is an array, but the top level (menu bar) is represented as an object, which is a bit awkward.
-	//   However, this function doesn't deal with the top level.
-
-	const menu_item_elements = /** @type {HTMLElement[]} */([...menu_element.querySelectorAll(".menu-item")]);
-	for (const menu_item of menu_items) {
-		if (typeof menu_item !== "object" || !("label" in menu_item)) {
-			continue;
-		}
-		const aria_label = AccessKeys.toText(menu_item.label);
-		const menu_item_element = menu_item_elements.filter((el) =>
-			el.getAttribute("aria-label") === aria_label
-		)[0];
-		if (!menu_item_element) {
-			console.warn("Couldn't find menu item", menu_item, "with aria-label", aria_label);
-			continue;
-		}
-		yield [menu_item, menu_item_element];
-		if (menu_item.submenu) {
-			yield* traverse_menu(menu_item.submenu, menu_document.getElementById(menu_item_element.getAttribute("aria-controls")));
-		}
-		// if (menu_item.radioItems) {
-		// 	yield* traverse_menu(menu_item.radioItems, menu_element);
-		// }
-	}
-}
-
-const menu_document = menu_bar.element.ownerDocument;
-const extras_menu_button = menu_document.querySelector(".extras-menu-button");
-const extras_menu_popup = menu_document.getElementById(extras_menu_button.getAttribute("aria-controls"));
-
-let emoji_css = `
-	.menu-item .menu-item-label::before {
-		display: inline-block;
-		width: 1.8em;
-		margin-right: 0.2em;
-		text-align: center;
-	}
-`;
-for (const [menu_item, menu_item_element] of traverse_menu(menus["E&xtras"], extras_menu_popup)) {
-	if (menu_item.emoji_icon) {
-		emoji_css += `
-			#${menu_item_element.id} .menu-item-label::before {
-				content: "${menu_item.emoji_icon}";
-			}
-		`;
-	}
-}
-$("<style>").text(emoji_css).appendTo(menu_document.head);
-
-// Electron menu integration
-if (window.is_electron_app) {
-	window.setMenus(menus);
-}
 
 // #endregion
 
