@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Window from "./Window";
 import ProjectList from "@/components/projects/ProjectList";
+import ProjectDetail from "@/components/projects/ProjectDetail";
 import { projectCategories } from "@/data/projects";
 import projectsIcon from "@/assets/taskbar/icons/projects-icon-lg.webp";
 import backIcon from "@/assets/window/header-tools/right-arrow-green-icon.webp";
@@ -128,9 +129,7 @@ function ProjectsWindow({ onClose }: ProjectsWindowProps) {
       onClose={onClose}
     >
       {activeProject ? (
-        <div className="h-full overflow-auto bg-white p-2 text-xs">
-          {activeProject.title}
-        </div>
+        <ProjectDetail project={activeProject} />
       ) : (
         <ProjectList
           categories={projectCategories}
