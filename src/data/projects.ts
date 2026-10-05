@@ -19,6 +19,7 @@ export const projectCategories: ProjectCategory[] = [
         name: "JobHop",
         icon: folderIcon,
         title: "JobHop - Full-stack freelancing platform",
+        date: "Oct 2025 - Dec 2025",
         repoUrl: "https://github.com/ArianMakiabadi/JobHop",
         siteUrl: "https://jobhop.makiabadi.com/",
         tools: [

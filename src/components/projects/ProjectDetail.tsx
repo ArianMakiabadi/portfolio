@@ -14,10 +14,10 @@ function ProjectDetail({ project }: ProjectDetailProps) {
       <div className="h-full overflow-x-hidden overflow-y-auto bg-white p-2 pb-10 text-xs">
         <h2 className="text-lg">{title}</h2>
         {date && (
-          <div className="mt-1 flex items-center gap-0.5 text-sm">
+          <div className="mt-0.5 flex items-center gap-0.5 text-xs font-light text-gray-600">
             <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
               <path
-                fill="#000000"
+                fill="currentColor"
                 d="M9 10v2H7v-2zm4 0v2h-2v-2zm4 0v2h-2v-2zm2-7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h1V1h2v2h8V1h2v2zm0 16V8H5v11zM9 14v2H7v-2zm4 0v2h-2v-2zm4 0v2h-2v-2z"
               />
             </svg>
