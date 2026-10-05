@@ -123,7 +123,7 @@ function ProjectsWindow({ onClose }: ProjectsWindowProps) {
       menus={menus}
       headerBar={headerBar}
       leftMenu={leftMenu}
-      initialSize={{ width: 640, height: 460 }}
+      initialSize={{ width: 740, height: 500 }}
       initialPosition={{ x: 260, y: 110 }}
       minSize={{ width: 480, height: 320 }}
       onClose={onClose}
