@@ -1,5 +1,6 @@
 import githubIcon from "@/assets/window/left-menu/github-icon.webp";
 import webIcon from "@/assets/projects/tools/web.svg";
+import calendarIcon from "@/assets/window/Calendar.svg";
 import type { Project, ProjectBlock } from "@/types/project";
 
 type ProjectDetailProps = {
@@ -14,13 +15,8 @@ function ProjectDetail({ project }: ProjectDetailProps) {
       <div className="h-full overflow-x-hidden overflow-y-auto bg-white p-2 pb-10 text-xs">
         <h2 className="text-lg">{title}</h2>
         {date && (
-          <div className="mt-0.5 flex items-center gap-0.5 text-xs font-light text-gray-600">
-            <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M9 10v2H7v-2zm4 0v2h-2v-2zm4 0v2h-2v-2zm2-7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h1V1h2v2h8V1h2v2zm0 16V8H5v11zM9 14v2H7v-2zm4 0v2h-2v-2zm4 0v2h-2v-2z"
-              />
-            </svg>
+          <div className="mt-0.5 flex items-center gap-1 text-xs font-light text-gray-600">
+            <img src={calendarIcon} className="h-3 w-3 shrink-0" />
             <span>{date}</span>
           </div>
         )}
@@ -93,11 +89,7 @@ function BlockContent({ block }: { block: ProjectBlock }) {
           {block.caption && (
             <p className="mb-px text-gray-500 italic">{block.caption}</p>
           )}
-          <img
-            src={block.src}
-            alt={block.alt}
-            className="w-full max-w-[750px]"
-          />
+          <img src={block.src} alt={block.alt} className="w-full max-w-187.5" />
         </>
       );
   }
