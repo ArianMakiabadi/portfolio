@@ -1,4 +1,9 @@
+import { useState } from "react";
 import Window from "./Window";
+import ProjectList from "@/components/projects/ProjectList";
+import ProjectDetail from "@/components/projects/ProjectDetail";
+import { projectCategories } from "@/data/projects";
+import { useIconSelection } from "@/hooks/useIconSelection";
 import projectsIcon from "@/assets/taskbar/icons/projects-icon-lg.webp";
 import backIcon from "@/assets/window/header-tools/right-arrow-green-icon.webp";
 import forwardIcon from "@/assets/window/header-tools/left-arrow-green-icon.webp";
@@ -22,9 +27,16 @@ type ProjectsWindowProps = {
   onClose: () => void;
 };
 
-const PLACEHOLDER_PROJECTS = ["Project Alpha", "Project Beta", "Project Gamma"];
-
 function ProjectsWindow({ onClose }: ProjectsWindowProps) {
+  const selection = useIconSelection();
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const activeProject = projectCategories
+    .flatMap((category) => category.projects)
+    .find((project) => project.id === activeId);
+
+  const handleBack = () => setActiveId(null);
+
   const menus: MenuBarMenu[] = [
     {
       label: "File",
@@ -39,18 +51,27 @@ function ProjectsWindow({ onClose }: ProjectsWindowProps) {
     tools: {
       groups: [
         [
-          { icon: backIcon, label: "Back", disabled: true, isBack: true },
+          {
+            icon: backIcon,
+            label: "Back",
+            disabled: !activeProject,
+            isBack: true,
+            onSelect: handleBack,
+          },
           { icon: forwardIcon, disabled: true },
         ],
         [
-          { icon: upIcon },
+          { icon: upIcon, onSelect: handleBack },
           { icon: searchIcon, label: "Search" },
           { icon: folderIcon, label: "Folders" },
         ],
         [{ icon: projectsIcon, hasDropdown: true }],
       ],
     },
-    search: { icon: projectsIcon, path: "My Projects" },
+    search: {
+      icon: projectsIcon,
+      path: activeProject ? `My Projects/${activeProject.name}` : "My Projects",
+    },
   };
 
   const leftMenu: WindowLeftMenuConfig = {
@@ -103,24 +124,20 @@ function ProjectsWindow({ onClose }: ProjectsWindowProps) {
       menus={menus}
       headerBar={headerBar}
       leftMenu={leftMenu}
-      initialSize={{ width: 640, height: 460 }}
+      initialSize={{ width: 740, height: 500 }}
       initialPosition={{ x: 260, y: 110 }}
       minSize={{ width: 480, height: 320 }}
       onClose={onClose}
     >
-      <div className="h-full overflow-auto bg-white p-4">
-        <p className="mb-3 text-xs font-bold text-gray-600">
-          Placeholder content — not the real Projects feature yet.
-        </p>
-        <div className="flex flex-wrap gap-4">
-          {PLACEHOLDER_PROJECTS.map((name) => (
-            <div key={name} className="flex w-20 flex-col items-center gap-1">
-              <img src={folderIcon} alt="" className="h-8 w-8" />
-              <span className="text-center text-xs">{name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      {activeProject ? (
+        <ProjectDetail project={activeProject} />
+      ) : (
+        <ProjectList
+          categories={projectCategories}
+          selection={selection}
+          onOpen={setActiveId}
+        />
+      )}
     </Window>
   );
 }

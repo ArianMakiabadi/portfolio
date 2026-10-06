@@ -21,4 +21,4 @@ Internally the store also tracks a z-index map (focusing a window bumps it to a 
 
 `Window.tsx` is the only component that talks to the store's mutators directly. On mount it calls `registerWindow(id, meta)` + `focusWindow(id)`, and unregisters on unmount — deliberately a mount-only effect with an `exhaustive-deps` disable. It owns its own position/size/maximize/closed state locally; the store owns focus, minimize, and stacking. Minimize hides via `display: none` (state preserved), close unmounts content via a local `isClosed` flag.
 
-Windows are single-instance: `id` is a hardcoded literal (`"minesweeper"`, `"pinball"`, `"solitaire"`) and `Desktop.tsx` tracks open/closed per id in a plain `Record<string, boolean>` state (`openApps`), not a list — opening the same app twice just re-shows the one window.
+Windows are single-instance: `id` is a hardcoded literal (`"minesweeper"`, `"pinball"`, `"solitaire"`, `"paint"`, `"projects"`) matching the app's `startMenuApps` id and `Desktop.tsx` tracks open/closed per id in a plain `Record<string, boolean>` state (`openApps`), not a list — opening the same app twice just re-shows the one window.
