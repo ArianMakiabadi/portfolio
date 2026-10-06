@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import xpBliss from "@/assets/xp-bliss.webp";
+import DesktopIcons from "./DesktopIcons";
 import Taskbar from "@/components/taskbar/Taskbar";
 import MinesweeperWindow from "@/programs/minesweeper/MinesweeperWindow";
 import JsPaintWindow from "@/programs/paint/JsPaintWindow";
@@ -21,9 +22,10 @@ function Desktop() {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat"
+      className="relative min-h-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${xpBliss})` }}
     >
+      <DesktopIcons onOpenApp={openApp} />
       <WindowManagerProvider>
         {openApps.minesweeper && (
           <MinesweeperWindow onClose={() => closeApp("minesweeper")} />

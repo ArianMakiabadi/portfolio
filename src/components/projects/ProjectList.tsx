@@ -1,60 +1,35 @@
-import type { MouseEvent } from "react";
+import IconItem from "@/components/shared/IconItem";
+import type { IconSelection } from "@/hooks/useIconSelection";
 import type { ProjectCategory } from "@/types/project";
 
 type ProjectListProps = {
   categories: ProjectCategory[];
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
+  selection: IconSelection;
   onOpen: (id: string) => void;
 };
 
-function ProjectList({
-  categories,
-  selectedId,
-  onSelect,
-  onOpen,
-}: ProjectListProps) {
-  const handleBackgroundMouseDown = (event: MouseEvent<HTMLDivElement>) => {
-    if (!(event.target as HTMLElement).closest("[data-project-card]")) {
-      onSelect(null);
-    }
-  };
-
+function ProjectList({ categories, selection, onOpen }: ProjectListProps) {
   return (
     <div
       className="flex h-full flex-col overflow-auto bg-white pt-0.5 select-none"
-      onMouseDown={handleBackgroundMouseDown}
+      {...selection.containerProps}
     >
       {categories.map((category) => (
         <div key={category.name} className="relative mb-3">
           <h1 className="px-3 text-xs font-semibold">{category.name}</h1>
           <div className="absolute top-5 -left-3 h-px w-80 bg-linear-to-r from-blue-300 to-white" />
           <div className="flex w-full flex-wrap gap-2 pt-3 pb-3">
-            {category.projects.map((project) => {
-              const isSelected = project.id === selectedId;
-              return (
-                <div
-                  key={project.id}
-                  data-project-card
-                  className="pointer flex items-center gap-2.5 px-4 pb-2"
-                  onMouseDown={() => onSelect(project.id)}
-                  onDoubleClick={() => onOpen(project.id)}
-                >
-                  <img
-                    src={project.icon}
-                    alt=""
-                    className={`h-10 w-10 ${isSelected ? "opacity-50" : ""}`}
-                  />
-                  <p
-                    className={`text-xs font-medium ${
-                      isSelected ? "bg-[#0B61FF] text-white" : "text-black"
-                    }`}
-                  >
-                    {project.name}
-                  </p>
-                </div>
-              );
-            })}
+            {category.projects.map((project) => (
+              <IconItem
+                key={project.id}
+                variant="list"
+                icon={project.icon}
+                label={project.name}
+                isSelected={project.id === selection.selectedId}
+                onSelect={() => selection.select(project.id)}
+                onOpen={() => onOpen(project.id)}
+              />
+            ))}
           </div>
         </div>
       ))}

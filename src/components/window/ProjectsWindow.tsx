@@ -3,6 +3,7 @@ import Window from "./Window";
 import ProjectList from "@/components/projects/ProjectList";
 import ProjectDetail from "@/components/projects/ProjectDetail";
 import { projectCategories } from "@/data/projects";
+import { useIconSelection } from "@/hooks/useIconSelection";
 import projectsIcon from "@/assets/taskbar/icons/projects-icon-lg.webp";
 import backIcon from "@/assets/window/header-tools/right-arrow-green-icon.webp";
 import forwardIcon from "@/assets/window/header-tools/left-arrow-green-icon.webp";
@@ -27,7 +28,7 @@ type ProjectsWindowProps = {
 };
 
 function ProjectsWindow({ onClose }: ProjectsWindowProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selection = useIconSelection();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const activeProject = projectCategories
@@ -133,8 +134,7 @@ function ProjectsWindow({ onClose }: ProjectsWindowProps) {
       ) : (
         <ProjectList
           categories={projectCategories}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
+          selection={selection}
           onOpen={setActiveId}
         />
       )}
