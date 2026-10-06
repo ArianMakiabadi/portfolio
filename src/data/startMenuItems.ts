@@ -2,7 +2,7 @@ import {
   contactMeIcon,
   cvIcon,
   githubIcon,
-  instagramIcon,
+  // instagramIcon,
   pinballIcon,
   linkedinIcon,
   noteIcon,
@@ -80,12 +80,12 @@ export const startMenuLinks: StartMenuLinkItem[] = [
     icon: linkedinIcon,
     href: "https://linkedin.com/in/ArianMakiabadi",
   },
-  {
-    id: "instagram",
-    label: "Instagram",
-    icon: instagramIcon,
-    href: "https://instagram.com/Arian.Maki",
-  },
+  // {
+  //   id: "instagram",
+  //   label: "Instagram",
+  //   icon: instagramIcon,
+  //   href: "https://instagram.com/Arian.Maki",
+  // },
   {
     id: "resume",
     label: "Download CV",
