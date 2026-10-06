@@ -21,8 +21,8 @@ be extremly concise, sacrifice grammer for the sake of consision.
 
 ## What this is
 
-A personal portfolio built as a recreation of the Windows XP desktop in React 19 + TypeScript + Vite + Tailwind v4. Portfolio content opens as draggable XP windows launched from the Start menu. Wired apps so far: Minesweeper (native), Solitaire and 3D Pinball (embedded games, see below). `projects`, `cv`, `notepad`, `paint`, `contact` exist as Start menu entries in `startMenuItems.ts` but have no `<Window>` behind them yet — wiring those up is the open work.
+A personal portfolio built as a recreation of the Windows XP desktop in React 19 + TypeScript + Vite + Tailwind v4. Portfolio content opens as draggable XP windows launched from the Start menu or from desktop icons. Wired apps so far: My Projects (native, data-driven Explorer-style window), Minesweeper (native), Solitaire, 3D Pinball and Paint (embedded iframe apps). `cv`, `notepad`, `contact` exist as Start menu entries in `startMenuItems.ts` but have no `<Window>` behind them yet — wiring those up is the open work.
 
 ## Architecture & conventions
 
-Documented as path-scoped rules under `.claude/rules/` — they load automatically when Claude works with the relevant files, instead of always being in context. See `.claude/rules/*.md` for boot flow, window management, taskbar/start-menu wiring, embedded games, native programs, loading states, styling, and other conventions.
+Documented as path-scoped rules under `.claude/rules/` — they load automatically when Claude works with the relevant files, instead of always being in context. See `.claude/rules/*.md` for boot flow, window management, taskbar/start-menu/desktop-icon wiring, embedded games, native programs, the projects window, icon selection, loading states, styling, and other conventions.
