@@ -12,6 +12,8 @@ import TaskbarPellet from "./TaskbarPellet";
 
 type TaskbarProps = {
   onSelectApp: (id: string) => void;
+  onLogOff: () => void;
+  onShutDown: () => void;
 };
 
 function formatTime(date: Date) {
@@ -22,7 +24,7 @@ function formatTime(date: Date) {
   });
 }
 
-function Taskbar({ onSelectApp }: TaskbarProps) {
+function Taskbar({ onSelectApp, onLogOff, onShutDown }: TaskbarProps) {
   const { focusWindow } = useWindowManager();
   // windowList only changes when a window opens/closes (not on focus/minimize/
   // drag), so this doesn't re-render on every unrelated window-manager update.
@@ -88,6 +90,16 @@ function Taskbar({ onSelectApp }: TaskbarProps) {
     [closeStartMenu, onSelectApp],
   );
 
+  const handleLogOff = useCallback(() => {
+    closeStartMenu();
+    onLogOff();
+  }, [closeStartMenu, onLogOff]);
+
+  const handleShutDown = useCallback(() => {
+    closeStartMenu();
+    onShutDown();
+  }, [closeStartMenu, onShutDown]);
+
   return (
     <div
       ref={taskbarRef}
@@ -98,8 +110,8 @@ function Taskbar({ onSelectApp }: TaskbarProps) {
         <StartMenu
           ref={startMenuRef}
           onSelectApp={handleSelectApp}
-          onLogOff={closeStartMenu}
-          onShutDown={closeStartMenu}
+          onLogOff={handleLogOff}
+          onShutDown={handleShutDown}
         />
       )}
       <button

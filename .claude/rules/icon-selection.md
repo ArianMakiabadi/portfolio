@@ -2,7 +2,7 @@
 paths:
   - "src/components/shared/IconItem.tsx"
   - "src/hooks/useIconSelection.ts"
-  - "src/components/bootup/DesktopIcons.tsx"
+  - "src/components/bootup/desktop/DesktopIcons.tsx"
   - "src/components/projects/ProjectList.tsx"
   - "src/components/window/ProjectsWindow.tsx"
 ---
