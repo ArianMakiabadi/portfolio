@@ -3,7 +3,7 @@ paths:
   - "src/context/**/*.ts"
   - "src/context/**/*.tsx"
   - "src/components/window/Window.tsx"
-  - "src/components/bootup/Desktop.tsx"
+  - "src/components/bootup/desktop/Desktop.tsx"
   - "src/components/taskbar/Taskbar.tsx"
 ---
 
