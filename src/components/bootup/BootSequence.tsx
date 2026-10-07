@@ -3,6 +3,7 @@ import BlackScreen from "./BlackScreen";
 import StartupScreen from "./StartupScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import LoginScreen from "./LoginScreen";
+import ShutdownScreen from "./ShutdownScreen";
 import Desktop from "./Desktop";
 import startupSound from "@/assets/sounds/start-windows.mp3";
 import shutdownSound from "@/assets/sounds/shutdown-windows.mp3";
@@ -107,10 +108,8 @@ function BootSequence() {
       );
 
     case "logging-off":
-      return <WelcomeScreen message="Logging off..." />;
-
     case "shutting-down":
-      return <WelcomeScreen message="Portfolio is shutting down..." />;
+      return <ShutdownScreen phase={stage} />;
 
     case "desktop":
       return <Desktop onLogOff={handleLogOff} onRestart={handleRestart} />;
