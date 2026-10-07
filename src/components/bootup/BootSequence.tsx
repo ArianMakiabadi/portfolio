@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import BlackScreen from "./BlackScreen";
-import StartupScreen from "./StartupScreen";
-import WelcomeScreen from "./WelcomeScreen";
-import LoginScreen from "./LoginScreen";
-import ShutdownScreen from "./ShutdownScreen";
-import Desktop from "./Desktop";
+import BlackScreen from "./screens/BlackScreen";
+import StartupScreen from "./screens/StartupScreen";
+import WelcomeScreen from "./screens/WelcomeScreen";
+import LoginScreen from "./screens/LoginScreen";
+import ShutdownScreen from "./screens/ShutdownScreen";
+import Desktop from "./desktop/Desktop";
 import startupSound from "@/assets/sounds/start-windows.mp3";
 import shutdownSound from "@/assets/sounds/shutdown-windows.mp3";
 import { playSound } from "@/utils/audio";

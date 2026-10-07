@@ -1,6 +1,6 @@
 import LoginButton from "./LoginButton";
 import SessionScreenLayout from "./SessionScreenLayout";
-import windowsLogo from "./../../assets/logos/windows-logo.webp";
+import windowsLogo from "@/assets/logos/windows-logo.webp";
 
 type LoginScreenProps = {
   onLogin: () => void;

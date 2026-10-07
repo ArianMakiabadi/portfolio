@@ -1,4 +1,4 @@
-import profilePhoto from "./../../assets/profile-photo.webp";
+import profilePhoto from "@/assets/profile-photo.webp";
 
 type props = {
   onLogin: () => void;

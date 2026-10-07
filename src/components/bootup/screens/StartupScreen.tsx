@@ -1,5 +1,5 @@
 import LoadingBar from "./LoadingBar";
-import windowsLogo from "./../../assets/logos/windows-logo.webp";
+import windowsLogo from "@/assets/logos/windows-logo.webp";
 
 function StartupScreen() {
   return (

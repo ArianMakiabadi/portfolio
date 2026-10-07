@@ -16,8 +16,8 @@ function ShutdownScreen({ phase }: ShutdownScreenProps) {
   return (
     <SessionScreenLayout>
       {/* Right edge sits 300px past the horizontal centre, slightly above the
-          vertical centre of the area between the bars; the text right-aligns
-          to that edge while the logo overhangs it. */}
+          vertical centre of the area between the bars; the text left-aligns
+          to that edge. */}
       <div className="absolute right-[calc(50%-300px)] top-[calc(45%+11.2px)] flex -translate-y-1/2 flex-col items-start">
         <img
           className="relative h-auto w-56"
