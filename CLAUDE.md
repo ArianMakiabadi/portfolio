@@ -26,3 +26,17 @@ A personal portfolio built as a recreation of the Windows XP desktop in React 19
 ## Architecture & conventions
 
 Documented as path-scoped rules under `.claude/rules/` — they load automatically when Claude works with the relevant files, instead of always being in context. See `.claude/rules/*.md` for boot flow, window management, taskbar/start-menu/desktop-icon wiring, embedded games, native programs, the projects window, icon selection, loading states, styling, and other conventions.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues (ArianMakiabadi/portfolio) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`), applied as GitHub labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` + `docs/adr/` (created lazily). See `docs/agents/domain.md`.
