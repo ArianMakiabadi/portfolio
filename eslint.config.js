@@ -7,7 +7,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default defineConfig([
-  globalIgnores(["dist", "references", "public/programs"]),
+  globalIgnores(["dist", "server/dist", "references", "public/programs"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -19,6 +19,12 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+    },
+  },
+  {
+    files: ["server/**/*.ts"],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ]);

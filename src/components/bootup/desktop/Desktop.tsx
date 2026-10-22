@@ -8,6 +8,7 @@ import JsPaintWindow from "@/programs/paint/JsPaintWindow";
 import PinballWindow from "@/programs/pinball/PinballWindow";
 import SolitaireWindow from "@/programs/solitaire/SolitaireWindow";
 import ProjectsWindow from "@/components/window/ProjectsWindow";
+import ContactWindow from "@/components/window/ContactWindow";
 import { WindowManagerProvider } from "@/context/WindowManagerProvider";
 
 type DesktopProps = {
@@ -59,6 +60,9 @@ function Desktop({ onLogOff, onRestart }: DesktopProps) {
           )}
           {openApps.projects && (
             <ProjectsWindow onClose={() => closeApp("projects")} />
+          )}
+          {openApps.contact && (
+            <ContactWindow onClose={() => closeApp("contact")} />
           )}
           <Taskbar
             onSelectApp={openApp}

@@ -86,8 +86,11 @@ function Taskbar({ onSelectApp, onLogOff, onShutDown }: TaskbarProps) {
     (id: string) => {
       closeStartMenu();
       onSelectApp(id);
+      // Already-open window: bring it forward. Not-yet-mounted ones focus
+      // themselves on mount (focusWindow ignores unregistered ids).
+      focusWindow(id);
     },
-    [closeStartMenu, onSelectApp],
+    [closeStartMenu, onSelectApp, focusWindow],
   );
 
   const handleLogOff = useCallback(() => {
