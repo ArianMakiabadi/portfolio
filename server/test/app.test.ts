@@ -90,3 +90,109 @@ describe("POST /api/inquiries", () => {
     expect(logLines[0]).not.toContain(validInquiry.message);
   });
 });
+
+describe("POST /api/inquiries validation", () => {
+  async function postExpectingFieldError(
+    overrides: Record<string, unknown>,
+    field: string,
+    message: string,
+  ) {
+    const { app, sent } = createTestApp();
+    const res = await request(app)
+      .post("/api/inquiries")
+      .send({ ...validInquiry, ...overrides });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ errors: { [field]: message } });
+    expect(sent).toHaveLength(0);
+  }
+
+  it("rejects a missing name", () =>
+    postExpectingFieldError({ name: "" }, "name", "Please enter your name."));
+
+  it("rejects an absent name key", () =>
+    postExpectingFieldError(
+      { name: undefined },
+      "name",
+      "Please enter your name.",
+    ));
+
+  it("rejects a name over 200 characters", () =>
+    postExpectingFieldError(
+      { name: "a".repeat(201) },
+      "name",
+      "Name must be 200 characters or fewer.",
+    ));
+
+  it("rejects a missing email", () =>
+    postExpectingFieldError(
+      { email: "" },
+      "email",
+      "Please enter your email address.",
+    ));
+
+  it("rejects a malformed email", () =>
+    postExpectingFieldError(
+      { email: "ada.example.com" },
+      "email",
+      "Please enter a valid email address.",
+    ));
+
+  it("rejects an email over 200 characters", () =>
+    postExpectingFieldError(
+      // 189 + "@example.com" (12) = 201 characters, otherwise well-formed.
+      { email: `${"a".repeat(189)}@example.com` },
+      "email",
+      "Email must be 200 characters or fewer.",
+    ));
+
+  it("rejects a subject over 200 characters", () =>
+    postExpectingFieldError(
+      { subject: "s".repeat(201) },
+      "subject",
+      "Subject must be 200 characters or fewer.",
+    ));
+
+  it("rejects a missing message", () =>
+    postExpectingFieldError(
+      { message: "   " },
+      "message",
+      "Please enter a message.",
+    ));
+
+  it("rejects a message over 1000 characters", () =>
+    postExpectingFieldError(
+      { message: "m".repeat(1001) },
+      "message",
+      "Message must be 1000 characters or fewer.",
+    ));
+
+  it("logs an invalid outcome without personal data", async () => {
+    const { app, logLines } = createTestApp();
+
+    await request(app)
+      .post("/api/inquiries")
+      .set("X-Forwarded-For", "203.0.113.7")
+      .send({ ...validInquiry, email: "ada.example.com" });
+
+    expect(logLines).toHaveLength(1);
+    const entry = JSON.parse(logLines[0]);
+    expect(Object.keys(entry).sort()).toEqual(["ip", "outcome", "time"]);
+    expect(entry.outcome).toBe("invalid");
+    expect(logLines[0]).not.toContain("203.0.113.7");
+    expect(logLines[0]).not.toContain("ada.example.com");
+    expect(logLines[0]).not.toContain(validInquiry.message);
+  });
+
+  it("rejects a body over 16kb before validating it", async () => {
+    const { app, sent } = createTestApp();
+
+    const res = await request(app)
+      .post("/api/inquiries")
+      .send({ ...validInquiry, message: "m".repeat(20_000) });
+
+    expect(res.status).toBe(413);
+    expect(res.body).toEqual({ error: "payload_too_large" });
+    expect(sent).toHaveLength(0);
+  });
+});

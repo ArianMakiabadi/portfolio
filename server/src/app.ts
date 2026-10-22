@@ -1,6 +1,6 @@
-import express from "express";
-import { buildInquiryEmail, type Inquiry } from "./inquiry.js";
-import { formatOutcome } from "./log.js";
+import express, { type ErrorRequestHandler } from "express";
+import { buildInquiryEmail, validateInquiry } from "./inquiry.js";
+import { formatOutcome, type InquiryOutcome } from "./log.js";
 import type { MailAddresses, MailTransport } from "./mail/transport.js";
 
 export type AppDeps = {
@@ -21,12 +21,31 @@ export function createApp({ transport, mail, log }: AppDeps) {
   });
 
   app.post("/api/inquiries", async (req, res) => {
-    // Validation lands with zod in a later ticket; trust the shape for now.
-    const inquiry = req.body as Inquiry;
-    await transport.send(buildInquiryEmail(inquiry, mail, new Date()));
-    log(formatOutcome(req.ip ?? "unknown", "sent"));
+    const logOutcome = (outcome: InquiryOutcome) =>
+      log(formatOutcome(req.ip ?? "unknown", outcome));
+
+    const result = validateInquiry(req.body);
+    if (!result.ok) {
+      logOutcome("invalid");
+      res.status(400).json({ errors: result.errors });
+      return;
+    }
+
+    await transport.send(buildInquiryEmail(result.inquiry, mail, new Date()));
+    logOutcome("sent");
     res.json({ ok: true });
   });
 
+  app.use(jsonBodyErrors);
+
   return app;
 }
+
+// express.json() errors would otherwise reach Express's default HTML handler.
+const jsonBodyErrors: ErrorRequestHandler = (err, _req, res, next) => {
+  if (err?.type === "entity.too.large") {
+    res.status(413).json({ error: "payload_too_large" });
+    return;
+  }
+  next(err);
+};

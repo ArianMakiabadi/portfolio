@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Inquiry } from "@/types/inquiry";
+import type { Inquiry, InquiryFieldErrors } from "@/types/inquiry";
 import { sendInquiry } from "@/utils/sendInquiry";
 
 const EMPTY_INQUIRY: Inquiry = {
@@ -9,8 +9,14 @@ const EMPTY_INQUIRY: Inquiry = {
   message: "",
 };
 
+// Mirrors the server's message rule (server/src/inquiry.ts), which stays the backstop.
+// Checked here so an over-long message never leaves the browser.
+const MESSAGE_MAX_LENGTH = 1000;
+const MESSAGE_TOO_LONG = `Message must be ${MESSAGE_MAX_LENGTH} characters or fewer.`;
+
 export function useContactForm() {
   const [fields, setFields] = useState<Inquiry>(EMPTY_INQUIRY);
+  const [fieldErrors, setFieldErrors] = useState<InquiryFieldErrors>({});
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
@@ -20,12 +26,22 @@ export function useContactForm() {
 
   async function submit() {
     if (isSending) return;
+    // Trimmed like the server does, so both sides count the same characters.
+    if (fields.message.trim().length > MESSAGE_MAX_LENGTH) {
+      setFieldErrors({ message: MESSAGE_TOO_LONG });
+      return;
+    }
     setIsSending(true);
     try {
-      await sendInquiry(fields);
-      setIsSent(true);
+      const result = await sendInquiry(fields);
+      // Errors are replaced per response, so a fixed field's error clears on resend.
+      if (result.ok) {
+        setFieldErrors({});
+        setIsSent(true);
+      } else {
+        setFieldErrors(result.fieldErrors);
+      }
     } catch (error) {
-      // Error message boxes come in a later ticket; the draft is kept either way.
       console.error(error);
     } finally {
       setIsSending(false);
@@ -33,7 +49,7 @@ export function useContactForm() {
   }
 
   return {
-    state: { fields, isSending, isSent },
+    state: { fields, fieldErrors, isSending, isSent },
     actions: { setField, submit },
   };
 }

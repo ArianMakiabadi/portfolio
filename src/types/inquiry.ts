@@ -5,3 +5,6 @@ export type Inquiry = {
   subject: string;
   message: string;
 };
+
+// Body of a 400 from POST /api/inquiries: one message per invalid field.
+export type InquiryFieldErrors = Partial<Record<keyof Inquiry, string>>;
