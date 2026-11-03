@@ -14,7 +14,7 @@ Rules: Name required ≤ 200, Email required and valid ≤ 200, Subject optional
 
 **Blocked by:** 01 (Send an Inquiry end-to-end)
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] Each rule above is enforced server-side and returns the matching field error
 - [x] Inline errors render next to the right field; fixing and resending clears them
