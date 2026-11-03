@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import request from "supertest";
-import { createApp } from "../src/app.js";
+import { createApp, HOUR_MS } from "../src/app.js";
 import type { Inquiry } from "../src/inquiry.js";
 import type { InquiryTransport } from "../src/notify/transport.js";
 
@@ -18,12 +18,16 @@ function createStubTransport(failSend: boolean) {
   return { transport, sent };
 }
 
-function createTestApp({ failSend = false } = {}) {
+function createTestApp({
+  failSend = false,
+  now,
+}: { failSend?: boolean; now?: () => number } = {}) {
   const { transport, sent } = createStubTransport(failSend);
   const logLines: string[] = [];
   const app = createApp({
     transport,
     log: (line) => logLines.push(line),
+    now,
   });
   return { app, sent, logLines };
 }
@@ -214,5 +218,95 @@ describe("POST /api/inquiries validation", () => {
     expect(res.status).toBe(413);
     expect(res.body).toEqual({ error: "payload_too_large" });
     expect(sent).toHaveLength(0);
+  });
+});
+
+describe("POST /api/inquiries honeypot", () => {
+  it("answers 200 ok and sends nothing when the website field is filled", async () => {
+    const { app, sent, logLines } = createTestApp();
+
+    const res = await request(app)
+      .post("/api/inquiries")
+      .send({ ...validInquiry, website: "https://spam.example" });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true });
+    expect(sent).toHaveLength(0);
+    expect(logLines).toHaveLength(1);
+    expect(JSON.parse(logLines[0]).outcome).toBe("honeypot");
+  });
+});
+
+describe("POST /api/inquiries rate limit", () => {
+  function postFrom(
+    app: ReturnType<typeof createApp>,
+    forwardedFor: string,
+    body: Record<string, unknown> = validInquiry,
+  ) {
+    return request(app)
+      .post("/api/inquiries")
+      .set("X-Forwarded-For", forwardedFor)
+      .send(body);
+  }
+
+  it("answers 429 to the 6th Inquiry from one IP within an hour", async () => {
+    let clock = 0;
+    const { app, sent, logLines } = createTestApp({ now: () => clock });
+
+    for (let i = 0; i < 5; i++) {
+      clock += 10 * 60 * 1000 - 1;
+      expect((await postFrom(app, "203.0.113.7")).status).toBe(200);
+    }
+    const res = await postFrom(app, "203.0.113.7");
+
+    expect(res.status).toBe(429);
+    expect(res.body).toEqual({ error: "rate_limited" });
+    expect(sent).toHaveLength(5);
+    expect(JSON.parse(logLines.at(-1)!).outcome).toBe("rate_limited");
+  });
+
+  it("allows the IP again once its oldest Inquiry is an hour old", async () => {
+    let clock = 0;
+    const { app } = createTestApp({ now: () => clock });
+
+    for (let i = 0; i < 5; i++) await postFrom(app, "203.0.113.7");
+    clock = HOUR_MS - 1;
+    expect((await postFrom(app, "203.0.113.7")).status).toBe(429);
+    clock = HOUR_MS;
+    expect((await postFrom(app, "203.0.113.7")).status).toBe(200);
+  });
+
+  it("does not count invalid or honeypot requests", async () => {
+    const { app } = createTestApp();
+
+    for (let i = 0; i < 5; i++) {
+      await postFrom(app, "203.0.113.7", { ...validInquiry, email: "" });
+      await postFrom(app, "203.0.113.7", { ...validInquiry, website: "x" });
+    }
+
+    expect((await postFrom(app, "203.0.113.7")).status).toBe(200);
+  });
+
+  it("does not count Inquiries whose delivery failed", async () => {
+    const { app } = createTestApp({ failSend: true });
+
+    for (let i = 0; i < 5; i++) await postFrom(app, "203.0.113.7");
+
+    // The error box says "try again later": a retry must not hit the limit.
+    expect((await postFrom(app, "203.0.113.7")).status).toBe(502);
+  });
+
+  it("keys on the client IP the one trusted proxy hop reports", async () => {
+    const { app } = createTestApp();
+
+    // Nginx appends the real client IP; anything left of it is client-supplied.
+    for (let i = 0; i < 5; i++) {
+      await postFrom(app, `198.51.100.${i}, 203.0.113.7`);
+    }
+
+    expect((await postFrom(app, "198.51.100.99, 203.0.113.7")).status).toBe(
+      429,
+    );
+    expect((await postFrom(app, "203.0.113.8")).status).toBe(200);
   });
 });

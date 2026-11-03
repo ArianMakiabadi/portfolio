@@ -1,23 +1,28 @@
-import type { Inquiry, InquiryFieldErrors } from "@/types/inquiry";
+import type { InquiryFieldErrors, InquiryRequest } from "@/types/inquiry";
 
 type SendInquiryResult =
-  { ok: true } | { ok: false; fieldErrors: InquiryFieldErrors };
+  | { status: "sent" }
+  | { status: "invalid"; fieldErrors: InquiryFieldErrors }
+  | { status: "rate_limited" };
 
-// A 400 is an expected outcome (the Visitor fixes the fields); anything else throws.
+// 400 and 429 are expected outcomes the window explains; anything else throws.
 export async function sendInquiry(
-  inquiry: Inquiry,
+  request: InquiryRequest,
 ): Promise<SendInquiryResult> {
   const response = await fetch("/api/inquiries", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(inquiry),
+    body: JSON.stringify(request),
   });
   if (response.status === 400) {
     const body: { errors?: InquiryFieldErrors } = await response.json();
-    return { ok: false, fieldErrors: body.errors ?? {} };
+    return { status: "invalid", fieldErrors: body.errors ?? {} };
+  }
+  if (response.status === 429) {
+    return { status: "rate_limited" };
   }
   if (!response.ok) {
     throw new Error(`Inquiry failed with status ${response.status}`);
   }
-  return { ok: true };
+  return { status: "sent" };
 }

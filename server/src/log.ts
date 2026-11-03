@@ -1,7 +1,7 @@
 import { createHmac, randomBytes } from "node:crypto";
 
-// Later tickets add "honeypot" | "rate_limited".
-export type InquiryOutcome = "sent" | "invalid" | "send_failed";
+export type InquiryOutcome =
+  "sent" | "invalid" | "send_failed" | "honeypot" | "rate_limited";
 
 // Keyed so the small IPv4 space can't be brute-forced back from the logs.
 // Without IP_HASH_SECRET the key is per-process: hashes only correlate until restart.

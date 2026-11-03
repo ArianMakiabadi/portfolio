@@ -5,6 +5,7 @@ import { contactMeIcon } from "@/data/startMenuIcons";
 import infoIcon from "@/assets/window/message-box/info.png";
 import errorIcon from "@/assets/window/message-box/error.png";
 import { useContactForm } from "@/hooks/useContactForm";
+import type { SendError } from "@/types/inquiry";
 import { useProgressCursor } from "@/hooks/useProgressCursor";
 
 type ContactWindowProps = {
@@ -14,9 +15,14 @@ type ContactWindowProps = {
 // Display name only: the Owner's email address lives on the server, never here.
 const OWNER_DISPLAY_NAME = "Arian Makiabadi";
 
+const SEND_ERROR_MESSAGES: Record<SendError, string> = {
+  rate_limited: "Too many messages, try again later.",
+  failed: "Your message could not be sent. Please try again later.",
+};
+
 function ContactWindow({ onClose }: ContactWindowProps) {
   const contactForm = useContactForm();
-  const { isSending, isSent, hasSendFailed } = contactForm.state;
+  const { isSending, isSent, sendError } = contactForm.state;
 
   useProgressCursor(isSending);
 
@@ -39,11 +45,11 @@ function ContactWindow({ onClose }: ContactWindowProps) {
           onOk={onClose}
         />
       )}
-      {hasSendFailed && (
+      {sendError && (
         <MessageBox
           title="Message not sent"
           icon={errorIcon}
-          message="Your message could not be sent. Please try again later."
+          message={SEND_ERROR_MESSAGES[sendError]}
           onOk={contactForm.actions.dismissSendError}
         />
       )}

@@ -10,11 +10,16 @@
 
 **Blocked by:** 01 (Send an Inquiry end-to-end)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Honeypot is invisible and unreachable by keyboard for real Visitors
-- [ ] Filled honeypot → 200, transport not called
-- [ ] 6th Inquiry within an hour from one IP → 429; window shows the XP error box; draft kept
-- [ ] Rate limit keys on the forwarded client IP (one trusted hop), not the proxy's IP
-- [ ] Tests: honeypot, rate limit, forwarded-IP keying
-- [ ] `npm run build` and `npm run lint` pass
+- [x] Honeypot is invisible and unreachable by keyboard for real Visitors
+- [x] Filled honeypot → 200, transport not called
+- [x] 6th Inquiry within an hour from one IP → 429; window shows the XP error box; draft kept
+- [x] Rate limit keys on the forwarded client IP (one trusted hop), not the proxy's IP
+- [x] Tests: honeypot, rate limit, forwarded-IP keying
+- [x] `npm run build` and `npm run lint` pass
+
+## Notes
+
+- Only Inquiries that reach the transport count toward the limit: invalid and honeypot requests never do, and a failed send (502) gives its hit back so the Visitor's retry isn't blocked.
+- The frontend (hidden field, 429 box, draft kept) has no test setup and was checked by `npm run build`/`npm run lint` only.

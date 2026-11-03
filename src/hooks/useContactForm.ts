@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Inquiry, InquiryFieldErrors } from "@/types/inquiry";
+import type { Inquiry, InquiryFieldErrors, SendError } from "@/types/inquiry";
 import { sendInquiry } from "@/utils/sendInquiry";
 
 const EMPTY_INQUIRY: Inquiry = {
@@ -19,7 +19,9 @@ export function useContactForm() {
   const [fieldErrors, setFieldErrors] = useState<InquiryFieldErrors>({});
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
-  const [hasSendFailed, setHasSendFailed] = useState(false);
+  const [sendError, setSendError] = useState<SendError | null>(null);
+  // Honeypot: only bots fill it. Sent as-is so the server can drop the Inquiry.
+  const [honeypot, setHoneypot] = useState("");
 
   function setField(field: keyof Inquiry, value: string) {
     setFields((current) => ({ ...current, [field]: value }));
@@ -34,30 +36,32 @@ export function useContactForm() {
     }
     setIsSending(true);
     try {
-      const result = await sendInquiry(fields);
+      const result = await sendInquiry({ ...fields, website: honeypot });
       // Errors are replaced per response, so a fixed field's error clears on resend.
-      if (result.ok) {
+      if (result.status === "sent") {
         setFieldErrors({});
         setIsSent(true);
-      } else {
+      } else if (result.status === "invalid") {
         setFieldErrors(result.fieldErrors);
+      } else if (result.status === "rate_limited") {
+        setSendError("rate_limited");
       }
     } catch (error) {
       // 502/5xx/network: the window shows an error box; fields stay untouched.
       console.error(error);
-      setHasSendFailed(true);
+      setSendError("failed");
     } finally {
       setIsSending(false);
     }
   }
 
   function dismissSendError() {
-    setHasSendFailed(false);
+    setSendError(null);
   }
 
   return {
-    state: { fields, fieldErrors, isSending, isSent, hasSendFailed },
-    actions: { setField, submit, dismissSendError },
+    state: { fields, fieldErrors, honeypot, isSending, isSent, sendError },
+    actions: { setField, setHoneypot, submit, dismissSendError },
   };
 }
 

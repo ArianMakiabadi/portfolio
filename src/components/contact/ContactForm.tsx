@@ -50,7 +50,7 @@ function FieldRow({ label, error, errorId, children }: FieldRowProps) {
 }
 
 function ContactForm({ state, actions, recipientName }: ContactFormProps) {
-  const { fields, fieldErrors, isSending } = state;
+  const { fields, fieldErrors, honeypot, isSending } = state;
 
   function bind(field: keyof Inquiry) {
     const hasError = Boolean(fieldErrors[field]);
@@ -69,12 +69,26 @@ function ContactForm({ state, actions, recipientName }: ContactFormProps) {
     // client-side message length check) render inline after submit.
     <form
       noValidate
-      className="flex h-full flex-col gap-1.5 bg-[#ece9d8] p-2 xp-text"
+      className="relative flex h-full flex-col gap-1.5 bg-[#ece9d8] p-2 xp-text"
       onSubmit={(event) => {
         event.preventDefault();
         actions.submit();
       }}
     >
+      {/* Honeypot: clipped to 1px by sr-only (not display:none, which some bots
+          skip), out of the tab order and the accessibility tree, never autofilled. */}
+      <div aria-hidden="true" className="sr-only">
+        <label>
+          Website
+          <input
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(event) => actions.setHoneypot(event.target.value)}
+          />
+        </label>
+      </div>
       <FieldRow label="To:">
         <input className={INPUT_CLASS} value={recipientName} readOnly />
       </FieldRow>
