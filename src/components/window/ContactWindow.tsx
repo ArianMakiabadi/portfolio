@@ -3,6 +3,7 @@ import ContactForm from "@/components/contact/ContactForm";
 import MessageBox from "@/components/shared/MessageBox";
 import { contactMeIcon } from "@/data/startMenuIcons";
 import infoIcon from "@/assets/window/message-box/info.png";
+import errorIcon from "@/assets/window/message-box/error.png";
 import { useContactForm } from "@/hooks/useContactForm";
 import { useProgressCursor } from "@/hooks/useProgressCursor";
 
@@ -15,7 +16,7 @@ const OWNER_DISPLAY_NAME = "Arian Makiabadi";
 
 function ContactWindow({ onClose }: ContactWindowProps) {
   const contactForm = useContactForm();
-  const { isSending, isSent } = contactForm.state;
+  const { isSending, isSent, hasSendFailed } = contactForm.state;
 
   useProgressCursor(isSending);
 
@@ -36,6 +37,14 @@ function ContactWindow({ onClose }: ContactWindowProps) {
           icon={infoIcon}
           message="Your message has been sent. Thanks for getting in touch!"
           onOk={onClose}
+        />
+      )}
+      {hasSendFailed && (
+        <MessageBox
+          title="Message not sent"
+          icon={errorIcon}
+          message="Your message could not be sent. Please try again later."
+          onOk={contactForm.actions.dismissSendError}
         />
       )}
     </Window>

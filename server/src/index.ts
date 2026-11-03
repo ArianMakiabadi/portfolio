@@ -1,14 +1,11 @@
+import "./loadEnv.js";
 import { createApp } from "./app.js";
-import { createConsoleTransport } from "./mail/consoleTransport.js";
+import { transportFromEnv } from "./notify/transportFromEnv.js";
 
-const port = Number(process.env.PORT ?? 3001);
+const port = Number(process.env.PORT || 3001);
 
 const app = createApp({
-  transport: createConsoleTransport(),
-  mail: {
-    from: process.env.INQUIRY_FROM ?? "portfolio@localhost",
-    to: process.env.INQUIRY_TO ?? "owner@localhost",
-  },
+  transport: transportFromEnv(process.env),
   log: (line) => console.log(line),
 });
 

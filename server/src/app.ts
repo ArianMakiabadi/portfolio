@@ -1,15 +1,14 @@
 import express, { type ErrorRequestHandler } from "express";
-import { buildInquiryEmail, validateInquiry } from "./inquiry.js";
+import { validateInquiry } from "./inquiry.js";
 import { formatOutcome, type InquiryOutcome } from "./log.js";
-import type { MailAddresses, MailTransport } from "./mail/transport.js";
+import type { InquiryTransport } from "./notify/transport.js";
 
 export type AppDeps = {
-  transport: MailTransport;
-  mail: MailAddresses;
+  transport: InquiryTransport;
   log: (line: string) => void;
 };
 
-export function createApp({ transport, mail, log }: AppDeps) {
+export function createApp({ transport, log }: AppDeps) {
   const app = express();
 
   // Behind Nginx: req.ip is the Visitor's address, not the proxy's.
@@ -31,7 +30,13 @@ export function createApp({ transport, mail, log }: AppDeps) {
       return;
     }
 
-    await transport.send(buildInquiryEmail(result.inquiry, mail, new Date()));
+    try {
+      await transport.send(result.inquiry, new Date());
+    } catch {
+      logOutcome("send_failed");
+      res.status(502).json({ error: "send_failed" });
+      return;
+    }
     logOutcome("sent");
     res.json({ ok: true });
   });

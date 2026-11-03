@@ -1,24 +1,28 @@
 import { describe, expect, it } from "vitest";
 import request from "supertest";
 import { createApp } from "../src/app.js";
-import type { MailMessage, MailTransport } from "../src/mail/transport.js";
+import type { Inquiry } from "../src/inquiry.js";
+import type { InquiryTransport } from "../src/notify/transport.js";
 
-function createStubTransport() {
-  const sent: MailMessage[] = [];
-  const transport: MailTransport = {
-    async send(message) {
-      sent.push(message);
+// Records every send attempt; with failSend it then throws like a failed delivery.
+function createStubTransport(failSend: boolean) {
+  const sent: { inquiry: Inquiry; receivedAt: Date }[] = [];
+  const transport: InquiryTransport = {
+    async send(inquiry, receivedAt) {
+      sent.push({ inquiry, receivedAt });
+      if (failSend) {
+        throw new Error("Telegram sendMessage failed: 401 Unauthorized");
+      }
     },
   };
   return { transport, sent };
 }
 
-function createTestApp() {
-  const { transport, sent } = createStubTransport();
+function createTestApp({ failSend = false } = {}) {
+  const { transport, sent } = createStubTransport(failSend);
   const logLines: string[] = [];
   const app = createApp({
     transport,
-    mail: { from: "portfolio@example.com", to: "owner@example.com" },
     log: (line) => logLines.push(line),
   });
   return { app, sent, logLines };
@@ -42,33 +46,26 @@ const validInquiry = {
 };
 
 describe("POST /api/inquiries", () => {
-  it("delivers a valid inquiry to the owner exactly once", async () => {
+  it("hands the validated inquiry to the transport exactly once", async () => {
     const { app, sent } = createTestApp();
+    const before = Date.now();
 
-    const res = await request(app).post("/api/inquiries").send(validInquiry);
+    const res = await request(app)
+      .post("/api/inquiries")
+      .send({ ...validInquiry, name: "  Ada Lovelace  " });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
     expect(sent).toHaveLength(1);
-    expect(sent[0]).toMatchObject({
-      from: "portfolio@example.com",
-      to: "owner@example.com",
-      replyTo: "ada@example.com",
-      subject: "[Portfolio] Hello",
+    // Trimmed, and the honeypot field never reaches the transport.
+    expect(sent[0].inquiry).toEqual({
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      subject: "Hello",
+      message: "I'd like to work with you.",
     });
-    expect(sent[0].text).toContain("Ada Lovelace");
-    expect(sent[0].text).toContain("ada@example.com");
-    expect(sent[0].text).toContain("I'd like to work with you.");
-  });
-
-  it("uses a default subject when none is given", async () => {
-    const { app, sent } = createTestApp();
-
-    await request(app)
-      .post("/api/inquiries")
-      .send({ ...validInquiry, subject: "" });
-
-    expect(sent[0].subject).toBe("[Portfolio] New inquiry");
+    expect(sent[0].receivedAt.getTime()).toBeGreaterThanOrEqual(before);
+    expect(sent[0].receivedAt.getTime()).toBeLessThanOrEqual(Date.now());
   });
 
   it("logs one outcome line without personal data", async () => {
@@ -86,6 +83,29 @@ describe("POST /api/inquiries", () => {
     expect(new Date(entry.time).toISOString()).toBe(entry.time);
     expect(entry.ip).toMatch(/^[0-9a-f]{16}$/);
     expect(logLines[0]).not.toContain("203.0.113.7");
+    expect(logLines[0]).not.toContain(validInquiry.email);
+    expect(logLines[0]).not.toContain(validInquiry.message);
+  });
+});
+
+describe("POST /api/inquiries delivery failure", () => {
+  it("responds 502 send_failed when the transport throws", async () => {
+    const { app, sent } = createTestApp({ failSend: true });
+
+    const res = await request(app).post("/api/inquiries").send(validInquiry);
+
+    expect(sent).toHaveLength(1);
+    expect(res.status).toBe(502);
+    expect(res.body).toEqual({ error: "send_failed" });
+  });
+
+  it("logs a send_failed outcome without personal data", async () => {
+    const { app, logLines } = createTestApp({ failSend: true });
+
+    await request(app).post("/api/inquiries").send(validInquiry);
+
+    expect(logLines).toHaveLength(1);
+    expect(JSON.parse(logLines[0]).outcome).toBe("send_failed");
     expect(logLines[0]).not.toContain(validInquiry.email);
     expect(logLines[0]).not.toContain(validInquiry.message);
   });

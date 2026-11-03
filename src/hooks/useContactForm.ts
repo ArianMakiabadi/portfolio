@@ -19,6 +19,7 @@ export function useContactForm() {
   const [fieldErrors, setFieldErrors] = useState<InquiryFieldErrors>({});
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [hasSendFailed, setHasSendFailed] = useState(false);
 
   function setField(field: keyof Inquiry, value: string) {
     setFields((current) => ({ ...current, [field]: value }));
@@ -42,15 +43,21 @@ export function useContactForm() {
         setFieldErrors(result.fieldErrors);
       }
     } catch (error) {
+      // 502/5xx/network: the window shows an error box; fields stay untouched.
       console.error(error);
+      setHasSendFailed(true);
     } finally {
       setIsSending(false);
     }
   }
 
+  function dismissSendError() {
+    setHasSendFailed(false);
+  }
+
   return {
-    state: { fields, fieldErrors, isSending, isSent },
-    actions: { setField, submit },
+    state: { fields, fieldErrors, isSending, isSent, hasSendFailed },
+    actions: { setField, submit, dismissSendError },
   };
 }
 

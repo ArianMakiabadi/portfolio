@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { MailAddresses, MailMessage } from "./mail/transport.js";
 
 const NAME_REQUIRED = "Please enter your name.";
 const EMAIL_REQUIRED = "Please enter your email address.";
@@ -56,26 +55,4 @@ export function validateInquiry(
     if (messages?.[0]) errors[field as keyof Inquiry] = messages[0];
   }
   return { ok: false, errors };
-}
-
-export function buildInquiryEmail(
-  inquiry: Inquiry,
-  addresses: MailAddresses,
-  receivedAt: Date,
-): MailMessage {
-  const subject = inquiry.subject?.trim() || "New inquiry";
-
-  return {
-    from: addresses.from,
-    to: addresses.to,
-    replyTo: inquiry.email,
-    subject: `[Portfolio] ${subject}`,
-    text: [
-      `Name: ${inquiry.name}`,
-      `Email: ${inquiry.email}`,
-      `Received: ${receivedAt.toISOString()}`,
-      "",
-      inquiry.message,
-    ].join("\n"),
-  };
 }
