@@ -25,9 +25,10 @@ import type { WindowLeftMenuConfig } from "@/types/windowLeftMenu";
 
 type ProjectsWindowProps = {
   onClose: () => void;
+  onOpenApp: (id: string) => void;
 };
 
-function ProjectsWindow({ onClose }: ProjectsWindowProps) {
+function ProjectsWindow({ onClose, onOpenApp }: ProjectsWindowProps) {
   const selection = useIconSelection();
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -109,7 +110,7 @@ function ProjectsWindow({ onClose }: ProjectsWindowProps) {
           {
             icon: contactMeIcon,
             label: "Contact me",
-            href: "#",
+            onSelect: () => onOpenApp("contact"),
           },
         ],
       },

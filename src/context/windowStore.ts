@@ -69,6 +69,7 @@ export function createWindowStore() {
     },
 
     focusWindow(id: string) {
+      if (!windows.has(id)) return;
       let changed = false;
 
       if (activeWindowId !== id) {

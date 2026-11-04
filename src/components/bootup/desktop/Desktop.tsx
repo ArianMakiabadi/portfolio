@@ -8,20 +8,39 @@ import JsPaintWindow from "@/programs/paint/JsPaintWindow";
 import PinballWindow from "@/programs/pinball/PinballWindow";
 import SolitaireWindow from "@/programs/solitaire/SolitaireWindow";
 import ProjectsWindow from "@/components/window/ProjectsWindow";
+import ContactWindow from "@/components/window/ContactWindow";
 import { WindowManagerProvider } from "@/context/WindowManagerProvider";
+import { useWindowManager } from "@/context/useWindowManager";
 
 type DesktopProps = {
   onLogOff?: () => void;
   onRestart?: () => void;
 };
 
-function Desktop({ onLogOff, onRestart }: DesktopProps) {
+// Provider wraps everything so every opener (desktop icon, Start menu, links
+// inside windows) can focus an already-open window through openApp.
+function Desktop(props: DesktopProps) {
+  return (
+    <WindowManagerProvider>
+      <DesktopScreen {...props} />
+    </WindowManagerProvider>
+  );
+}
+
+function DesktopScreen({ onLogOff, onRestart }: DesktopProps) {
+  const { focusWindow } = useWindowManager();
   const [powerDialog, setPowerDialog] = useState<PowerDialogMode | null>(null);
   const [openApps, setOpenApps] = useState<Record<string, boolean>>({});
 
-  const openApp = useCallback((id: string) => {
-    setOpenApps((prev) => ({ ...prev, [id]: true }));
-  }, []);
+  const openApp = useCallback(
+    (id: string) => {
+      setOpenApps((prev) => ({ ...prev, [id]: true }));
+      // Already-open window: bring it forward. Not-yet-mounted ones focus
+      // themselves on mount (focusWindow ignores unregistered ids).
+      focusWindow(id);
+    },
+    [focusWindow],
+  );
 
   const closeApp = useCallback((id: string) => {
     setOpenApps((prev) => ({ ...prev, [id]: false }));
@@ -44,28 +63,30 @@ function Desktop({ onLogOff, onRestart }: DesktopProps) {
         style={{ backgroundImage: `url(${xpBliss})` }}
       >
         <DesktopIcons onOpenApp={openApp} />
-        <WindowManagerProvider>
-          {openApps.minesweeper && (
-            <MinesweeperWindow onClose={() => closeApp("minesweeper")} />
-          )}
-          {openApps.paint && (
-            <JsPaintWindow onClose={() => closeApp("paint")} />
-          )}
-          {openApps.pinball && (
-            <PinballWindow onClose={() => closeApp("pinball")} />
-          )}
-          {openApps.solitaire && (
-            <SolitaireWindow onClose={() => closeApp("solitaire")} />
-          )}
-          {openApps.projects && (
-            <ProjectsWindow onClose={() => closeApp("projects")} />
-          )}
-          <Taskbar
-            onSelectApp={openApp}
-            onLogOff={openLogOffDialog}
-            onShutDown={openShutDownDialog}
+        {openApps.minesweeper && (
+          <MinesweeperWindow onClose={() => closeApp("minesweeper")} />
+        )}
+        {openApps.paint && <JsPaintWindow onClose={() => closeApp("paint")} />}
+        {openApps.pinball && (
+          <PinballWindow onClose={() => closeApp("pinball")} />
+        )}
+        {openApps.solitaire && (
+          <SolitaireWindow onClose={() => closeApp("solitaire")} />
+        )}
+        {openApps.projects && (
+          <ProjectsWindow
+            onClose={() => closeApp("projects")}
+            onOpenApp={openApp}
           />
-        </WindowManagerProvider>
+        )}
+        {openApps.contact && (
+          <ContactWindow onClose={() => closeApp("contact")} />
+        )}
+        <Taskbar
+          onSelectApp={openApp}
+          onLogOff={openLogOffDialog}
+          onShutDown={openShutDownDialog}
+        />
       </div>
       {powerDialog && (
         <PowerDialog

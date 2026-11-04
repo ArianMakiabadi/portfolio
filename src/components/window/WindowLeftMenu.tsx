@@ -60,10 +60,12 @@ function Item({ item }: { item: WindowLeftMenuItem }) {
     );
   }
 
+  // onClick, not onMouseDown: the window's own mousedown focuses this window
+  // first, so an item that opens/focuses another window isn't undone by it.
   return (
     <div
       className="window-left-menu-item pointer"
-      onMouseDown={() => item.onSelect?.()}
+      onClick={() => item.onSelect?.()}
     >
       {content}
     </div>
