@@ -10,11 +10,11 @@
 
 **Blocked by:** 01 (Send an Inquiry end-to-end)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Window reads clearly as an Outlook Express "New Message"
-- [ ] Toolbar Send sends the Inquiry; other items do nothing and throw no errors
-- [ ] Desktop icon opens the Contact window (selection/double-click behave like other desktop icons)
-- [ ] Projects window "Contact me" opens the Contact window
-- [ ] Opening from any opener while it's open focuses the existing window
-- [ ] `npm run build` and `npm run lint` pass
+- [x] Window reads clearly as an Outlook Express "New Message"
+- [x] Toolbar Send sends the Inquiry; other items do nothing and throw no errors
+- [x] Desktop icon opens the Contact window (selection/double-click behave like other desktop icons)
+- [x] Projects window "Contact me" opens the Contact window
+- [x] Opening from any opener while it's open focuses the existing window
+- [x] `npm run build` and `npm run lint` pass

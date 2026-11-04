@@ -10,7 +10,7 @@ function WindowHeaderBar({ config }: WindowHeaderBarProps) {
   return (
     <div className="window-header-bar">
       <WindowHeaderTools config={config.tools} />
-      <WindowHeaderSearch config={config.search} />
+      {config.search && <WindowHeaderSearch config={config.search} />}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { ContactFormHook } from "@/hooks/useContactForm";
 import type { Inquiry } from "@/types/inquiry";
+import mailtoIcon from "@/assets/window/contact/mailto-icon.webp";
 
 type ContactFormProps = ContactFormHook & {
   recipientName: string;
@@ -7,6 +8,7 @@ type ContactFormProps = ContactFormHook & {
 
 type FieldRowProps = {
   label: string;
+  icon?: string;
   error?: string;
   errorId?: string;
   children: React.ReactNode;
@@ -34,11 +36,14 @@ function FieldError({ id, message, className = "" }: FieldErrorProps) {
   );
 }
 
-function FieldRow({ label, error, errorId, children }: FieldRowProps) {
+function FieldRow({ label, icon, error, errorId, children }: FieldRowProps) {
   return (
     <div className="flex flex-col gap-[3px]">
       <label className="flex items-center gap-2">
-        <span className="w-16 shrink-0 text-right">{label}</span>
+        <span className="flex w-16 shrink-0 items-center justify-end gap-1">
+          {icon && <img src={icon} alt="" className="h-4 w-4" />}
+          {label}
+        </span>
         {children}
       </label>
       {/* Indented past the label column (w-16 + gap-2) to sit under the input. */}
@@ -50,7 +55,7 @@ function FieldRow({ label, error, errorId, children }: FieldRowProps) {
 }
 
 function ContactForm({ state, actions, recipientName }: ContactFormProps) {
-  const { fields, fieldErrors, honeypot, isSending } = state;
+  const { fields, fieldErrors, honeypot } = state;
 
   function bind(field: keyof Inquiry) {
     const hasError = Boolean(fieldErrors[field]);
@@ -66,10 +71,11 @@ function ContactForm({ state, actions, recipientName }: ContactFormProps) {
 
   return (
     // noValidate: no native validation popups. Errors (server fields, plus the
-    // client-side message length check) render inline after submit.
+    // client-side message length check) render inline after submit. Submitted
+    // from the window's toolbar Send button (Outlook Express has no form button).
     <form
       noValidate
-      className="relative flex h-full flex-col gap-1.5 bg-[#ece9d8] p-2 xp-text"
+      className="relative flex h-full flex-col bg-[#ece9d8] xp-text"
       onSubmit={(event) => {
         event.preventDefault();
         actions.submit();
@@ -89,61 +95,68 @@ function ContactForm({ state, actions, recipientName }: ContactFormProps) {
           />
         </label>
       </div>
-      <FieldRow label="To:">
-        <input className={INPUT_CLASS} value={recipientName} readOnly />
-      </FieldRow>
-      <FieldRow
-        label="Name:"
-        error={fieldErrors.name}
-        errorId={errorIdFor("name")}
-      >
-        <input
-          className={INPUT_CLASS}
-          required
-          maxLength={200}
-          autoComplete="name"
-          {...bind("name")}
-        />
-      </FieldRow>
-      <FieldRow
-        label="Email:"
-        error={fieldErrors.email}
-        errorId={errorIdFor("email")}
-      >
-        <input
-          className={INPUT_CLASS}
-          type="email"
-          required
-          maxLength={200}
-          autoComplete="email"
-          {...bind("email")}
-        />
-      </FieldRow>
-      <FieldRow
-        label="Subject:"
-        error={fieldErrors.subject}
-        errorId={errorIdFor("subject")}
-      >
-        <input className={INPUT_CLASS} maxLength={200} {...bind("subject")} />
-      </FieldRow>
-      <div className="flex min-h-0 flex-1 flex-col gap-[3px]">
+      <div className="flex flex-col gap-1.5 border-t border-[#aca899] p-2">
+        <FieldRow label="To:" icon={mailtoIcon}>
+          <input className={INPUT_CLASS} value={recipientName} readOnly />
+        </FieldRow>
+        <FieldRow
+          label="Name:"
+          error={fieldErrors.name}
+          errorId={errorIdFor("name")}
+        >
+          <input
+            className={INPUT_CLASS}
+            required
+            maxLength={200}
+            autoComplete="name"
+            {...bind("name")}
+          />
+        </FieldRow>
+        <FieldRow
+          label="Email:"
+          error={fieldErrors.email}
+          errorId={errorIdFor("email")}
+        >
+          <input
+            className={INPUT_CLASS}
+            type="email"
+            required
+            maxLength={200}
+            autoComplete="email"
+            {...bind("email")}
+          />
+        </FieldRow>
+        <FieldRow
+          label="Subject:"
+          error={fieldErrors.subject}
+          errorId={errorIdFor("subject")}
+        >
+          <input className={INPUT_CLASS} maxLength={200} {...bind("subject")} />
+        </FieldRow>
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-[3px] border-t border-[#aca899]">
         <textarea
-          className={`${INPUT_CLASS} resize-none`}
+          className={`${INPUT_CLASS} resize-none p-2`}
           aria-label="Message"
           required
           {...bind("message")}
         />
-        <FieldError id={errorIdFor("message")} message={fieldErrors.message} />
+        <FieldError
+          id={errorIdFor("message")}
+          message={fieldErrors.message}
+          className="px-2 pb-1"
+        />
       </div>
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isSending}
-          className="xp-button pointer disabled:pointer-events-none disabled:text-[#a19f92]"
-        >
-          Send
-        </button>
-      </div>
+      {/* Enter in a field submits: implicit submission needs a submit button.
+          The visible Send is the window toolbar's. */}
+      <button
+        type="submit"
+        tabIndex={-1}
+        aria-hidden="true"
+        className="sr-only"
+      >
+        Send
+      </button>
     </form>
   );
 }

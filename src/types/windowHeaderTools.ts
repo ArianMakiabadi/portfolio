@@ -9,4 +9,6 @@ export type WindowHeaderToolsButton = {
 
 export type WindowHeaderToolsConfig = {
   groups: WindowHeaderToolsButton[][];
+  // Label under the icon (Outlook Express style) instead of beside it.
+  stacked?: boolean;
 };
