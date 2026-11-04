@@ -1,4 +1,5 @@
 import { createConsoleTransport } from "./consoleTransport.js";
+import { formatReceivedAt } from "./formatInquiryMessage.js";
 import {
   createTelegramTransport,
   type TelegramConfig,
@@ -25,7 +26,20 @@ export function telegramConfigFromEnv(env: Env): TelegramConfig | null {
   };
 }
 
+// OWNER_TZ (IANA name, e.g. "Europe/Berlin") sets the time shown in each message.
+// Unset → UTC. A typo throws at startup rather than on the first Inquiry.
+export function timeZoneFromEnv(env: Env): string {
+  const timeZone = env.OWNER_TZ || "UTC";
+  try {
+    formatReceivedAt(new Date(), timeZone);
+  } catch {
+    throw new Error(`OWNER_TZ is not a valid IANA timezone: ${timeZone}`);
+  }
+  return timeZone;
+}
+
 export function transportFromEnv(env: Env): InquiryTransport {
+  const timeZone = timeZoneFromEnv(env);
   const config = telegramConfigFromEnv(env);
   if (!config) {
     // The console transport prints Visitor emails and messages; on the VPS that
@@ -36,7 +50,7 @@ export function transportFromEnv(env: Env): InquiryTransport {
       );
     }
     console.log("Telegram not configured: using the console transport.");
-    return createConsoleTransport();
+    return createConsoleTransport(timeZone);
   }
-  return createTelegramTransport(config);
+  return createTelegramTransport(config, timeZone);
 }

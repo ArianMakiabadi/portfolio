@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   telegramConfigFromEnv,
+  timeZoneFromEnv,
   transportFromEnv,
 } from "../src/notify/transportFromEnv.js";
 
@@ -38,6 +39,19 @@ describe("telegramConfigFromEnv", () => {
   });
 });
 
+describe("timeZoneFromEnv", () => {
+  it("defaults to UTC, treating blank as unset", () => {
+    expect(timeZoneFromEnv({})).toBe("UTC");
+    expect(timeZoneFromEnv({ OWNER_TZ: "" })).toBe("UTC");
+  });
+
+  it("returns a valid OWNER_TZ", () => {
+    expect(timeZoneFromEnv({ OWNER_TZ: "Europe/Berlin" })).toBe(
+      "Europe/Berlin",
+    );
+  });
+});
+
 describe("transportFromEnv", () => {
   afterEach(() => vi.restoreAllMocks());
 
@@ -50,9 +64,7 @@ describe("transportFromEnv", () => {
     await transportFromEnv({}).send(inquiry, new Date());
 
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(log.mock.calls.flat().join("\n")).toContain(
-      "From: Ada <ada@example.com>",
-    );
+    expect(log.mock.calls.flat().join("\n")).toContain("👤 <b>Ada</b>");
   });
 
   it("uses the Telegram transport when both vars are set", async () => {
@@ -75,6 +87,12 @@ describe("transportFromEnv", () => {
   it("refuses the console fallback in production", () => {
     expect(() => transportFromEnv({ NODE_ENV: "production" })).toThrow(
       /TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are required in production/,
+    );
+  });
+
+  it("refuses to start with an invalid OWNER_TZ", () => {
+    expect(() => transportFromEnv({ OWNER_TZ: "Mars/Olympus" })).toThrow(
+      /OWNER_TZ/,
     );
   });
 

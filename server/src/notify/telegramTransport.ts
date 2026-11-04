@@ -1,4 +1,4 @@
-import { formatInquiryText } from "./formatInquiryText.js";
+import { formatInquiryMessage } from "./formatInquiryMessage.js";
 import type { InquiryTransport } from "./transport.js";
 
 export type TelegramConfig = {
@@ -14,6 +14,7 @@ type TelegramResponse = { ok: boolean; description?: string };
 // Bot API sendMessage over plain fetch. Any failure throws (→ 502); no retries.
 export function createTelegramTransport(
   config: TelegramConfig,
+  timeZone: string,
   fetchFn: typeof fetch = fetch,
 ): InquiryTransport {
   // The URL holds the token: never let it reach an error message.
@@ -27,7 +28,8 @@ export function createTelegramTransport(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             chat_id: config.chatId,
-            text: formatInquiryText(inquiry, receivedAt),
+            text: formatInquiryMessage(inquiry, receivedAt, timeZone),
+            parse_mode: "HTML",
           }),
           signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         });

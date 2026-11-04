@@ -99,15 +99,18 @@ Request body (JSON):
 ### Delivery to the Owner (Telegram)
 
 - Transport: Telegram Bot API `sendMessage` (`https://api.telegram.org/bot<TOKEN>/sendMessage`) to `TELEGRAM_CHAT_ID`, over plain `fetch`.
-- Plain text, no `parse_mode`, so Visitor text never needs escaping. Telegram auto-links the email.
-- Layout:
+- `parse_mode: "HTML"`. Every Visitor field is HTML-escaped (`&`, `<`, `>`); an unescaped `<` would make Telegram reject the message (→ 502). The email stays plain text and Telegram auto-links it.
+- Layout (bold = `<b>`, message in `<blockquote>`, time in `OWNER_TZ` as `4 Nov 2026, 15:32`):
 
   ```
-  [Portfolio] <subject | New inquiry>
-  From: <name> <email>
-  Received: <ISO timestamp>
+  **📨 New inquiry — <subject>**      (no subject → **📨 New inquiry**)
 
-  <message>
+  👤 **<name>**
+  ✉️ <email>
+  🕒 <received time>
+
+  ━━━━━━━━━━
+  > <message>
   ```
 
 - Max Inquiry is ~1,600 chars, under Telegram's 4,096-char message limit, so one message always suffices.
@@ -122,12 +125,13 @@ Request body (JSON):
 
 ### Configuration (env)
 
-| Var                  | Purpose                                                           |
-| -------------------- | ----------------------------------------------------------------- |
-| `PORT`               | Listen port (default `3001`), bound to `127.0.0.1`                |
-| `TELEGRAM_BOT_TOKEN` | Bot token from @BotFather                                         |
-| `TELEGRAM_CHAT_ID`   | The Owner's chat with the bot                                     |
-| `IP_HASH_SECRET`     | Key for hashing Visitor IPs in logs (random per process if unset) |
+| Var                  | Purpose                                                                     |
+| -------------------- | --------------------------------------------------------------------------- |
+| `PORT`               | Listen port (default `3001`), bound to `127.0.0.1`                          |
+| `TELEGRAM_BOT_TOKEN` | Bot token from @BotFather                                                   |
+| `TELEGRAM_CHAT_ID`   | The Owner's chat with the bot                                               |
+| `OWNER_TZ`           | IANA timezone for the message time (default `UTC`; invalid → startup error) |
+| `IP_HASH_SECRET`     | Key for hashing Visitor IPs in logs (random per process if unset)           |
 
 A committed `server/.env.example` documents all of them, including how to get the chat id once: create the bot with @BotFather, message it, then open `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy `chat.id`. The real `.env` is gitignored.
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Inquiry } from "../src/inquiry.js";
-import { formatInquiryText } from "../src/notify/formatInquiryText.js";
+import { formatInquiryMessage } from "../src/notify/formatInquiryMessage.js";
 import { createTelegramTransport } from "../src/notify/telegramTransport.js";
 
 const inquiry: Inquiry = {
@@ -25,12 +25,15 @@ function stubFetch(respond: () => Promise<Response>) {
 const config = { botToken: "123:abc", chatId: "42" };
 
 describe("createTelegramTransport", () => {
-  it("posts the plain-text message to sendMessage for the chat", async () => {
+  it("posts the HTML message to sendMessage for the chat", async () => {
     const { fetchFn, calls } = stubFetch(async () =>
       Response.json({ ok: true, result: {} }),
     );
 
-    await createTelegramTransport(config, fetchFn).send(inquiry, receivedAt);
+    await createTelegramTransport(config, "UTC", fetchFn).send(
+      inquiry,
+      receivedAt,
+    );
 
     expect(calls).toHaveLength(1);
     expect(calls[0].url).toBe(
@@ -41,9 +44,9 @@ describe("createTelegramTransport", () => {
     const body = JSON.parse(calls[0].init.body as string);
     expect(body).toEqual({
       chat_id: "42",
-      text: formatInquiryText(inquiry, receivedAt),
+      text: formatInquiryMessage(inquiry, receivedAt, "UTC"),
+      parse_mode: "HTML",
     });
-    expect(body).not.toHaveProperty("parse_mode");
   });
 
   it("throws when Telegram answers ok: false", async () => {
@@ -51,7 +54,7 @@ describe("createTelegramTransport", () => {
       Response.json({ ok: false, description: "Bad Request: chat not found" }),
     );
     await expect(
-      createTelegramTransport(config, fetchFn).send(inquiry, receivedAt),
+      createTelegramTransport(config, "UTC", fetchFn).send(inquiry, receivedAt),
     ).rejects.toThrow(/chat not found/);
   });
 
@@ -60,7 +63,7 @@ describe("createTelegramTransport", () => {
       async () => new Response("Unauthorized", { status: 401 }),
     );
     await expect(
-      createTelegramTransport(config, fetchFn).send(inquiry, receivedAt),
+      createTelegramTransport(config, "UTC", fetchFn).send(inquiry, receivedAt),
     ).rejects.toThrow(/401/);
   });
 
@@ -69,7 +72,7 @@ describe("createTelegramTransport", () => {
       throw new TypeError("fetch failed");
     });
     await expect(
-      createTelegramTransport(config, fetchFn).send(inquiry, receivedAt),
+      createTelegramTransport(config, "UTC", fetchFn).send(inquiry, receivedAt),
     ).rejects.toThrow(/fetch failed/);
   });
 
@@ -81,7 +84,7 @@ describe("createTelegramTransport", () => {
       );
     });
     await expect(
-      createTelegramTransport(config, fetchFn).send(inquiry, receivedAt),
+      createTelegramTransport(config, "UTC", fetchFn).send(inquiry, receivedAt),
     ).rejects.toThrow(/timeout/);
   });
 
@@ -90,7 +93,7 @@ describe("createTelegramTransport", () => {
       async () => new Response("Not Found", { status: 404 }),
     );
     await expect(
-      createTelegramTransport(config, fetchFn).send(inquiry, receivedAt),
+      createTelegramTransport(config, "UTC", fetchFn).send(inquiry, receivedAt),
     ).rejects.not.toThrow(/123:abc/);
   });
 });
